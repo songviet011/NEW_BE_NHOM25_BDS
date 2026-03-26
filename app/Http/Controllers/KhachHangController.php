@@ -90,6 +90,22 @@ class KhachHangController extends Controller
             ]
         ]);
     }
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $user->ten = $request->input('ten', $user->ten);
+            $user->so_dien_thoai = $request->input('so_dien_thoai', $user->so_dien_thoai);
+            if ($request->input('password')) {
+                $user->password = Hash::make($request->input('password'));
+            }
+            $user->save();
+
+            return response()->json(['status' => 1, 'message' => 'Cập nhật thành công', 'data' => $user]);
+        } else {
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        }
+    }
 
     // Admin CRUD
     public function getData(Request $request)
