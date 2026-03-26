@@ -11,42 +11,52 @@ class YeuThichController extends Controller
 {
     public function like(Request $request)
     {
-        $khachHang = Auth::guard('sanctum')->user();
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $bds_id = $request->input('bds_id');
+            if (empty($bds_id)) {
+                 return response()->json(['status' => 0, 'message' => 'Vui lòng truyền id bất động sản']);
+            }
 
-        $validated = $request->validate([
-            'bds_id' => 'required|exists:bat_dong_sans,id',
-        ]);
+            // Toggle like
+            $yeuThich = YeuThich::where('khach_hang_id', $user->id)
+                ->where('bds_id', $bds_id)
+                ->first();
 
-        // Toggle like
-        $yeuThich = YeuThich::where('khach_hang_id', $khachHang->id)
-            ->where('bds_id', $validated['bds_id'])
-            ->first();
+            if ($yeuThich) {
+                $yeuThich->delete();
+                $message = 'Bỏ thích';
+            } else {
+                $bds = BatDongSan::find($bds_id);
+                if (!$bds) {
+                    return response()->json(['status' => 0, 'message' => 'Không tìm thấy BDS']);
+                }
+                YeuThich::create([
+                    'moi_gioi_id' => $bds->moi_gioi_id,
+                    'khach_hang_id' => $user->id,
+                    'bds_id' => $bds_id,
+                    'noi_dung' => "Khách hàng {$user->ten} đã thả tim BDS {$bds_id}",
+                ]);
+                $message = 'Đã thích';
+            }
 
-        if ($yeuThich) {
-            $yeuThich->delete();
-            $message = 'Bỏ thích';
+            return response()->json(['status' => 1, 'message' => $message]);
         } else {
-            $moiGioi = BatDongSan::find($validated['bds_id'])->moiGioi;
-            YeuThich::create([
-                'moi_gioi_id' => $moiGioi->id,
-                'khach_hang_id' => $khachHang->id,
-                'bds_id' => $validated['bds_id'],
-                'noi_dung' => "Khách hàng {$khachHang->ten} đã thả tim BDS {$validated['bds_id']}",
-            ]);
-            $message = 'Đã thích';
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
         }
-
-        return response()->json(['message' => $message]);
     }
 
     public function getData()
     {
-        $khachHang = Auth::guard('sanctum')->user();
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $yeuThichs = YeuThich::where('khach_hang_id', $user->id)
+                ->with('batDongSan', 'batDongSan.moiGioi')
+                ->paginate(10);
 
-        $yeuThichs = YeuThich::where('khach_hang_id', $khachHang->id)
-            ->with('batDongSan', 'batDongSan.moiGioi')
-            ->paginate(10);
-
-        return response()->json($yeuThichs);
+            return response()->json(['status' => 1, 'data' => $yeuThichs]);
+        } else {
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        }
     }
 }

@@ -8,30 +8,38 @@ use App\Models\DiaChi;
 use App\Models\TinhThanh;
 use App\Models\QuanHuyen;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AIDinhGiaController extends Controller
 {
     public function predictPrice(Request $request)
     {
-        $validated = $request->validate([
-            'loai_id' => 'exists:loai_bat_dong_sans,id',
-            'dien_tich' => 'numeric',
-            'tinh_id' => 'exists:tinh_thanhs,id',
-            'quan_id' => 'exists:quan_huyens,id',
-            'so_phong_ngu' => 'integer',
-            // Add more features
-        ]);
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $loai_id = $request->input('loai_id');
+            $dien_tich = $request->input('dien_tich');
+            $tinh_id = $request->input('tinh_id');
 
-        // Simple ML placeholder - mean price by loai/dien_tich/tinh
-        $avgPrice = BatDongSan::where('loai_id', $validated['loai_id'])
-            ->where('tinh_id', $validated['tinh_id'])
-            ->avg('gia') * ($validated['dien_tich'] / 100);
+            if (empty($loai_id) || empty($dien_tich) || empty($tinh_id)) {
+                 return response()->json(['status' => 0, 'message' => 'Vui lòng nhập đủ thông tin loại, tỉnh, diện tích']);
+            }
 
-        $predicted = $avgPrice ?: 0;
+            // Simple ML placeholder - mean price by loai/dien_tich/tinh
+            $avgPrice = BatDongSan::where('loai_id', $loai_id)
+                ->where('tinh_id', $tinh_id)
+                ->avg('gia') * ($dien_tich / 100);
 
-        return response()->json([
-            'gia_du_doan' => $predicted,
-            'note' => 'Cần ML model thật (php-ml or Python API)',
-        ]);
+            $predicted = $avgPrice ?: 0;
+
+            return response()->json([
+                'status' => 1,
+                'data' => [
+                    'gia_du_doan' => $predicted,
+                    'note' => 'Cần ML model thật (php-ml or Python API)',
+                ]
+            ]);
+        } else {
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        }
     }
 }

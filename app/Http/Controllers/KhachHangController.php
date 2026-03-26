@@ -12,59 +12,100 @@ class KhachHangController extends Controller
 {
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $email = $request->input('email');
+        $password = $request->input('password');
 
-        $khachHang = KhachHang::where('email', $request->email)->first();
+        if (empty($email) || empty($password)) {
+            return response()->json([
+                'status'  => 0,
+                'message' => "Vui lòng nhập đầy đủ email và mật khẩu",
+            ]);
+        }
 
-        if (! $khachHang || ! Hash::check($request->password, $khachHang->password) || ! $khachHang->is_active) {
-            throw ValidationException::withMessages([
-                'email' => ['Thông tin đăng nhập sai hoặc tài khoản bị khóa.'],
+        $khachHang = KhachHang::where('email', $email)->first();
+
+        if (! $khachHang || ! Hash::check($password, $khachHang->password) || ! $khachHang->is_active) {
+            return response()->json([
+                'status'  => 0,
+                'message' => "Thông tin đăng nhập sai hoặc tài khoản bị khóa.",
             ]);
         }
 
         $token = $khachHang->createToken('khach-hang-token')->plainTextToken;
 
         return response()->json([
-            'token' => $token,
-            'khach_hang' => $khachHang,
+            'status' => 1,
+            'message' => "Đăng nhập thành công",
+            'data' => [
+                'token' => $token,
+                'khach_hang' => $khachHang,
+            ]
         ]);
     }
 
     public function register(Request $request)
     {
-        $validated = $request->validate([
-            'ten' => 'required|string|max:255',
-            'email' => 'required|email|unique:khach_hangs,email',
-            'so_dien_thoai' => 'required|string',
-            'password' => 'required|min:8|confirmed',
+        $ten = $request->input('ten');
+        $email = $request->input('email');
+        $so_dien_thoai = $request->input('so_dien_thoai');
+        $password = $request->input('password');
+        $password_confirmation = $request->input('password_confirmation');
+
+        if (empty($ten) || empty($email) || empty($so_dien_thoai) || empty($password)) {
+            return response()->json([
+                'status'  => 0,
+                'message' => "Vui lòng nhập đầy đủ các trường bắt buộc",
+            ]);
+        }
+
+        if ($password !== $password_confirmation) {
+            return response()->json([
+                'status'  => 0,
+                'message' => "Mật khẩu xác nhận không khớp",
+            ]);
+        }
+
+        if (KhachHang::where('email', $email)->exists()) {
+            return response()->json([
+                'status'  => 0,
+                'message' => "Email đã được sử dụng",
+            ]);
+        }
+
+        $khachHang = KhachHang::create([
+            'ten' => $ten,
+            'email' => $email,
+            'so_dien_thoai' => $so_dien_thoai,
+            'password' => Hash::make($password),
         ]);
-
-        $validated['password'] = Hash::make($validated['password']);
-
-        $khachHang = KhachHang::create($validated);
 
         $token = $khachHang->createToken('khach-hang-token')->plainTextToken;
 
         return response()->json([
-            'token' => $token,
-            'khach_hang' => $khachHang,
-        ], 201);
+            'status' => 1,
+            'message' => "Đăng ký thành công",
+            'data' => [
+                'token' => $token,
+                'khach_hang' => $khachHang,
+            ]
+        ]);
     }
 
     // Admin CRUD
     public function getData(Request $request)
     {
-        $query = KhachHang::query();
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $query = KhachHang::query();
 
-        if ($request->search) {
-            $query->where('ten', 'like', '%' . $request->search . '%')
-                ->orWhere('email', 'like', '%' . $request->search . '%');
+            if ($request->search) {
+                $query->where('ten', 'like', '%' . $request->search . '%')
+                    ->orWhere('email', 'like', '%' . $request->search . '%');
+            }
+            return response()->json(['status' => 1, 'data' => $query->paginate(10)]);
+        } else {
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
         }
-
-        return response()->json($query->paginate(10));
     }
 
     public function search(Request $request)
@@ -74,35 +115,47 @@ class KhachHangController extends Controller
 
     public function update(Request $request)
     {
-        $khachHang = KhachHang::findOrFail($request->id);
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $khachHang = KhachHang::find($request->id);
+            if (!$khachHang) {
+                return response()->json(['status' => 0, 'message' => 'Không tìm thấy khách hàng']);
+            }
 
-        $validated = $request->validate([
-            'ten' => 'string|max:255',
-            'email' => 'email|unique:khach_hangs,email,' . $khachHang->id,
-            'so_dien_thoai' => 'string',
-            'is_active' => 'boolean',
-        ]);
+            $khachHang->ten = $request->input('ten', $khachHang->ten);
+            $khachHang->so_dien_thoai = $request->input('so_dien_thoai', $khachHang->so_dien_thoai);
+            $khachHang->is_active = $request->input('is_active', $khachHang->is_active);
+            $khachHang->save();
 
-        $khachHang->update($validated);
-
-        return response()->json($khachHang);
+            return response()->json(['status' => 1, 'message' => 'Cập nhật thành công', 'data' => $khachHang]);
+        } else {
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        }
     }
 
     public function destroy(Request $request)
     {
-        KhachHang::findOrFail($request->id)->delete();
-
-        return response()->json(['message' => 'Xóa thành công']);
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $khachHang = KhachHang::find($request->id);
+            if ($khachHang) {
+                $khachHang->delete();
+                return response()->json(['status' => 1, 'message' => 'Xóa thành công']);
+            }
+            return response()->json(['status' => 0, 'message' => 'Không tìm thấy khách hàng']);
+        } else {
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        }
     }
 
     public function checkToken()
     {
-        $khachHang = Auth::guard('sanctum')->user();
+        $user = Auth::guard('sanctum')->user();
 
-        if ($khachHang) {
+        if ($user) {
             return response()->json([
                 'status' => 1,
-                'ten' => $khachHang->ten,
+                'data' => ['ten' => $user->ten],
             ]);
         }
 
@@ -112,4 +165,3 @@ class KhachHangController extends Controller
         ]);
     }
 }
-

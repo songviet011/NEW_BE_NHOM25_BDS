@@ -14,77 +14,142 @@ class AdminController extends Controller
 {
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        $email = $request->input('email');
+        $password = $request->input('password');
 
-        $admin = Admin::where('email', $request->email)->first();
+        if (empty($email) || empty($password)) {
+            return response()->json([
+                'status'  => 0,
+                'message' => "Vui lòng nhập đầy đủ email và mật khẩu",
+            ]);
+        }
 
-        if (! $admin || ! Hash::check($request->password, $admin->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['credentials sai.'],
+        $admin = Admin::where('email', $email)->first();
+
+        if (! $admin || ! Hash::check($password, $admin->password)) {
+            return response()->json([
+                'status'  => 0,
+                'message' => "Thông tin đăng nhập không chính xác",
             ]);
         }
 
         $token = $admin->createToken('admin-token')->plainTextToken;
 
         return response()->json([
-            'token' => $token,
-            'admin' => $admin,
+            'status' => 1,
+            'message' => "Đăng nhập thành công",
+            'data' => [
+                'token' => $token,
+                'admin' => $admin,
+            ]
         ]);
     }
 
     public function checkToken()
     {
-        $admin = Auth::guard('sanctum')->user();
-
-        if ($admin) {
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
             return response()->json([
                 'status' => 1,
-                'ten' => $admin->ten,
+                'data' => ['ten' => $user->ten],
+            ]);
+        } else {
+            return response()->json([
+                'status'  => 0,
+                'message' => "Chưa đăng nhập",
             ]);
         }
-
-        return response()->json([
-            'status' => 0,
-            'message' => 'Chưa đăng nhập',
-        ]);
     }
 
     public function profile()
     {
-        $admin = Auth::guard('sanctum')->user();
-
-        return response()->json($admin);
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            return response()->json([
+                'status' => 1,
+                'data' => $user
+            ]);
+        } else {
+            return response()->json([
+                'status'  => 0,
+                'message' => "Có lỗi xảy ra",
+            ]);
+        }
     }
 
     public function updateProfile(Request $request)
     {
-        $admin = Auth::guard('sanctum')->user();
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $ten = $request->input('ten');
+            $email = $request->input('email');
 
-        $validated = $request->validate([
-            'ten' => 'string|max:255',
-            'email' => 'email|unique:admins,email,' . $admin->id,
-        ]);
+            if (empty($ten) || empty($email)) {
+                return response()->json([
+                    'status'  => 0,
+                    'message' => "Dữ liệu không hợp lệ, vui lòng điền đủ thông tin",
+                ]);
+            }
 
-        $admin->update($validated);
+            $exists = Admin::where('email', $email)->where('id', '!=', $user->id)->first();
+            if ($exists) {
+                return response()->json([
+                    'status'  => 0,
+                    'message' => "Email đã tồn tại trong hệ thống",
+                ]);
+            }
 
-        return response()->json($admin);
+            $user->ten = $ten;
+            $user->email = $email;
+            $user->save();
+
+            return response()->json([
+                'status' => 1,
+                'message' => "Cập nhật thành công",
+                'data' => $user
+            ]);
+        } else {
+            return response()->json([
+                'status'  => 0,
+                'message' => "Có lỗi xảy ra",
+            ]);
+        }
     }
 
     public function logout()
     {
-        Auth::guard('sanctum')->user()->currentAccessToken()->delete();
-
-        return response()->json(['message' => 'Đăng xuất thành công']);
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $user->currentAccessToken()->delete();
+            return response()->json([
+                'status'  => 1,
+                'message' => "Đăng xuất thành công",
+            ]);
+        } else {
+            return response()->json([
+                'status'  => 0,
+                'message' => "Có lỗi xảy ra",
+            ]);
+        }
     }
 
     public function logoutAll()
     {
-        Auth::guard('sanctum')->user()->tokens()->delete();
-
-        return response()->json(['message' => 'Đăng xuất tất cả thiết bị']);
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $ds_token = $user->tokens;
+            foreach ($ds_token as $key => $value) {
+                $value->delete();
+            }
+            return response()->json([
+                'status'  => 1,
+                'message' => "Đăng xuất tất cả thiết bị thành công",
+            ]);
+        } else {
+            return response()->json([
+                'status'  => 0,
+                'message' => "Có lỗi xảy ra",
+            ]);
+        }
     }
 }
-

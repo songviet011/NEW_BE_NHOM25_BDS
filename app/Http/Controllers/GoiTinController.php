@@ -15,83 +15,119 @@ class GoiTinController extends Controller
 {
     public function getData()
     {
-        $goiTins = GoiTin::all();
-
-        return response()->json($goiTins);
+        return response()->json([
+            'status' => 1,
+            'data' => GoiTin::all()
+        ]);
     }
 
     public function getAll()
     {
-        $goiTins = GoiTin::all();
-
-        return response()->json($goiTins);
+        return $this->getData();
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'ten_goi' => 'required|string',
-            'gia' => 'required|numeric',
-            'so_ngay' => 'required|integer',
-            'so_luong_tin' => 'required|integer',
-        ]);
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $ten_goi = $request->input('ten_goi');
+            $gia = $request->input('gia');
+            $so_ngay = $request->input('so_ngay');
+            $so_luong_tin = $request->input('so_luong_tin');
 
-        $goiTin = GoiTin::create($validated);
+            if (empty($ten_goi) || !isset($gia) || !isset($so_ngay) || !isset($so_luong_tin)) {
+                return response()->json(['status' => 0, 'message' => 'Vui lòng điền đầy đủ thông tin']);
+            }
 
-        return response()->json($goiTin, 201);
+            $goiTin = GoiTin::create([
+                'ten_goi' => $ten_goi,
+                'gia' => $gia,
+                'so_ngay' => $so_ngay,
+                'so_luong_tin' => $so_luong_tin,
+            ]);
+
+            return response()->json(['status' => 1, 'message' => 'Tạo thành công', 'data' => $goiTin]);
+        } else {
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $goiTin = GoiTin::findOrFail($id);
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $goiTin = GoiTin::find($id);
+            if (!$goiTin) {
+                return response()->json(['status' => 0, 'message' => 'Không tìm thấy gói tin']);
+            }
 
-        $validated = $request->validate([
-            'ten_goi' => 'string',
-            'gia' => 'numeric',
-            'so_ngay' => 'integer',
-            'so_luong_tin' => 'integer',
-        ]);
+            $goiTin->ten_goi = $request->input('ten_goi', $goiTin->ten_goi);
+            $goiTin->gia = $request->input('gia', $goiTin->gia);
+            $goiTin->so_ngay = $request->input('so_ngay', $goiTin->so_ngay);
+            $goiTin->so_luong_tin = $request->input('so_luong_tin', $goiTin->so_luong_tin);
+            $goiTin->save();
 
-        $goiTin->update($validated);
-
-        return response()->json($goiTin);
+            return response()->json(['status' => 1, 'message' => 'Cập nhật thành công', 'data' => $goiTin]);
+        } else {
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        }
     }
 
     public function destroy(Request $request)
     {
-        GoiTin::findOrFail($request->id)->delete();
-
-        return response()->json(['message' => 'Xóa thành công']);
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $goiTin = GoiTin::find($request->id);
+            if ($goiTin) {
+                $goiTin->delete();
+                return response()->json(['status' => 1, 'message' => 'Xóa thành công']);
+            }
+            return response()->json(['status' => 0, 'message' => 'Không tìm thấy gói tin']);
+        } else {
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        }
     }
 
     public function muaGoi(Request $request)
     {
-        $validated = $request->validate([
-            'goi_tin_id' => 'required|exists:goi_tins,id',
-        ]);
-
         $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $goi_tin_id = $request->input('goi_tin_id');
+            if (empty($goi_tin_id)) {
+                return response()->json(['status' => 0, 'message' => 'Vui lòng chọn gói tin']);
+            }
 
-        // Giả sử thanh toán success
-        $giaoDich = GiaoDich::create([
-            'moi_gioi_id' => $user->id, // or khach_hang_id if KhachHang
-            'goi_tin_id' => $validated['goi_tin_id'],
-            'so_tien' => GoiTin::find($validated['goi_tin_id'])->gia,
-            'phuong_thuc' => $request->phuong_thuc ?? 'cash',
-            'trang_thai' => 'success',
-            'ma_giao_dich' => 'TXN' . time(),
-        ]);
+            $goiTin = GoiTin::find($goi_tin_id);
+            if (!$goiTin) {
+                return response()->json(['status' => 0, 'message' => 'Gói tin không tồn tại']);
+            }
 
-        $goiTin = GoiTin::find($validated['goi_tin_id']);
-        $ngayKetThuc = now()->addDays($goiTin->so_ngay);
+            // Giả sử thanh toán success
+            $giaoDich = GiaoDich::create([
+                'moi_gioi_id' => $user->id, // or khach_hang_id if KhachHang
+                'goi_tin_id' => $goi_tin_id,
+                'so_tien' => $goiTin->gia,
+                'phuong_thuc' => $request->phuong_thuc ?? 'cash',
+                'trang_thai' => 'success',
+                'ma_giao_dich' => 'TXN' . time(),
+            ]);
 
-        LichSuGoiTin::create([
-            'moi_gioi_id' => $user->id,
-            'goi_tin_id' => $validated['goi_tin_id'],
-            'ngay_bat_dau' => now(),
-            'ngay_ket_thuc' => $ngayKetThuc,
-        ]);
+            $ngayKetThuc = now()->addDays($goiTin->so_ngay);
 
-        return response()->json($giaoDich);
+            LichSuGoiTin::create([
+                'moi_gioi_id' => $user->id,
+                'goi_tin_id' => $goi_tin_id,
+                'ngay_bat_dau' => now(),
+                'ngay_ket_thuc' => $ngayKetThuc,
+            ]);
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Mua gói thành công',
+                'data' => $giaoDich
+            ]);
+        } else {
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        }
     }
 }
