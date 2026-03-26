@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Admin;
 use App\Models\MoiGioi;
 use App\Models\KhachHang;
+use App\Http\Requests\AdminLoginRequest;
+use App\Http\Requests\AdminUpdateProfileRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -12,17 +14,10 @@ use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
 {
-    public function login(Request $request)
+    public function login(AdminLoginRequest $request)
     {
         $email = $request->input('email');
         $password = $request->input('password');
-
-        if (empty($email) || empty($password)) {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Vui lòng nhập đầy đủ email và mật khẩu",
-            ]);
-        }
 
         $admin = Admin::where('email', $email)->first();
 
@@ -77,30 +72,13 @@ class AdminController extends Controller
         }
     }
 
-    public function updateProfile(Request $request)
+    public function updateProfile(AdminUpdateProfileRequest $request)
     {
+        /** @var Admin|null $user */
         $user = Auth::guard('sanctum')->user();
         if ($user) {
-            $ten = $request->input('ten');
-            $email = $request->input('email');
-
-            if (empty($ten) || empty($email)) {
-                return response()->json([
-                    'status'  => 0,
-                    'message' => "Dữ liệu không hợp lệ, vui lòng điền đủ thông tin",
-                ]);
-            }
-
-            $exists = Admin::where('email', $email)->where('id', '!=', $user->id)->first();
-            if ($exists) {
-                return response()->json([
-                    'status'  => 0,
-                    'message' => "Email đã tồn tại trong hệ thống",
-                ]);
-            }
-
-            $user->ten = $ten;
-            $user->email = $email;
+            $user->ten = $request->input('ten');
+            $user->email = $request->input('email');
             $user->save();
 
             return response()->json([
@@ -118,9 +96,14 @@ class AdminController extends Controller
 
     public function logout()
     {
+        /** @var Admin|null $user */
         $user = Auth::guard('sanctum')->user();
         if ($user) {
-            $user->currentAccessToken()->delete();
+            $token = $user->currentAccessToken();
+            if ($token) {
+                $token->delete();
+            }
+
             return response()->json([
                 'status'  => 1,
                 'message' => "Đăng xuất thành công",

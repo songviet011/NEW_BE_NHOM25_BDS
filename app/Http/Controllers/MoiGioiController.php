@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DestroyRequest;
+use App\Http\Requests\MoiGioiLoginRequest;
+use App\Http\Requests\MoiGioiRegisterRequest;
+use App\Http\Requests\SearchRequest;
+use App\Http\Requests\UpdateMoiGioiRequest;
 use App\Models\MoiGioi;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class MoiGioiController extends Controller
 {
-    public function login(Request $request)
+    public function login(MoiGioiLoginRequest $request): JsonResponse
     {
         $email = $request->input('email');
         $password = $request->input('password');
@@ -26,8 +31,8 @@ class MoiGioiController extends Controller
 
         if (! $moiGioi || ! Hash::check($password, $moiGioi->password) || ! $moiGioi->is_active) {
             return response()->json([
-                'status'  => 0,
-                'message' => "Thông tin đăng nhập sai hoặc tài khoản bị khóa.",
+                'status' => 0,
+                'message' => 'Thông tin đăng nhập sai hoặc tài khoản bị khóa.',
             ]);
         }
 
@@ -35,162 +40,207 @@ class MoiGioiController extends Controller
 
         return response()->json([
             'status' => 1,
-            'message' => "Đăng nhập thành công",
+            'message' => 'Đăng nhập thành công',
             'data' => [
                 'token' => $token,
                 'moi_gioi' => $moiGioi,
-            ]
+            ],
         ]);
     }
 
-    public function register(Request $request)
+    public function register(MoiGioiRegisterRequest $request): JsonResponse
     {
-        $ten = $request->input('ten');
-        $email = $request->input('email');
-        $so_dien_thoai = $request->input('so_dien_thoai');
-        $password = $request->input('password');
-        $password_confirmation = $request->input('password_confirmation');
-
-        if (empty($ten) || empty($email) || empty($so_dien_thoai) || empty($password)) {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Vui lòng nhập đầy đủ các trường bắt buộc",
-            ]);
-        }
-
-        if ($password !== $password_confirmation) {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Mật khẩu xác nhận không khớp",
-            ]);
-        }
-        
-        if (MoiGioi::where('email', $email)->exists()) {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Email đã được sử dụng",
-            ]);
-        }
-
         $moiGioi = MoiGioi::create([
-            'ten' => $ten,
-            'email' => $email,
-            'so_dien_thoai' => $so_dien_thoai,
-            'password' => Hash::make($password),
+            'ten' => $request->input('ten'),
+            'email' => $request->input('email'),
+            'so_dien_thoai' => $request->input('so_dien_thoai'),
+            'password' => Hash::make($request->input('password')),
             'zalo_link' => $request->input('zalo_link'),
             'mo_ta' => $request->input('mo_ta'),
+            'is_active' => true,
         ]);
 
         $token = $moiGioi->createToken('moi-gioi-token')->plainTextToken;
 
         return response()->json([
             'status' => 1,
-            'message' => "Đăng ký thành công",
+            'message' => 'Đăng ký thành công',
             'data' => [
                 'token' => $token,
                 'moi_gioi' => $moiGioi,
-            ]
+            ],
         ]);
     }
 
-    public function profile()
+    public function profile(): JsonResponse
     {
+        /** @var MoiGioi|null $user */
         $user = Auth::guard('sanctum')->user();
-        if ($user) {
-             return response()->json([
-                'status' => 1,
-                'data' => $user
-            ]);
-        } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
-        }
-    }
 
-    public function checkToken()
-    {
-        $user = Auth::guard('sanctum')->user();
         if ($user) {
             return response()->json([
                 'status' => 1,
-                'data' => ['ten' => $user->ten],
+                'data' => $user,
             ]);
         } else {
             return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
         }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Có lỗi xảy ra',
+        ]);
     }
-    
-    public function logout()
+
+    public function checkToken(): JsonResponse
     {
+        /** @var MoiGioi|null $user */
         $user = Auth::guard('sanctum')->user();
+
         if ($user) {
-            $ds_token = $user->tokens;
-            foreach ($ds_token as $key => $value) {
-                $value->delete();
+            return response()->json([
+                'status' => 1,
+                'data' => [
+                    'ten' => $user->ten,
+                ],
+            ]);
+        } else {
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Có lỗi xảy ra',
+        ]);
+    }
+
+    public function logout(): JsonResponse
+    {
+        /** @var MoiGioi|null $user */
+        $user = Auth::guard('sanctum')->user();
+
+        if ($user) {
+            $token = $user->currentAccessToken();
+
+            if ($token) {
+                $token->delete();
             }
+
             return response()->json([
-                'status'  => 1,
-                'message' => "Đăng xuất thành công",
-            ]);
-        } else {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Có lỗi xảy ra",
+                'status' => 1,
+                'message' => 'Đăng xuất thành công',
             ]);
         }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Có lỗi xảy ra',
+        ]);
     }
 
-    // Admin CRUD
-    public function getData(Request $request)
+    public function getData(SearchRequest $request): JsonResponse
     {
+        /** @var MoiGioi|null $user */
         $user = Auth::guard('sanctum')->user();
+
         if ($user) {
             $query = MoiGioi::query();
-            if ($request->search) {
-                $query->where('ten', 'like', '%' . $request->search . '%')
-                    ->orWhere('email', 'like', '%' . $request->search . '%');
+
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+
+                $query->where(function ($q) use ($search) {
+                    $q->where('ten', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%')
+                        ->orWhere('so_dien_thoai', 'like', '%' . $search . '%');
+                });
             }
-            return response()->json(['status' => 1, 'data' => $query->paginate(10)]);
-        } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+
+            return response()->json([
+                'status' => 1,
+                'data' => $query->paginate(10),
+            ]);
         }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Có lỗi xảy ra',
+        ]);
     }
 
-    public function search(Request $request)
+    public function search(SearchRequest $request): JsonResponse
     {
         return $this->getData($request);
     }
 
-    public function update(Request $request)
+    public function update(UpdateMoiGioiRequest $request): JsonResponse
     {
+        /** @var MoiGioi|null $user */
         $user = Auth::guard('sanctum')->user();
+
         if ($user) {
-            $moiGioi = MoiGioi::find($request->id);
-            if (!$moiGioi) {
-                return response()->json(['status' => 0, 'message' => 'Không tìm thấy']);
+            $moiGioi = MoiGioi::find($request->input('id'));
+
+            if (! $moiGioi) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Không tìm thấy',
+                ]);
             }
-            $moiGioi->ten = $request->input('ten', $moiGioi->ten);
-            $moiGioi->so_dien_thoai = $request->input('so_dien_thoai', $moiGioi->so_dien_thoai);
-            $moiGioi->is_active = $request->input('is_active', $moiGioi->is_active);
+
+            if ($request->filled('ten')) {
+                $moiGioi->ten = $request->input('ten');
+            }
+
+            if ($request->filled('so_dien_thoai')) {
+                $moiGioi->so_dien_thoai = $request->input('so_dien_thoai');
+            }
+
+            if ($request->has('is_active')) {
+                $moiGioi->is_active = $request->boolean('is_active');
+            }
+
             $moiGioi->save();
-            
-            return response()->json(['status' => 1, 'message' => 'Cập nhật thành công', 'data' => $moiGioi]);
-        } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Cập nhật thành công',
+                'data' => $moiGioi,
+            ]);
         }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Có lỗi xảy ra',
+        ]);
     }
 
-    public function destroy(Request $request)
+    public function destroy(DestroyRequest $request): JsonResponse
     {
+        /** @var MoiGioi|null $user */
         $user = Auth::guard('sanctum')->user();
+
         if ($user) {
-            $moiGioi = MoiGioi::find($request->id);
-            if ($moiGioi) {
-                $moiGioi->delete();
-                return response()->json(['status' => 1, 'message' => 'Xóa thành công']);
+            $moiGioi = MoiGioi::find($request->input('id'));
+
+            if (! $moiGioi) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'Không tìm thấy',
+                ]);
             }
-            return response()->json(['status' => 0, 'message' => 'Không tìm thấy']);
-        } else {
-             return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+
+            $moiGioi->delete();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Xóa thành công',
+            ]);
         }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Có lỗi xảy ra',
+        ]);
     }
 }

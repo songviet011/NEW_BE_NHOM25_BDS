@@ -6,13 +6,14 @@ use App\Models\GiaoDich;
 use App\Models\MoiGioi;
 use App\Models\KhachHang;
 use App\Models\BatDongSan;
+use App\Http\Requests\ThongKeDoanhThuRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ThongKeController extends Controller
 {
-    public function doanhThu(Request $request)
+    public function doanhThu(ThongKeDoanhThuRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {

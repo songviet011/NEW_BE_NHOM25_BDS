@@ -7,6 +7,10 @@ use App\Models\GiaoDich;
 use App\Models\LichSuGoiTin;
 use App\Models\MoiGioi;
 use App\Models\KhachHang;
+use App\Http\Requests\CreateGoiTinRequest;
+use App\Http\Requests\UpdateGoiTinRequest;
+use App\Http\Requests\MuaGoiTinRequest;
+use App\Http\Requests\DestroyRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -26,24 +30,15 @@ class GoiTinController extends Controller
         return $this->getData();
     }
 
-    public function store(Request $request)
+    public function store(CreateGoiTinRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
-            $ten_goi = $request->input('ten_goi');
-            $gia = $request->input('gia');
-            $so_ngay = $request->input('so_ngay');
-            $so_luong_tin = $request->input('so_luong_tin');
-
-            if (empty($ten_goi) || !isset($gia) || !isset($so_ngay) || !isset($so_luong_tin)) {
-                return response()->json(['status' => 0, 'message' => 'Vui lòng điền đầy đủ thông tin']);
-            }
-
             $goiTin = GoiTin::create([
-                'ten_goi' => $ten_goi,
-                'gia' => $gia,
-                'so_ngay' => $so_ngay,
-                'so_luong_tin' => $so_luong_tin,
+                'ten_goi' => $request->ten_goi,
+                'gia' => $request->gia,
+                'so_ngay' => $request->so_ngay,
+                'so_luong_tin' => $request->so_luong_tin,
             ]);
 
             return response()->json(['status' => 1, 'message' => 'Tạo thành công', 'data' => $goiTin]);
@@ -52,7 +47,7 @@ class GoiTinController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateGoiTinRequest $request, $id)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
@@ -73,7 +68,7 @@ class GoiTinController extends Controller
         }
     }
 
-    public function destroy(Request $request)
+    public function destroy(DestroyRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
@@ -88,16 +83,11 @@ class GoiTinController extends Controller
         }
     }
 
-    public function muaGoi(Request $request)
+    public function muaGoi(MuaGoiTinRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
-            $goi_tin_id = $request->input('goi_tin_id');
-            if (empty($goi_tin_id)) {
-                return response()->json(['status' => 0, 'message' => 'Vui lòng chọn gói tin']);
-            }
-
-            $goiTin = GoiTin::find($goi_tin_id);
+            $goiTin = GoiTin::find($request->goi_tin_id);
             if (!$goiTin) {
                 return response()->json(['status' => 0, 'message' => 'Gói tin không tồn tại']);
             }
@@ -105,7 +95,7 @@ class GoiTinController extends Controller
             // Giả sử thanh toán success
             $giaoDich = GiaoDich::create([
                 'moi_gioi_id' => $user->id, // or khach_hang_id if KhachHang
-                'goi_tin_id' => $goi_tin_id,
+                'goi_tin_id' => $request->goi_tin_id,
                 'so_tien' => $goiTin->gia,
                 'phuong_thuc' => $request->phuong_thuc ?? 'cash',
                 'trang_thai' => 'success',
@@ -116,7 +106,7 @@ class GoiTinController extends Controller
 
             LichSuGoiTin::create([
                 'moi_gioi_id' => $user->id,
-                'goi_tin_id' => $goi_tin_id,
+                'goi_tin_id' => $request->goi_tin_id,
                 'ngay_bat_dau' => now(),
                 'ngay_ket_thuc' => $ngayKetThuc,
             ]);

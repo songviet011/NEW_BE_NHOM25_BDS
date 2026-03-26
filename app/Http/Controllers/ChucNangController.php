@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ChucNang;
+use App\Http\Requests\CreateChucNangRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -49,18 +50,11 @@ class ChucNangController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(CreateChucNangRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
             $tenChucNang = $request->input('ten_chuc_nang');
-
-            if (empty($tenChucNang) || !is_string($tenChucNang)) {
-                return response()->json([
-                    'status'  => 0,
-                    'message' => "Dữ liệu không hợp lệ: 'ten_chuc_nang' là bắt buộc và phải là chuỗi.",
-                ], 422);
-            }
 
             $chucNang = ChucNang::create([
                 'ten_chuc_nang' => $tenChucNang

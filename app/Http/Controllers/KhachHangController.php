@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\KhachHang;
+use App\Http\Requests\KhachHangLoginRequest;
+use App\Http\Requests\KhachHangRegisterRequest;
+use App\Http\Requests\UpdateKhachHangRequest;
+use App\Http\Requests\SearchRequest;
+use App\Http\Requests\DestroyRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -10,17 +15,10 @@ use Illuminate\Validation\ValidationException;
 
 class KhachHangController extends Controller
 {
-    public function login(Request $request)
+    public function login(KhachHangLoginRequest $request)
     {
         $email = $request->input('email');
         $password = $request->input('password');
-
-        if (empty($email) || empty($password)) {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Vui lòng nhập đầy đủ email và mật khẩu",
-            ]);
-        }
 
         $khachHang = KhachHang::where('email', $email)->first();
 
@@ -43,7 +41,7 @@ class KhachHangController extends Controller
         ]);
     }
 
-    public function register(Request $request)
+    public function register(KhachHangRegisterRequest $request)
     {
         $ten = $request->input('ten');
         $email = $request->input('email');
@@ -77,6 +75,8 @@ class KhachHangController extends Controller
             'email' => $email,
             'so_dien_thoai' => $so_dien_thoai,
             'password' => Hash::make($password),
+            'zalo_link' => $request->input('zalo_link'),
+            'mo_ta' => $request->input('mo_ta'),
         ]);
 
         $token = $khachHang->createToken('khach-hang-token')->plainTextToken;
@@ -124,12 +124,12 @@ class KhachHangController extends Controller
         }
     }
 
-    public function search(Request $request)
+    public function search(SearchRequest $request)
     {
         return $this->getData($request);
     }
 
-    public function update(Request $request)
+    public function update(UpdateKhachHangRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
@@ -149,7 +149,7 @@ class KhachHangController extends Controller
         }
     }
 
-    public function destroy(Request $request)
+    public function destroy(DestroyRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {

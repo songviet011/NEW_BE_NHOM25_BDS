@@ -10,6 +10,12 @@ use App\Models\TinhThanh;
 use App\Models\QuanHuyen;
 use App\Models\DiaChi;
 use App\Models\HinhAnhBatDongSan;
+use App\Http\Requests\CreateBatDongSanRequest;
+use App\Http\Requests\UpdateBatDongSanRequest;
+use App\Http\Requests\SearchBatDongSanRequest;
+use App\Http\Requests\ApproveOrRejectBatDongSanRequest;
+use App\Http\Requests\ChangeBatDongSanStatusRequest;
+use App\Http\Requests\DestroyRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -52,7 +58,7 @@ class BatDongSanController extends Controller
         ]);
     }
 
-    public function search(Request $request)
+    public function search(SearchBatDongSanRequest $request)
     {
         $query = BatDongSan::query();
 
@@ -104,7 +110,7 @@ class BatDongSanController extends Controller
         }
     }
 
-    public function duyetTin(Request $request)
+    public function duyetTin(ApproveOrRejectBatDongSanRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
@@ -120,7 +126,7 @@ class BatDongSanController extends Controller
         }
     }
 
-    public function changeStatus(Request $request)
+    public function changeStatus(ChangeBatDongSanStatusRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
@@ -136,7 +142,7 @@ class BatDongSanController extends Controller
         }
     }
 
-    public function delete(Request $request)
+    public function delete(DestroyRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
@@ -163,33 +169,23 @@ class BatDongSanController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(CreateBatDongSanRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
-            $tieu_de = $request->input('tieu_de');
-            $gia = $request->input('gia');
-            $dien_tich = $request->input('dien_tich');
-            $loai_id = $request->input('loai_id');
-            $trang_thai_id = $request->input('trang_thai_id');
-            
-            if (empty($tieu_de) || empty($gia) || empty($dien_tich) || empty($loai_id) || empty($trang_thai_id)) {
-                 return response()->json(['status' => 0, 'message' => 'Vui lòng nhập đầy đủ các trường bắt buộc']);
-            }
-            
             $bds = BatDongSan::create([
-                'tieu_de' => $tieu_de,
-                'mo_ta' => $request->input('mo_ta'),
-                'gia' => $gia,
-                'dien_tich' => $dien_tich,
-                'loai_id' => $loai_id,
-                'trang_thai_id' => $trang_thai_id,
-                'tinh_id' => $request->input('tinh_id', 1),
-                'quan_id' => $request->input('quan_id', 1),
-                'dia_chi_id' => $request->input('dia_chi_id', 1),
-                'so_phong_ngu' => $request->input('so_phong_ngu'),
-                'so_phong_tam' => $request->input('so_phong_tam'),
-                'is_noi_bat' => $request->input('is_noi_bat', false),
+                'tieu_de' => $request->tieu_de,
+                'mo_ta' => $request->mo_ta,
+                'gia' => $request->gia,
+                'dien_tich' => $request->dien_tich,
+                'loai_id' => $request->loai_id,
+                'trang_thai_id' => $request->trang_thai_id,
+                'tinh_id' => $request->tinh_id ?? 1,
+                'quan_id' => $request->quan_id ?? 1,
+                'dia_chi_id' => $request->dia_chi_id ?? 1,
+                'so_phong_ngu' => $request->so_phong_ngu,
+                'so_phong_tam' => $request->so_phong_tam,
+                'is_noi_bat' => $request->is_noi_bat ?? false,
                 'moi_gioi_id' => $user->id,
                 'is_duyet' => false,
             ]);
@@ -200,7 +196,7 @@ class BatDongSanController extends Controller
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateBatDongSanRequest $request, $id)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
@@ -208,21 +204,24 @@ class BatDongSanController extends Controller
             if (!$bds) {
                 return response()->json(['status' => 0, 'message' => 'Không tìm thấy BDS']);
             }
-            
+
             if ($bds->moi_gioi_id !== $user->id) {
                 return response()->json(['status' => 0, 'message' => 'Không có quyền']);
             }
 
-            $tieu_de = $request->input('tieu_de');
-            if (empty($tieu_de)) {
-                 return response()->json(['status' => 0, 'message' => 'Tiêu đề là bắt buộc']);
-            }
-
-            $bds->tieu_de = $tieu_de;
-            $bds->mo_ta = $request->input('mo_ta');
-            $bds->gia = $request->input('gia');
-            $bds->dien_tich = $request->input('dien_tich');
-            $bds->loai_id = $request->input('loai_id');
+            $bds->tieu_de = $request->tieu_de;
+            $bds->mo_ta = $request->mo_ta;
+            $bds->gia = $request->gia;
+            $bds->dien_tich = $request->dien_tich;
+            $bds->loai_id = $request->loai_id;
+            $bds->trang_thai_id = $request->trang_thai_id;
+            $bds->tinh_id = $request->tinh_id ?? $bds->tinh_id;
+            $bds->quan_id = $request->quan_id ?? $bds->quan_id;
+            $bds->dia_chi_id = $request->dia_chi_id ?? $bds->dia_chi_id;
+            $bds->so_phong_ngu = $request->so_phong_ngu;
+            $bds->so_phong_tam = $request->so_phong_tam;
+            $bds->is_noi_bat = $request->is_noi_bat ?? $bds->is_noi_bat;
+            $bds->is_duyet = false;
             $bds->save();
 
             return response()->json(['status' => 1, 'message' => 'Cập nhật thành công', 'data' => $bds]);
@@ -231,7 +230,7 @@ class BatDongSanController extends Controller
         }
     }
 
-    public function destroy(Request $request)
+    public function destroy(DestroyRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
@@ -239,7 +238,7 @@ class BatDongSanController extends Controller
             if (!$bds) {
                 return response()->json(['status' => 0, 'message' => 'Không tìm thấy BDS']);
             }
-            
+
             if ($bds->moi_gioi_id !== $user->id) {
                 return response()->json(['status' => 0, 'message' => 'Không có quyền']);
             }

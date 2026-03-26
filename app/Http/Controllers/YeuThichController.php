@@ -4,19 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\YeuThich;
 use App\Models\BatDongSan;
+use App\Http\Requests\YeuThichRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class YeuThichController extends Controller
 {
-    public function like(Request $request)
+    public function like(YeuThichRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
             $bds_id = $request->input('bds_id');
-            if (empty($bds_id)) {
-                 return response()->json(['status' => 0, 'message' => 'Vui lòng truyền id bất động sản']);
-            }
 
             // Toggle like
             $yeuThich = YeuThich::where('khach_hang_id', $user->id)
