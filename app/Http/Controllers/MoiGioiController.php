@@ -48,6 +48,43 @@ class MoiGioiController extends Controller
         ]);
     }
 
+    public function updateProfile(UpdateMoiGioiRequest $request): JsonResponse
+    {
+        /** @var MoiGioi|null $user */
+        $user = Auth::guard('sanctum')->user();
+
+        if ($user) {
+            if ($request->filled('ten')) {
+                $user->ten = $request->input('ten');
+            }
+
+            if ($request->filled('so_dien_thoai')) {
+                $user->so_dien_thoai = $request->input('so_dien_thoai');
+            }
+
+            if ($request->filled('zalo_link')) {
+                $user->zalo_link = $request->input('zalo_link');
+            }
+
+            if ($request->filled('mo_ta')) {
+                $user->mo_ta = $request->input('mo_ta');
+            }
+
+            $user->save();
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Cập nhật thành công',
+                'data' => $user,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Có lỗi xảy ra',
+        ]);
+    }
+
     public function register(MoiGioiRegisterRequest $request): JsonResponse
     {
         $moiGioi = MoiGioi::create([

@@ -110,7 +110,7 @@ Route::prefix('moi-gioi')->middleware('MoiGioiMiddleware')->group(function () {
 
     //PROFILE MÔI GIỚI
     Route::get('/profile', [MoiGioiController::class, 'profile']);
-    Route::post('/update-profile', [MoiGioiController::class, 'updateProfile']); //CHƯA VIẾT TRONG CONTROLLER
+    Route::post('/update-profile', [MoiGioiController::class, 'updateProfile']);
 
     //QUẢN LÝ BĐS
     Route::prefix('bds')->group(function () {
@@ -136,7 +136,7 @@ Route::prefix('moi-gioi')->middleware('MoiGioiMiddleware')->group(function () {
 Route::prefix('khach-hang')->middleware('KhachHangMiddleware')->group(function () {
 
     //PROFILE KHÁCH HÀNG
-    Route::get('/profile', [KhachHangController::class, 'profile']); //CHƯA VIẾT TRONG CONTROLLER
+    Route::get('/profile', [KhachHangController::class, 'profile']); 
     Route::post('/update-profile', [KhachHangController::class, 'updateProfile']);
 
     //YÊU THÍCH (THẢ TIM)

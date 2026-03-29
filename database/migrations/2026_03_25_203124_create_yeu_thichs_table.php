@@ -20,8 +20,6 @@ return new class extends Migration
 
             $table->string('noi_dung');
             $table->boolean('is_read')->default(false);
-            $table->foreignId('khach_hang_id');
-            $table->foreignId('bds_id');
             $table->timestamps();
         });
     }

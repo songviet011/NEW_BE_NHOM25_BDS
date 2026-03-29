@@ -90,6 +90,24 @@ class KhachHangController extends Controller
             ]
         ]);
     }
+
+    public function profile()
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        if ($user) {
+            return response()->json([
+                'status' => 1,
+                'data' => $user,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 0,
+            'message' => 'Chưa đăng nhập',
+        ]);
+    }
+
     public function updateProfile(Request $request)
     {
         $user = Auth::guard('sanctum')->user();

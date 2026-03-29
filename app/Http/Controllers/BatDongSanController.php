@@ -160,13 +160,28 @@ class BatDongSanController extends Controller
     // MoiGioi
     public function dataMoiGioi(Request $request)
     {
+        // $user = Auth::guard('sanctum')->user();
+        // if ($user) {
+        //     $query = BatDongSan::where('moi_gioi_id', $user->id)->with(['loai', 'trangThai']);
+        //     return response()->json(['status' => 1, 'data' => $query->paginate(10)]);
+        // } else {
+        //     return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        // }
         $user = Auth::guard('sanctum')->user();
-        if ($user) {
-            $query = BatDongSan::where('moi_gioi_id', $user->id)->with(['loai', 'trangThai']);
-            return response()->json(['status' => 1, 'data' => $query->paginate(10)]);
-        } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+
+        $query = BatDongSan::with(['loai', 'trangThai']);
+
+        // Nếu có login + là môi giới
+        if ($user && $user->role == 'moi_gioi') {
+            $query->where('moi_gioi_id', $user->id);
         }
+
+        // Nếu không login hoặc là khách → lấy tất cả
+
+        return response()->json([
+            'status' => 1,
+            'data' => $query->paginate(10)
+        ]);
     }
 
     public function store(CreateBatDongSanRequest $request)
