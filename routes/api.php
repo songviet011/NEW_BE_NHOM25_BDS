@@ -14,6 +14,10 @@ use App\Http\Controllers\YeuThichController;
 use App\Http\Controllers\AIDinhGiaController;
 use App\Http\Controllers\ChatBotController;
 use App\Http\Controllers\TrainChatController;
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\KhachHangMiddleware;
+use App\Http\Middleware\MoiGioiMiddleware;
+
 
 
 //--------------------- AUTH + CHECK TOKEN-----------------------------
