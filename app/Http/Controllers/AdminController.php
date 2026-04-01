@@ -16,43 +16,45 @@ class AdminController extends Controller
 {
     public function login(AdminLoginRequest $request)
     {
-        $email = $request->input('email');
-        $password = $request->input('password');
+        $user = Auth::guard('admin')->attempt([
+            'email' => $request->email,
+            'password' => $request->password,
+        ]);
 
-        $admin = Admin::where('email', $email)->first();
-
-        if (! $admin || ! Hash::check($password, $admin->password)) {
+         if ($user) {
+            $user = Auth::guard('admin')->user();
+            $token = $user->createToken('auth_token')->plainTextToken;
             return response()->json([
-                'status'  => 0,
-                'message' => "Thông tin đăng nhập không chính xác",
-            ]);
+                'status' => 'success',
+                'message' => 'Dang nhap thanh cong',
+                'token' => $token,
+                'data' => $user
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Email hoặc mật khẩu không đúng'
+            ], 401);
         }
 
-        $token = $admin->createToken('admin-token')->plainTextToken;
-
         return response()->json([
-            'status' => 1,
-            'message' => "Đăng nhập thành công",
-            'data' => [
-                'token' => $token,
-                'admin' => $admin,
-            ]
-        ]);
+            'data' => $request->validate(),
+        ], 200);
     }
 
     public function checkToken()
     {
-        $user = Auth::guard('sanctum')->user();
+         $user = Auth::guard('sanctum')->user();
         if ($user) {
             return response()->json([
-                'status' => 1,
-                'data' => ['ten' => $user->ten],
-            ]);
+                'status' => 'success',
+                'data' => $user,
+            ], 200);
         } else {
             return response()->json([
-                'status'  => 0,
-                'message' => "Chưa đăng nhập",
-            ]);
+                'status' => 'error',
+                'message' => 'Token không hợp lệ'
+            ], 401);
         }
     }
 

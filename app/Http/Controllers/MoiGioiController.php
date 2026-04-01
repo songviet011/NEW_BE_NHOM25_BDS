@@ -12,40 +12,32 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Request;
 
 class MoiGioiController extends Controller
 {
     public function login(MoiGioiLoginRequest $request): JsonResponse
     {
-        $email = $request->input('email');
-        $password = $request->input('password');
-
-        if (empty($email) || empty($password)) {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Vui lòng nhập đầy đủ email và mật khẩu",
-            ]);
-        }
-
-        $moiGioi = MoiGioi::where('email', $email)->first();
-
-        if (! $moiGioi || ! Hash::check($password, $moiGioi->password) || ! $moiGioi->is_active) {
-            return response()->json([
-                'status' => 0,
-                'message' => 'Thông tin đăng nhập sai hoặc tài khoản bị khóa.',
-            ]);
-        }
-
-        $token = $moiGioi->createToken('moi-gioi-token')->plainTextToken;
-
-        return response()->json([
-            'status' => 1,
-            'message' => 'Đăng nhập thành công',
-            'data' => [
-                'token' => $token,
-                'moi_gioi' => $moiGioi,
-            ],
+        $user = Auth::guard('moi_gioi')->attempt([
+            'email' => $request->email,
+            'password' => $request->password,
         ]);
+
+         if ($user) {
+            $user = Auth::guard('moi_gioi')->user();
+            $token = $user->createToken('auth_token')->plainTextToken;
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Dang nhap thanh cong',
+                'token' => $token,
+                'data' => $user
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Email hoặc mật khẩu không đúng'
+            ], 401);
+        }
     }
 
     public function updateProfile(UpdateMoiGioiRequest $request): JsonResponse
@@ -129,26 +121,20 @@ class MoiGioiController extends Controller
         ]);
     }
 
-    public function checkToken(): JsonResponse
+    public function checkToken(Request $request)
     {
-        /** @var MoiGioi|null $user */
-        $user = Auth::guard('sanctum')->user();
-
+         $user = Auth::guard('sanctum')->user();
         if ($user) {
             return response()->json([
-                'status' => 1,
-                'data' => [
-                    'ten' => $user->ten,
-                ],
-            ]);
+                'status' => 'success',
+                'data' => $user,
+            ], 200);
         } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token không hợp lệ'
+            ], 401);
         }
-
-        return response()->json([
-            'status' => 0,
-            'message' => 'Có lỗi xảy ra',
-        ]);
     }
 
     public function logout(): JsonResponse

@@ -11,6 +11,9 @@ class ChucNang extends Model
 
     protected $fillable = [
         'ten_chuc_nang',
+        'url_chuc_nang',
+        'methods_chuc_nang',
+        'mo_ta_chuc_nang',
     ];
 
     protected $casts = [

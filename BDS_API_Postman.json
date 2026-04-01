@@ -1,0 +1,1356 @@
+{
+  "info": {
+    "_postman_id": "bds-kltn-api-collection",
+    "name": "BDS KLTN API Collection",
+    "description": "API collection for Real Estate Management Platform (Nền tảng quản lý Bất Động Sản)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "📋 AUTHENTICATION",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('admin_token', jsonData.token);",
+                  "    console.log('Admin Token set:', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/dang-nhap",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "dang-nhap"]
+            }
+          }
+        },
+        {
+          "name": "Khách Hàng Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten\": \"Nguyễn Văn A\",\n  \"email\": \"khachhang@example.com\",\n  \"so_dien_thoai\": \"0901234567\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/khach-hang/register",
+              "host": ["{{base_url}}"],
+              "path": ["khach-hang", "register"]
+            }
+          }
+        },
+        {
+          "name": "Khách Hàng Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('khachhang_token', jsonData.token);",
+                  "    console.log('Khách Hàng Token set:', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"khachhang@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/khach-hang/dang-nhap",
+              "host": ["{{base_url}}"],
+              "path": ["khach-hang", "dang-nhap"]
+            }
+          }
+        },
+        {
+          "name": "Môi Giới Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten\": \"Trần Thị B\",\n  \"email\": \"moigioi@example.com\",\n  \"so_dien_thoai\": \"0987654321\",\n  \"password\": \"password123\",\n  \"zalo_link\": \"https://zalo.me/0987654321\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/dang-ky",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "dang-ky"]
+            }
+          }
+        },
+        {
+          "name": "Môi Giới Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('moigioi_token', jsonData.token);",
+                  "    console.log('Môi Giới Token set:', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"moigioi@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/dang-nhap",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "dang-nhap"]
+            }
+          }
+        },
+        {
+          "name": "Admin Check Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/check-token",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "check-token"]
+            }
+          }
+        },
+        {
+          "name": "Khách Hàng Check Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{khachhang_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/khach-hang/check-token",
+              "host": ["{{base_url}}"],
+              "path": ["khach-hang", "check-token"]
+            }
+          }
+        },
+        {
+          "name": "Môi Giới Check Token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moigioi_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/check-token",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "check-token"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🌐 PUBLIC - BẤT ĐỘNG SẢN",
+      "item": [
+        {
+          "name": "Lấy danh sách BDS (phân trang)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bds?page=1&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["bds"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tìm kiếm BDS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tieu_de\": \"nhà\",\n  \"loai_id\": 1,\n  \"tinh_id\": 1,\n  \"quan_id\": 1,\n  \"gia_min\": 1000000,\n  \"gia_max\": 5000000000,\n  \"dien_tich_min\": 20,\n  \"dien_tich_max\": 500,\n  \"so_phong_ngu\": 3,\n  \"trang_thai_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/bds/tim-kiem",
+              "host": ["{{base_url}}"],
+              "path": ["bds", "tim-kiem"]
+            }
+          }
+        },
+        {
+          "name": "Chi tiết BDS",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bds/1",
+              "host": ["{{base_url}}"],
+              "path": ["bds", "1"]
+            }
+          }
+        },
+        {
+          "name": "Lấy thông tin Môi giới theo BDS",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bds/1/moi-gioi",
+              "host": ["{{base_url}}"],
+              "path": ["bds", "1", "moi-gioi"]
+            }
+          }
+        },
+        {
+          "name": "Bản đồ - Hiển thị BDS theo khu vực",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/bds/map-data?tinh_id=1&quan_id=1",
+              "host": ["{{base_url}}"],
+              "path": ["bds", "map-data"],
+              "query": [
+                {
+                  "key": "tinh_id",
+                  "value": "1"
+                },
+                {
+                  "key": "quan_id",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👨‍💼 ADMIN MANAGEMENT",
+      "item": [
+        {
+          "name": "Profile Admin",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/profile",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten\": \"Admin Name Update\",\n  \"email\": \"admin@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/update-profile",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "update-profile"]
+            }
+          }
+        },
+        {
+          "name": "Logout All Devices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/dang-xuat-tat-ca",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "dang-xuat-tat-ca"]
+            }
+          }
+        },
+        {
+          "name": "Admin Logout",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/dang-xuat",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "dang-xuat"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 ADMIN - QUẢN LÝ KHÁCH HÀNG",
+      "item": [
+        {
+          "name": "Danh sách Khách hàng",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/khach-hang/data?page=1&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "khach-hang", "data"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tìm kiếm Khách hàng",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keyword\": \"Nguyễn\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/khach-hang/search",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "khach-hang", "search"]
+            }
+          }
+        },
+        {
+          "name": "Update Khách hàng",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"ten\": \"Nguyễn Văn A Updated\",\n  \"email\": \"khachhang@example.com\",\n  \"so_dien_thoai\": \"0901234567\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/khach-hang/update",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "khach-hang", "update"]
+            }
+          }
+        },
+        {
+          "name": "Delete Khách hàng",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/khach-hang/delete",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "khach-hang", "delete"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏢 ADMIN - QUẢN LÝ MÔI GIỚI",
+      "item": [
+        {
+          "name": "Danh sách Môi giới",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/moi-gioi/data?page=1&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "moi-gioi", "data"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tìm kiếm Môi giới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keyword\": \"Trần\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/moi-gioi/search",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "moi-gioi", "search"]
+            }
+          }
+        },
+        {
+          "name": "Update Môi giới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"ten\": \"Trần Thị B Updated\",\n  \"email\": \"moigioi@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/moi-gioi/update",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "moi-gioi", "update"]
+            }
+          }
+        },
+        {
+          "name": "Delete Môi giới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/moi-gioi/delete",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "moi-gioi", "delete"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏠 ADMIN - QUẢN LÝ BẤT ĐỘNG SẢN",
+      "item": [
+        {
+          "name": "Danh sách BDS",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/bds/data?page=1&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "bds", "data"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tìm kiếm BDS (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keyword\": \"nhà\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/bds/tim-kiem",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "bds", "tim-kiem"]
+            }
+          }
+        },
+        {
+          "name": "Duyệt tin BDS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"is_duyet\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/bds/duyet",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "bds", "duyet"]
+            }
+          }
+        },
+        {
+          "name": "Đổi trạng thái BDS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"trang_thai_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/bds/change-status",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "bds", "change-status"]
+            }
+          }
+        },
+        {
+          "name": "Delete BDS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/bds/delete",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "bds", "delete"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 ADMIN - QUẢN LÝ GÓI TIN",
+      "item": [
+        {
+          "name": "Danh sách Gói tin",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/goi-tin/data?page=1&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "goi-tin", "data"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tạo Gói tin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten_goi\": \"Gói Bạc\",\n  \"gia\": 500000,\n  \"so_ngay\": 30,\n  \"so_luong_tin\": 20\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/goi-tin/create",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "goi-tin", "create"]
+            }
+          }
+        },
+        {
+          "name": "Update Gói tin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"ten_goi\": \"Gói Bạc Updated\",\n  \"gia\": 600000,\n  \"so_ngay\": 30,\n  \"so_luong_tin\": 25\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/goi-tin/update",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "goi-tin", "update"]
+            }
+          }
+        },
+        {
+          "name": "Delete Gói tin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/goi-tin/delete",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "goi-tin", "delete"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 ADMIN - THỐNG KÊ & GIAO DỊCH",
+      "item": [
+        {
+          "name": "Thống kê Doanh thu",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start_date\": \"2026-01-01\",\n  \"end_date\": \"2026-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/doanh-thu",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "doanh-thu"]
+            }
+          }
+        },
+        {
+          "name": "Thống kê User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start_date\": \"2026-01-01\",\n  \"end_date\": \"2026-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/user",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "user"]
+            }
+          }
+        },
+        {
+          "name": "Danh sách Giao dịch",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/giao-dich/data?page=1&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "giao-dich", "data"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👨‍💼 MÔI GIỚI - PROFILE & BDS",
+      "item": [
+        {
+          "name": "Profile Môi giới",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moigioi_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/profile",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile Môi giới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moigioi_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten\": \"Trần Thị B Updated\",\n  \"avatar\": \"https://example.com/avatar.jpg\",\n  \"mo_ta\": \"Môi giới bất động sản chuyên nghiệp\",\n  \"zalo_link\": \"https://zalo.me/0987654321\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/update-profile",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "update-profile"]
+            }
+          }
+        },
+        {
+          "name": "Danh sách BDS của Môi giới",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moigioi_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/bds/data?page=1&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "bds", "data"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tạo BDS mới",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moigioi_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tieu_de\": \"Bán nhà 3 tầng tại Hà Nội\",\n  \"mo_ta\": \"Nhà đẹp, an toàn, gần trường học và siêu thị\",\n  \"gia\": 3500000000,\n  \"dien_tich\": 150,\n  \"so_phong_ngu\": 3,\n  \"so_phong_tam\": 2,\n  \"loai_id\": 1,\n  \"trang_thai_id\": 1,\n  \"tinh_id\": 1,\n  \"quan_id\": 1,\n  \"dia_chi_chi_tiet\": \"Số 123, đường Lê Lợi\",\n  \"lat\": 21.0285,\n  \"lng\": 105.8542\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/bds/create",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "bds", "create"]
+            }
+          }
+        },
+        {
+          "name": "Update BDS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moigioi_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"tieu_de\": \"Bán nhà 3 tầng tại Hà Nội - Updated\",\n  \"mo_ta\": \"Nhà đẹp, an toàn, gần trường học và siêu thị\",\n  \"gia\": 3500000000,\n  \"dien_tich\": 150\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/bds/update",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "bds", "update"]
+            }
+          }
+        },
+        {
+          "name": "Delete BDS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moigioi_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/bds/delete",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "bds", "delete"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 MÔI GIỚI - MUA GÓI & GIAO DỊCH",
+      "item": [
+        {
+          "name": "Danh sách Gói tin",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moigioi_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/goi-tin/data",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "goi-tin", "data"]
+            }
+          }
+        },
+        {
+          "name": "Mua Gói tin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moigioi_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goi_tin_id\": 1,\n  \"phuong_thuc\": \"momo\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/goi-tin/mua",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "goi-tin", "mua"]
+            }
+          }
+        },
+        {
+          "name": "Lấy Thông báo (Khách thả tim)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moigioi_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/thong-bao",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "thong-bao"]
+            }
+          }
+        },
+        {
+          "name": "Danh sách Giao dịch (Môi giới)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{moigioi_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/giao-dich/data?page=1&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "giao-dich", "data"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👨‍👩‍👧‍👦 KHÁCH HÀNG - PROFILE & YÊU THÍCH",
+      "item": [
+        {
+          "name": "Profile Khách hàng",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{khachhang_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/khach-hang/profile",
+              "host": ["{{base_url}}"],
+              "path": ["khach-hang", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile Khách hàng",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{khachhang_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten\": \"Nguyễn Văn A Updated\",\n  \"so_dien_thoai\": \"0901234567\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/khach-hang/update-profile",
+              "host": ["{{base_url}}"],
+              "path": ["khach-hang", "update-profile"]
+            }
+          }
+        },
+        {
+          "name": "Thả tim BDS (Yêu thích)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{khachhang_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bds_id\": 1,\n  \"noi_dung\": \"Rất thích BDS này\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/khach-hang/bds/yeu-thich",
+              "host": ["{{base_url}}"],
+              "path": ["khach-hang", "bds", "yeu-thich"]
+            }
+          }
+        },
+        {
+          "name": "Danh sách BDS Yêu thích",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{khachhang_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/khach-hang/bds/yeu-thich/data?page=1&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["khach-hang", "bds", "yeu-thich", "data"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mua Gói (Trở thành Môi giới)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{khachhang_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goi_tin_id\": 1,\n  \"phuong_thuc\": \"bank\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/khach-hang/mua-goi",
+              "host": ["{{base_url}}"],
+              "path": ["khach-hang", "mua-goi"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🤖 AI & CHATBOT",
+      "item": [
+        {
+          "name": "AI Định giá BDS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loai_bds\": \"nhà\",\n  \"dien_tich\": 150,\n  \"so_phong_ngu\": 3,\n  \"so_phong_tam\": 2,\n  \"tinh_id\": 1,\n  \"quan_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/ai/dinh-gia",
+              "host": ["{{base_url}}"],
+              "path": ["ai", "dinh-gia"]
+            }
+          }
+        },
+        {
+          "name": "Chatbot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Xin chào, tôi muốn tìm nhà ở Hà Nội\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/chatbot",
+              "host": ["{{base_url}}"],
+              "path": ["chatbot"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "khachhang_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "moigioi_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

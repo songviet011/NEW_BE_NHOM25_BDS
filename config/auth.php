@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Admin;
+use App\Models\KhachHang;
+use App\Models\MoiGioi;
 use App\Models\User;
 
 return [
@@ -42,6 +45,18 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admin',
+        ],
+        'moi_gioi' => [
+            'driver' => 'session',
+            'provider' => 'moi_gioi',
+        ],
+        'khach_hang' => [
+            'driver' => 'session',
+            'provider' => 'khach_hang',
+        ]
     ],
 
     /*
@@ -67,10 +82,20 @@ return [
             'model' => env('AUTH_MODEL', User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'admin' => [
+            'driver' => 'eloquent',
+            'model' => Admin::class,
+        ],
+
+        'moi_gioi' => [
+            'driver' => 'eloquent',
+            'model' => MoiGioi::class,
+        ],
+
+        'khach_hang' => [
+            'driver' => 'eloquent',
+            'model' => KhachHang::class,
+        ],
     ],
 
     /*

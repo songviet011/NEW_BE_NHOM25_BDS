@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Sanctum\HasApiTokens;
 
 class KhachHang extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable,HasApiTokens;
 
     protected $table = 'khach_hangs';
 

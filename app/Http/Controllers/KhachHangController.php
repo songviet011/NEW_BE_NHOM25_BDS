@@ -17,28 +17,26 @@ class KhachHangController extends Controller
 {
     public function login(KhachHangLoginRequest $request)
     {
-        $email = $request->input('email');
-        $password = $request->input('password');
-
-        $khachHang = KhachHang::where('email', $email)->first();
-
-        if (! $khachHang || ! Hash::check($password, $khachHang->password) || ! $khachHang->is_active) {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Thông tin đăng nhập sai hoặc tài khoản bị khóa.",
-            ]);
-        }
-
-        $token = $khachHang->createToken('khach-hang-token')->plainTextToken;
-
-        return response()->json([
-            'status' => 1,
-            'message' => "Đăng nhập thành công",
-            'data' => [
-                'token' => $token,
-                'khach_hang' => $khachHang,
-            ]
+        $user = Auth::guard('khach_hang')->attempt([
+            'email' => $request->email,
+            'password' => $request->password,
         ]);
+
+        if ($user) {
+            $user = Auth::guard('khach_hang')->user();
+            $token = $user->createToken('auth_token')->plainTextToken;
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Dang nhap thanh cong',
+                'token' => $token,
+                'data' => $user
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Email hoặc mật khẩu không đúng'
+            ], 401);
+        }
     }
 
     public function register(KhachHangRegisterRequest $request)
