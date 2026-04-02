@@ -7,24 +7,25 @@ use Illuminate\Support\Facades\DB;
 
 class PhanQuyenSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
+
     public function run(): void
     {
-        DB::table('phan_quyens')->insert([
-            [
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
+        DB::table('phan_quyens')->delete();
+        DB::table('phan_quyens')->truncate();
+        // Nhân Viên Kiểm Duyệt
+        $hr_permissions = [5];
+        foreach ($hr_permissions as $permission) {
+            DB::table('phan_quyens')->insert([
+                ['id_chuc_vu' => 1, 'id_chuc_nang' => $permission],
+            ]);
+        }
+
+        $all_permissions = DB::table('chuc_nangs')->pluck('id')->toArray();
+        foreach ($all_permissions as $permission) {
+            DB::table('phan_quyens')->insert([
+                'id_chuc_vu' => 2,
+                'id_chuc_nang' => $permission,
+            ]);
+        }
     }
 }

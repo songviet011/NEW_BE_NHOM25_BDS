@@ -13,6 +13,9 @@ use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\YeuThichController;
 use App\Http\Controllers\AIDinhGiaController;
 use App\Http\Controllers\ChatBotController;
+use App\Http\Controllers\ChucNangController;
+use App\Http\Controllers\ChucVuController;
+use App\Http\Controllers\PhanQuyenController;
 use App\Http\Controllers\TrainChatController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\KhachHangMiddleware;
@@ -106,6 +109,23 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
 
     //GIAO DỊCH
     Route::get('/giao-dich/data', [GiaoDichController::class, 'getData']);
+
+    //CHỨC VỤ
+    Route::prefix('chuc-vu')->group(function () {
+        Route::get('/data', [ChucVuController::class, 'getData']);
+        Route::post('/create', [ChucVuController::class, 'store']);
+        Route::post('/update', [ChucVuController::class, 'update']);
+        Route::post('/delete', [ChucVuController::class, 'destroy']);
+    });
+    //CHỨC NĂNG
+    Route::get('/chuc-nang/data', [ChucNangController::class, 'getData']);
+
+    // PHÂN QUYỀN
+    Route::prefix('phan-quyen')->group(function () {
+        Route::get('/data/{id_chuc_vu}', [PhanQuyenController::class, 'getData']);
+        Route::post('/chuc-vu/create', [PhanQuyenController::class, 'store']);
+        Route::post('/chuc-vu/delete', [PhanQuyenController::class, 'destroy']);
+    });
 });
 
 //---------------------------MÔI GIỚI---------------------------
@@ -140,7 +160,7 @@ Route::prefix('moi-gioi')->middleware('MoiGioiMiddleware')->group(function () {
 Route::prefix('khach-hang')->middleware('KhachHangMiddleware')->group(function () {
 
     //PROFILE KHÁCH HÀNG
-    Route::get('/profile', [KhachHangController::class, 'profile']); 
+    Route::get('/profile', [KhachHangController::class, 'profile']);
     Route::post('/update-profile', [KhachHangController::class, 'updateProfile']);
 
     //YÊU THÍCH (THẢ TIM)

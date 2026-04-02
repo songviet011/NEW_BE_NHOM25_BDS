@@ -13,6 +13,7 @@ class ChucNangSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::table('chuc_nangs')->delete();
         DB::table('chuc_nangs')->truncate();
         DB::table('chuc_nangs')->insert([
             [
@@ -453,7 +454,7 @@ class ChucNangSeeder extends Seeder
             ],
             // ==================== KHÁCH HÀNG - MUA GÓI ====================
             [
-                'id' => 48,
+                'id' => 48, 
                 'ten_chuc_nang' => 'Mua gói -> Trở thành môi giới',
                 'url_chuc_nang' => '/api/khach-hang/mua-goi',
                 'methods_chuc_nang' => 'POST',
@@ -477,6 +478,77 @@ class ChucNangSeeder extends Seeder
                 'url_chuc_nang' => '/api/chatbot',
                 'methods_chuc_nang' => 'POST',
                 'mo_ta_chuc_nang' => 'Chức năng cho phép user chat tương tác với chatbot hỗ trợ.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [   'id' => 51, //ChucVuCrl
+                'ten_chuc_nang' => 'Thêm Mới Chức Vụ',
+                'url_chuc_nang' => '/api/admin/chuc-vu/create',
+                'methods_chuc_nang' => 'POST',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin thêm mới một chức vụ với tên chức vụ và slug chức vụ.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [   
+                'id' => 52, //ChucVuCrl
+                'ten_chuc_nang' => 'Lấy dữ liệu chức vụ',
+                'url_chuc_nang' => '/api/admin/chuc-vu/data',
+                'methods_chuc_nang' => 'GET',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin lấy dữ liệu tất cả chức vụ trên hệ thống.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'id' => 53, //ChucVuCrl
+                'ten_chuc_nang' => 'Cập Nhật Chức Vụ',
+                'url_chuc_nang' => '/api/admin/chuc-vu/update',
+                'methods_chuc_nang' => 'POST',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin cập nhật trạng thái của một chức vụ.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'id' => 54, //ChucVuCrl
+                'ten_chuc_nang' => 'Xóa Chức Vụ',
+                'url_chuc_nang' => '/api/admin/chuc-vu/delete',
+                'methods_chuc_nang' => 'POST',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin xóa một chức vụ.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'id' => 55, //ChucVuCrl
+                'ten_chuc_nang' => 'Cấp chức năng cho Chức Vụ',
+                'url_chuc_nang' => '/api/admin/phan-quyen/chuc-vu/create',
+                'methods_chuc_nang' => 'POST',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin cấp chức năng cho một chức vụ.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'id' => 56, //PhanQuyenCrl
+                'ten_chuc_nang' => 'Hủy chức năng của Chức Vụ ',
+                'url_chuc_nang' => '/api/admin/phan-quyen/chuc-vu/delete',
+                'methods_chuc_nang' => 'POST',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin hủy chức năng của một chức vụ.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'id' => 57, //ChucNangCrl
+                'ten_chuc_nang' => 'Lấy dữ liệu chức năng',
+                'url_chuc_nang' => '/api/admin/chuc-nang/data',
+                'methods_chuc_nang' => 'GET',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin lấy dữ liệu tất cả chức năng trên hệ thống.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'id' => 58, //PhanQuyenCrl
+                'ten_chuc_nang' => 'Lấy dữ liệu chi tiết chức năng',
+                'url_chuc_nang' => '/api/admin/phan-quyen/data/{id_chuc_vu}',
+                'methods_chuc_nang' => 'GET',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin lấy dữ liệu chi tiết của một chức năng.',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],

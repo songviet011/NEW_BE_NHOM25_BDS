@@ -1329,6 +1329,217 @@
           }
         }
       ]
+    },
+    {
+      "name": "🏛️ ADMIN - CHỨC VỤ (Roles)",
+      "item": [
+        {
+          "name": "Danh sách Chức vụ",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/chuc-vu/data?page=1&per_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "chuc-vu", "data"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Tạo Chức vụ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ten_chuc_vu\": \"Trưởng phòng\",\n  \"mo_ta\": \"Quản lý phòng ban\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/chuc-vu/create",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "chuc-vu", "create"]
+            }
+          }
+        },
+        {
+          "name": "Update Chức vụ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"ten_chuc_vu\": \"Trưởng phòng Updated\",\n  \"mo_ta\": \"Quản lý phòng ban (Updated)\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/chuc-vu/update",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "chuc-vu", "update"]
+            }
+          }
+        },
+        {
+          "name": "Delete Chức vụ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/chuc-vu/delete",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "chuc-vu", "delete"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📚 ADMIN - CHỨC NĂNG (Functions)",
+      "item": [
+        {
+          "name": "Danh sách Chức năng",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/chuc-nang/data?page=1&per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "chuc-nang", "data"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 ADMIN - PHÂN QUYỀN (Permissions)",
+      "item": [
+        {
+          "name": "Danh sách Quyền theo Chức vụ",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/phan-quyen/data/1",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "phan-quyen", "data", "1"]
+            }
+          }
+        },
+        {
+          "name": "Gán Quyền cho Chức vụ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_chuc_vu\": 1,\n  \"id_chuc_nang\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/phan-quyen/chuc-vu/create",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "phan-quyen", "chuc-vu", "create"]
+            }
+          }
+        },
+        {
+          "name": "Thu hồi Quyền của Chức vụ",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_chuc_vu\": 1,\n  \"id_chuc_nang\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/phan-quyen/chuc-vu/delete",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "phan-quyen", "chuc-vu", "delete"]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

@@ -4,137 +4,40 @@ namespace App\Http\Controllers;
 
 use App\Models\ChucNang;
 use App\Http\Requests\CreateChucNangRequest;
+use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChucNangController extends Controller
 {
-    public function index()
-    {
-        $user = Auth::guard('sanctum')->user();
-        if ($user) {
-            $data = ChucNang::paginate(10);
-            return response()->json([
-                'status' => 1,
-                'data' => $data
-            ]);
-        } else {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Không có quyền truy cập",
-            ], 401);
-        }
+    public function getData(Request $request)
+{
+    $login = Auth::guard('admin')->user();
+
+    // ✅ SUPER ADMIN → bypass toàn bộ phân quyền
+    if ($login->is_super) {
+        return response()->json([
+            'data' => ChucNang::all(),
+        ]);
     }
 
-    public function show($id)
-    {
-        $user = Auth::guard('sanctum')->user();
-        if ($user) {
-            $chucNang = ChucNang::find($id);
-            if ($chucNang) {
-                return response()->json([
-                    'status' => 1,
-                    'data' => $chucNang
-                ]);
-            } else {
-                return response()->json([
-                    'status'  => 0,
-                    'message' => "Không tìm thấy chức năng",
-                ], 404);
-            }
-        } else {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Không có quyền truy cập",
-            ], 401);
-        }
+    // ❗ Các admin thường → check như cũ
+    $id_chuc_nang = 57;
+    $id_chuc_vu = $login->id_chuc_vu;
+
+    $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
+        ->where('id_chuc_nang', $id_chuc_nang)
+        ->first();
+
+    if (!$check_quyen) {
+        return response()->json([
+            'data' => false,
+            'message' => "bạn không có quyền thực hiện chức năng này!"
+        ]);
     }
 
-    public function store(CreateChucNangRequest $request)
-    {
-        $user = Auth::guard('sanctum')->user();
-        if ($user) {
-            $tenChucNang = $request->input('ten_chuc_nang');
-
-            $chucNang = ChucNang::create([
-                'ten_chuc_nang' => $tenChucNang
-            ]);
-
-            return response()->json([
-                'status' => 1,
-                'message' => 'Tạo mới thành công',
-                'data' => $chucNang
-            ], 201);
-        } else {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Không có quyền truy cập",
-            ], 401);
-        }
-    }
-
-    public function update(Request $request, $id)
-    {
-        $user = Auth::guard('sanctum')->user();
-        if ($user) {
-            $chucNang = ChucNang::find($id);
-
-            if (!$chucNang) {
-                return response()->json([
-                    'status'  => 0,
-                    'message' => "Không tìm thấy chức năng",
-                ], 404);
-            }
-
-            $tenChucNang = $request->input('ten_chuc_nang');
-
-            if (empty($tenChucNang) || !is_string($tenChucNang)) {
-                return response()->json([
-                    'status'  => 0,
-                    'message' => "Dữ liệu không hợp lệ: 'ten_chuc_nang' là bắt buộc và phải là chuỗi.",
-                ], 422);
-            }
-
-            $chucNang->ten_chuc_nang = $tenChucNang;
-            $chucNang->save();
-
-            return response()->json([
-                'status' => 1,
-                'message' => 'Cập nhật thành công',
-                'data' => $chucNang
-            ]);
-        } else {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Không có quyền truy cập",
-            ], 401);
-        }
-    }
-
-    public function destroy($id)
-    {
-        $user = Auth::guard('sanctum')->user();
-        if ($user) {
-            $chucNang = ChucNang::find($id);
-
-            if (!$chucNang) {
-                return response()->json([
-                    'status'  => 0,
-                    'message' => "Không tìm thấy chức năng",
-                ], 404);
-            }
-
-            $chucNang->delete();
-
-            return response()->json([
-                'status' => 1,
-                'message' => 'Xóa thành công'
-            ]);
-        } else {
-            return response()->json([
-                'status'  => 0,
-                'message' => "Không có quyền truy cập",
-            ], 401);
-        }
-    }
+    return response()->json([
+        'data' => ChucNang::all(),
+    ]);
+}
 }
