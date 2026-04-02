@@ -12,17 +12,23 @@ class PhanQuyenController extends Controller
 {
     public function getData($id_chuc_vu)
     {
-        $id_chuc_nang = 58;
         $login = Auth::guard('admin')->user();
-        $id_chuc_vu = $login->id_chuc_vu;
-        $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
-            ->where('id_chuc_nang', $id_chuc_nang)
-            ->first();
-        if (!$check_quyen) {
-            return response()->json([
-                'data' => false,
-                'message' => "bạn không có quyền thực hiện chức năng này!"
-            ]);
+
+        // ✅ super → cho qua
+        if (!$login->is_super) {
+            $id_chuc_nang = 58;
+            $id_chuc_vu = $login->id_chuc_vu;
+
+            $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
+                ->where('id_chuc_nang', $id_chuc_nang)
+                ->first();
+
+            if (!$check_quyen) {
+                return response()->json([
+                    'data' => false,
+                    'message' => "bạn không có quyền!"
+                ]);
+            }
         }
         $data = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
             ->join('chuc_nangs', 'phan_quyens.id_chuc_nang', 'chuc_nangs.id')
@@ -36,17 +42,23 @@ class PhanQuyenController extends Controller
 
     public function store(PhanQuyenRequest $request)
     {
-        $id_chuc_nang = 55;
         $login = Auth::guard('admin')->user();
-        $id_chuc_vu = $login->id_chuc_vu;
-        $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
-            ->where('id_chuc_nang', $id_chuc_nang)
-            ->first();
-        if (!$check_quyen) {
-            return response()->json([
-                'data' => false,
-                'message' => "bạn không có quyền thực hiện chức năng này!"
-            ]);
+
+        // ✅ super → cho qua
+        if (!$login->is_super) {
+            $id_chuc_nang = 55;
+            $id_chuc_vu = $login->id_chuc_vu;
+
+            $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
+                ->where('id_chuc_nang', $id_chuc_nang)
+                ->first();
+
+            if (!$check_quyen) {
+                return response()->json([
+                    'data' => false,
+                    'message' => "bạn không có quyền!"
+                ]);
+            }
         }
         $data = PhanQuyen::firstOrCreate([
             'id_chuc_vu'  => $request->id_chuc_vu,
@@ -61,17 +73,23 @@ class PhanQuyenController extends Controller
 
     public function destroy(deletePhanQuyenRequest $request)
     {
-        $id_chuc_nang = 56;
         $login = Auth::guard('admin')->user();
-        $id_chuc_vu = $login->id_chuc_vu;
-        $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
-            ->where('id_chuc_nang', $id_chuc_nang)
-            ->first();
-        if (!$check_quyen) {
-            return response()->json([
-                'data' => false,
-                'message' => "bạn không có quyền thực hiện chức năng này!"
-            ]);
+
+        // ✅ super → cho qua
+        if (!$login->is_super) {
+            $id_chuc_nang = 56;
+            $id_chuc_vu = $login->id_chuc_vu;
+
+            $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
+                ->where('id_chuc_nang', $id_chuc_nang)
+                ->first();
+
+            if (!$check_quyen) {
+                return response()->json([
+                    'data' => false,
+                    'message' => "bạn không có quyền!"
+                ]);
+            }
         }
         $data = PhanQuyen::where('id_chuc_vu', $request->id_chuc_vu)
             ->where('id_chuc_nang', $request->id_chuc_nang)
