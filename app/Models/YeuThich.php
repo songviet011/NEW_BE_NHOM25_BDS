@@ -25,13 +25,12 @@ class YeuThich extends Model
     {
         return $this->belongsTo(MoiGioi::class);
     }
-
-    public function khachHang(): BelongsTo
+    public function khachHang()
     {
-        return $this->belongsTo(KhachHang::class);
+        return $this->belongsTo(KhachHang::class, 'khach_hang_id');
     }
 
-    public function batDongSan(): BelongsTo
+    public function batDongSan()
     {
         return $this->belongsTo(BatDongSan::class, 'bds_id');
     }

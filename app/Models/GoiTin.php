@@ -20,13 +20,13 @@ class GoiTin extends Model
         'gia' => 'decimal:0',
     ];
 
-    public function giaoDichs(): HasMany
-    {
-        return $this->hasMany(GiaoDich::class, 'goi_tin_id');
-    }
+    public function user()
+{
+    return $this->belongsTo(User::class, 'moi_gioi_id');
+}
 
-    public function lichSuGoiTins(): HasMany
-    {
-        return $this->hasMany(LichSuGoiTin::class, 'goi_tin_id');
-    }
+public function goiTin()
+{
+    return $this->belongsTo(GoiTin::class, 'goi_tin_id');
+}
 }

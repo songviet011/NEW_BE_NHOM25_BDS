@@ -20,6 +20,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+// ============================================================
+// IMPORT EVENTS
+// ============================================================
+use App\Events\BatDongSanCreated;
+use App\Events\BatDongSanUpdated;
+
 class BatDongSanController extends Controller
 {
     // Public
@@ -205,17 +211,26 @@ class BatDongSanController extends Controller
                 'is_duyet' => false,
             ]);
 
+            // ============================================================
+            // 🔥 FIRE EVENT: BatDongSanCreated
+            // ============================================================
+            // Listener sẽ:
+            //   - Dispatch SendNotificationJob (gửi thông báo async)
+            //   - Log event
+            // API return response ngay (job xử lý background)
+            BatDongSanCreated::dispatch($bds);
+
             return response()->json(['status' => 1, 'message' => 'Tạo thành công', 'data' => $bds]);
         } else {
             return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
         }
     }
 
-    public function update(UpdateBatDongSanRequest $request, $id)
+    public function update(UpdateBatDongSanRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
-            $bds = BatDongSan::find($id);
+            $bds = BatDongSan::find($request->id);
             if (!$bds) {
                 return response()->json(['status' => 0, 'message' => 'Không tìm thấy BDS']);
             }
@@ -224,6 +239,14 @@ class BatDongSanController extends Controller
                 return response()->json(['status' => 0, 'message' => 'Không có quyền']);
             }
 
+            // ============================================================
+            // 💾 LƯU DỮ LIỆU CŨ (để so sánh trong event listener)
+            // ============================================================
+            $oldData = $bds->toArray();
+
+            // ============================================================
+            // ✏️ UPDATE BDS
+            // ============================================================
             $bds->tieu_de = $request->tieu_de;
             $bds->mo_ta = $request->mo_ta;
             $bds->gia = $request->gia;
@@ -238,6 +261,16 @@ class BatDongSanController extends Controller
             $bds->is_noi_bat = $request->is_noi_bat ?? $bds->is_noi_bat;
             $bds->is_duyet = false;
             $bds->save();
+
+            // ============================================================
+            // 🔥 FIRE EVENT: BatDongSanUpdated
+            // ============================================================
+            // Listener sẽ:
+            //   - So sánh oldData vs newData
+            //   - Dispatch SendNotificationJob (thông báo update)
+            //   - Nếu field quan trọng (gia, dien_tich, etc) thay đổi
+            //     → Dispatch AIDefinePriceJob (retrigger AI định giá)
+            BatDongSanUpdated::dispatch($bds, $oldData);
 
             return response()->json(['status' => 1, 'message' => 'Cập nhật thành công', 'data' => $bds]);
         } else {

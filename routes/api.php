@@ -15,13 +15,17 @@ use App\Http\Controllers\AIDinhGiaController;
 use App\Http\Controllers\ChatBotController;
 use App\Http\Controllers\ChucNangController;
 use App\Http\Controllers\ChucVuController;
+use App\Http\Controllers\DiaChiController;
+use App\Http\Controllers\LichSuGoiTinController;
+use App\Http\Controllers\LoaiBatDongSanController;
 use App\Http\Controllers\PhanQuyenController;
+use App\Http\Controllers\QuanHuyenController;
+use App\Http\Controllers\TinhThanhController;
 use App\Http\Controllers\TrainChatController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\KhachHangMiddleware;
 use App\Http\Middleware\MoiGioiMiddleware;
-
-
+use App\Models\LoaiBatDongSan;
 
 //--------------------- AUTH + CHECK TOKEN-----------------------------
 
@@ -29,21 +33,30 @@ Route::prefix('admin')->group(function () {
     Route::post('/dang-nhap', [AdminController::class, 'login']);
     Route::get('/dang-xuat', [AdminController::class, 'logout']);
     Route::get('/check-token', [AdminController::class, 'checkToken']);
+    Route::post('/forgot-password/send-otp', [AdminController::class, 'sendOtp']);
+    Route::post('/forgot-password/reset', [AdminController::class, 'resetPassword']);
 });
 
 Route::prefix('khach-hang')->group(function () {
     Route::post('/dang-nhap', [KhachHangController::class, 'login']);
     Route::post('/register', [KhachHangController::class, 'register']);
     Route::get('/check-token', [KhachHangController::class, 'checkToken']);
+    Route::post('/forgot-password/send-otp', [KhachHangController::class, 'sendOtp']);
+    Route::post('/forgot-password/reset', [KhachHangController::class, 'resetPassword']);
 });
 
 Route::prefix('moi-gioi')->group(function () {
     Route::post('/dang-nhap', [MoiGioiController::class, 'login']);
     Route::post('/dang-ky', [MoiGioiController::class, 'register']);
     Route::get('/check-token', [MoiGioiController::class, 'checkToken']);
+    Route::post('/forgot-password/send-otp', [MoiGioiController::class, 'sendOtp']);
+    Route::post('/forgot-password/reset', [MoiGioiController::class, 'resetPassword']);
 });
 
 //---------------------------PUBLIC---------------------------
+Route::get('/tinh-thanh', [TinhThanhController::class, 'getTinhThanh']);
+Route::get('/quan-huyen', [QuanHuyenController::class, 'getQuanHuyen']);
+Route::get('/loai-bds', [LoaiBatDongSanController::class, 'getAll']);
 
 Route::prefix('bds')->group(function () {
     // Bất Động Sản
@@ -101,6 +114,7 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
         Route::post('/create', [GoiTinController::class, 'store']);
         Route::post('/update', [GoiTinController::class, 'update']);
         Route::post('/delete', [GoiTinController::class, 'destroy']);
+        Route::get('/lich-su-mua', [LichSuGoiTinController::class, 'lichSuMua']);
     });
 
     //THỐNG KÊ
@@ -135,6 +149,8 @@ Route::prefix('moi-gioi')->middleware('MoiGioiMiddleware')->group(function () {
     //PROFILE MÔI GIỚI
     Route::get('/profile', [MoiGioiController::class, 'profile']);
     Route::post('/update-profile', [MoiGioiController::class, 'updateProfile']);
+    Route::post('/update-password', [MoiGioiController::class, 'updatePassword']);
+    Route::post('/logout', [MoiGioiController::class, 'logout']);
 
     //QUẢN LÝ BĐS
     Route::prefix('bds')->group(function () {
@@ -162,6 +178,14 @@ Route::prefix('khach-hang')->middleware('KhachHangMiddleware')->group(function (
     //PROFILE KHÁCH HÀNG
     Route::get('/profile', [KhachHangController::class, 'profile']);
     Route::post('/update-profile', [KhachHangController::class, 'updateProfile']);
+    Route::post('/update-password', [KhachHangController::class, 'updatePassword']);
+    Route::post('/logout', [KhachHangController::class, 'logout']);
+
+
+    //QUẢN LÝ BĐS
+    Route::get('/loai-bds', [LoaiBatDongSanController::class, 'getAll']);
+
+
 
     //YÊU THÍCH (THẢ TIM)
     Route::post('/bds/yeu-thich', [YeuThichController::class, 'like']);

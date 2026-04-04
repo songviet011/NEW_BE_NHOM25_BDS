@@ -25,10 +25,10 @@ class GoiTinController extends Controller
         ]);
     }
 
-    public function getAll()
-    {
-        return $this->getData();
-    }
+    // public function getAll()
+    // {
+    //     return $this->getData();
+    // }
 
     public function store(CreateGoiTinRequest $request)
     {
@@ -47,26 +47,40 @@ class GoiTinController extends Controller
         }
     }
 
-    public function update(UpdateGoiTinRequest $request, $id)
-    {
-        $user = Auth::guard('sanctum')->user();
-        if ($user) {
-            $goiTin = GoiTin::find($id);
-            if (!$goiTin) {
-                return response()->json(['status' => 0, 'message' => 'Không tìm thấy gói tin']);
-            }
+    public function update(UpdateGoiTinRequest $request)
+{
+    $user = Auth::guard('sanctum')->user();
 
-            $goiTin->ten_goi = $request->input('ten_goi', $goiTin->ten_goi);
-            $goiTin->gia = $request->input('gia', $goiTin->gia);
-            $goiTin->so_ngay = $request->input('so_ngay', $goiTin->so_ngay);
-            $goiTin->so_luong_tin = $request->input('so_luong_tin', $goiTin->so_luong_tin);
-            $goiTin->save();
+    if ($user) {
+        $id = $request->input('id'); // 👈 lấy id từ body
 
-            return response()->json(['status' => 1, 'message' => 'Cập nhật thành công', 'data' => $goiTin]);
-        } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        $goiTin = GoiTin::find($id);
+
+        if (!$goiTin) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Không tìm thấy gói tin'
+            ]);
         }
+
+        $goiTin->ten_goi = $request->input('ten_goi', $goiTin->ten_goi);
+        $goiTin->gia = $request->input('gia', $goiTin->gia);
+        $goiTin->so_ngay = $request->input('so_ngay', $goiTin->so_ngay);
+        $goiTin->so_luong_tin = $request->input('so_luong_tin', $goiTin->so_luong_tin);
+        $goiTin->save();
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Cập nhật thành công',
+            'data' => $goiTin
+        ]);
     }
+
+    return response()->json([
+        'status' => 0,
+        'message' => 'Có lỗi xảy ra'
+    ]);
+}
 
     public function destroy(DestroyRequest $request)
     {

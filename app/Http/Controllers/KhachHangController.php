@@ -8,8 +8,10 @@ use App\Http\Requests\KhachHangRegisterRequest;
 use App\Http\Requests\UpdateKhachHangRequest;
 use App\Http\Requests\SearchRequest;
 use App\Http\Requests\DestroyRequest;
+use App\Http\Requests\updatePasswordKhachHangRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -89,6 +91,24 @@ class KhachHangController extends Controller
         ]);
     }
 
+    public function logout(Request $request)
+    {
+        /** @var MoiGioi|null $user */
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $user->currentAccessToken()->delete();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Đăng xuất thành công'
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Không tìm thấy người dùng hoặc token không hợp lệ'
+            ], 401);
+        }
+    }
+
     public function profile()
     {
         $user = Auth::guard('sanctum')->user();
@@ -121,6 +141,97 @@ class KhachHangController extends Controller
         } else {
             return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
         }
+    }
+
+    public function updatePassword(updatePasswordKhachHangRequest $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+        $data = KhachHang::where('id', $user->id)
+            ->where('password', $request->old_password)
+            ->first();
+        if ($data) {
+            $data->update([
+                'password' => $request->password,
+            ]);
+            return response()->json([
+                'status'    => 1,
+                'message'   => 'Cập nhật mật khẩu thành công!',
+            ]);
+        } else {
+            return response()->json([
+                'status'    => 0,
+                'message'   => 'Mật khẩu cũ không đúng!',
+            ]);
+        }
+    }
+
+    //Gửi OTP
+    public function sendOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $user = KhachHang::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Email không tồn tại'
+            ]);
+        }
+
+        $otp = rand(100000, 999999);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token' => $otp,
+                'created_at' => now()
+            ]
+        );
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'OTP đã gửi',
+            'otp' => $otp // dev thôi
+        ]);
+    }
+
+    //Reset password
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required',
+            'password' => 'required|min:6'
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->otp)
+            ->first();
+
+        if (!$record) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'OTP không đúng'
+            ]);
+        }
+
+        $user = KhachHang::where('email', $request->email)->first();
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->delete();
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Đổi mật khẩu thành công'
+        ]);
     }
 
     // Admin CRUD
@@ -186,13 +297,13 @@ class KhachHangController extends Controller
 
         if ($user) {
             return response()->json([
-                'status' => 1,
+                'status' => "success",
                 'data' => ['ten' => $user->ten],
             ]);
         }
 
         return response()->json([
-            'status' => 0,
+            'status' => "error",
             'message' => 'Chưa đăng nhập',
         ]);
     }

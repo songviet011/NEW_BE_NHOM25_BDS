@@ -19,7 +19,7 @@ class AdminMiddleware
 
     public function handle(Request $request, Closure $next): Response
     {
-        $user = Auth::guard('admin')->user();
+        $user = Auth::guard('sanctum')->user();
 
         // nếu không có session → dùng Sanctum token
         if (!$user) {
@@ -40,8 +40,14 @@ class AdminMiddleware
             ], 401);
         }
 
+        if (!($user instanceof \App\Models\Admin)) {
+            return response()->json([
+                'message' => 'Bạn cần đăng nhập Admin tai khoan'
+            ], 401);
+        }
+
         // set lại user cho guard admin
-        Auth::guard('admin')->setUser($user);
+        Auth::guard('sanctum')->setUser($user);
 
         return $next($request);
     }

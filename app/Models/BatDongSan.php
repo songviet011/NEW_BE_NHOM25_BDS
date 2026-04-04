@@ -25,6 +25,8 @@ class BatDongSan extends Model
         'so_phong_tam',
         'is_duyet',
         'is_noi_bat',
+        'vi_do',
+        'kinh_do',
     ];
 
     protected $casts = [

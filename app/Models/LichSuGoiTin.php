@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LichSuGoiTin extends Model
 {
+
     protected $table = 'lich_su_goi_tins';
 
     protected $fillable = [
@@ -14,19 +15,15 @@ class LichSuGoiTin extends Model
         'goi_tin_id',
         'ngay_bat_dau',
         'ngay_ket_thuc',
+        'trang_thai'
     ];
 
-    protected $casts = [
-        'ngay_bat_dau' => 'date',
-        'ngay_ket_thuc' => 'date',
-    ];
-
-    public function moiGioi(): BelongsTo
+    public function moiGioi()
     {
-        return $this->belongsTo(MoiGioi::class);
+        return $this->belongsTo(MoiGioi::class, 'moi_gioi_id');
     }
 
-    public function goiTin(): BelongsTo
+    public function goiTin()
     {
         return $this->belongsTo(GoiTin::class, 'goi_tin_id');
     }

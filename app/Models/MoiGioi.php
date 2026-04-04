@@ -10,7 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class MoiGioi extends Authenticatable
 {
-    use Notifiable,HasApiTokens;
+    use Notifiable, HasApiTokens;
 
     protected $table = 'moi_giois';
 

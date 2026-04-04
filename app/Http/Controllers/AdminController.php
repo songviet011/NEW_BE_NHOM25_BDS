@@ -9,6 +9,7 @@ use App\Http\Requests\AdminLoginRequest;
 use App\Http\Requests\AdminUpdateProfileRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -21,7 +22,7 @@ class AdminController extends Controller
             'password' => $request->password,
         ]);
 
-         if ($user) {
+        if ($user) {
             $user = Auth::guard('admin')->user();
             $token = $user->createToken('auth_token')->plainTextToken;
             return response()->json([
@@ -44,8 +45,8 @@ class AdminController extends Controller
 
     public function checkToken()
     {
-         $user = Auth::guard('sanctum')->user();
-        if ($user) {
+        $user = Auth::guard('sanctum')->user();
+        if ($user && $user instanceof Admin) {
             return response()->json([
                 'status' => 'success',
                 'data' => $user,
@@ -101,20 +102,16 @@ class AdminController extends Controller
         /** @var Admin|null $user */
         $user = Auth::guard('sanctum')->user();
         if ($user) {
-            $token = $user->currentAccessToken();
-            if ($token) {
-                $token->delete();
-            }
-
+            $user->currentAccessToken()->delete();
             return response()->json([
-                'status'  => 1,
-                'message' => "Đăng xuất thành công",
-            ]);
+                'status' => 'success',
+                'message' => 'Đăng xuất thành công'
+            ], 200);
         } else {
             return response()->json([
-                'status'  => 0,
-                'message' => "Có lỗi xảy ra",
-            ]);
+                'status' => 'error',
+                'message' => 'Không tìm thấy người dùng hoặc token không hợp lệ'
+            ], 401);
         }
     }
 
@@ -122,19 +119,85 @@ class AdminController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
-            $ds_token = $user->tokens;
-            foreach ($ds_token as $key => $value) {
-                $value->delete();
-            }
+            $user->tokens()->delete();
             return response()->json([
-                'status'  => 1,
-                'message' => "Đăng xuất tất cả thiết bị thành công",
-            ]);
+                'status' => 'success',
+                'message' => 'Đăng xuất tất cả thiết bị thành công'
+            ], 200);
         } else {
             return response()->json([
-                'status'  => 0,
-                'message' => "Có lỗi xảy ra",
+                'status' => 'error',
+                'message' => 'Không tìm thấy người dùng hoặc token không hợp lệ'
+            ], 401);
+        }
+    }
+
+    //Gửi OTP
+    public function sendOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $user = KhachHang::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Email không tồn tại'
             ]);
         }
+
+        $otp = rand(100000, 999999);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token' => $otp,
+                'created_at' => now()
+            ]
+        );
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'OTP đã gửi',
+            'otp' => $otp // dev thôi
+        ]);
+    }
+
+    //Reset password
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required',
+            'password' => 'required|min:6'
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->otp)
+            ->first();
+
+        if (!$record) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'OTP không đúng'
+            ]);
+        }
+
+        $user = Admin::where('email', $request->email)->first();
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->delete();
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Đổi mật khẩu thành công'
+        ]);
     }
 }

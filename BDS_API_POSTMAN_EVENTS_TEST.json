@@ -1,0 +1,507 @@
+{
+  "info": {
+    "_postman_id": "bds-events-queue-testing",
+    "name": "BDS KLTN - Events & Queue Testing",
+    "description": "Test Events, Listeners, và Background Jobs\n\n🔥 Collection này dùng để test:\n- BatDongSanCreated Event\n- BatDongSanUpdated Event  \n- GiaoDichCreated Event\n- GoiTinPurchased Event\n\n📝 Hướng dẫn:\n1. Import collection này vào Postman\n2. Set environment variable: base_url = http://localhost:8000/api\n3. Chạy lần lượt từ trên xuống\n4. Xem logs: tail -f storage/logs/laravel.log\n5. Chạy queue: php artisan queue:work",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "⚙️ SETUP - Environment & Variables",
+      "item": [
+        {
+          "name": "📌 Setup (đọc trước)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// ============================================================",
+                  "// SETUP ENVIRONMENT VARIABLES",
+                  "// ============================================================",
+                  "// Thêm vào Postman Environment (Manage Environments):",
+                  "//",
+                  "// base_url: http://localhost:8000/api",
+                  "// admin_token: (để trống, sẽ auto set khi login)",
+                  "// khachhang_token: (để trống)",
+                  "// bds_id: (để trống, sẽ auto set từ response)",
+                  "// giao_dich_id: (để trống)",
+                  "// goi_tin_id: 1",
+                  "// moi_gioi_id: 1",
+                  "//",
+                  "// ============================================================",
+                  "",
+                  "console.log('📌 Setup Environment Variables:');",
+                  "console.log('base_url: http://localhost:8000/api');",
+                  "console.log('admin_token: (auto set từ login)');",
+                  "console.log('bds_id: (auto set từ create BDS)');",
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/setup",
+            "description": "❌ Không cần chạy request này - đây là hướng dẫn\n\n1. Mở Postman Environments (kích icon mata bên phải)\n2. Create new environment (hoặc edit existing)\n3. Thêm variables:\n   - base_url = http://localhost:8000/api\n   - admin_token = (để trống)\n   - bds_id = (để trống)\n   - goi_tin_id = 1\n   - moi_gioi_id = 1\n\n4. Save & Set is Active\n5. Quay lại, chạy các request dưới"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 AUTHENTICATION",
+      "item": [
+        {
+          "name": "1️⃣ Admin Login (chạy trước)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('admin_token', jsonData.data.id);",
+                  "    console.log('✅ Admin Token set:', jsonData.data.id);",
+                  "    console.log('👤 Admin:', jsonData.data.email);",
+                  "} else {",
+                  "    console.log('❌ Login failed:', pm.response.code);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/dang-nhap",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "dang-nhap"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔥 TEST EVENTS",
+      "item": [
+        {
+          "name": "EVENT 1️⃣: Tạo BDS (BatDongSanCreated)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// ============================================================",
+                  "// TEST RESPONSE & SAVE ID",
+                  "// ============================================================",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('bds_id', jsonData.data.id);",
+                  "    ",
+                  "    console.log('✅ BDS created successfully');",
+                  "    console.log('📊 BDS ID:', jsonData.data.id);",
+                  "    console.log('📝 Title:', jsonData.data.tieu_de);",
+                  "    console.log('💰 Giá:', jsonData.data.gia);",
+                  "    ",
+                  "    console.log('');",
+                  "    console.log('🔥 Event BatDongSanCreated được fire!');",
+                  "    console.log('📢 Listener dispatch SendNotificationJob vào queue');",
+                  "    console.log('');",
+                  "    console.log('✅ Kiểm tra kết quả:');",
+                  "    console.log('   1. Xem logs: tail -f storage/logs/laravel.log');",
+                  "    console.log('   2. Kiểm tra jobs: SELECT * FROM jobs;');",
+                  "    console.log('   3. Chạy queue: php artisan queue:work');",
+                  "} else {",
+                  "    console.log('❌ Failed:', pm.response.code, pm.response.reason);",
+                  "    console.log('Response:', pm.response.text());",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tieu_de\": \"[TEST POSTMAN] BDS Cao Cấp Midtown\",\n  \"mo_ta\": \"Căn hộ 2 phòng ngủ, view thoáng mát từ Postman test\",\n  \"gia\": 2500000000,\n  \"dien_tich\": 85,\n  \"loai_id\": 1,\n  \"trang_thai_id\": 1,\n  \"so_phong_ngu\": 2,\n  \"so_phong_tam\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/moi-gioi/bds/create",
+              "host": ["{{base_url}}"],
+              "path": ["moi-gioi", "bds", "create"]
+            }
+          },
+          "description": "🔥 **EVENT 1: BatDongSanCreated**\n\n**Route:** `POST /api/moi-gioi/bds/create`\n\n**Require:** Bearer token (MoiGioi hoặc Admin)\n\n**Flow:**\n1. Tạo BDS mới\n2. Fire Event: BatDongSanCreated::dispatch($bds)\n3. Listener được gọi\n4. Listener dispatch SendNotificationJob vào queue\n5. API trả response ngay (không chờ job)\n\n**Kết quả kiểm tra:**\n- Xem logs: tail -f storage/logs/laravel.log\n  - Sẽ thấy: \"Notification job dispatched for BDS ID: ...\"\n- Kiểm tra bảng jobs:\n  - SELECT COUNT(*) FROM jobs; → 1\n- Chạy queue worker:\n  - php artisan queue:work\n  - Job sẽ được xử lý\n  - Bảng jobs trống sau (job xong)"
+        },
+        {
+          "name": "EVENT 2️⃣: Update BDS (BatDongSanUpdated)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    ",
+                  "    console.log('✅ BDS updated successfully');",
+                  "    console.log('📊 BDS ID:', jsonData.data.id);",
+                  "    console.log('💰 Giá mới:', jsonData.data.gia);",
+                  "    console.log('');",
+                  "    ",
+                  "    console.log('🔥 Event BatDongSanUpdated được fire!');",
+                  "    console.log('📢 Listener check field thay đổi...');",
+                  "    console.log('📢 Field quan trọng (gia) thay đổi!');",
+                  "    console.log('📢 Dispatch 2 jobs:');",
+                  "    console.log('   1. SendNotificationJob (thông báo update)');",
+                  "    console.log('   2. AIDefinePriceJob (retrigger AI định giá)');",
+                  "    console.log('');",
+                  "    console.log('✅ Kiểm tra:');",
+                  "    console.log('   1. SELECT COUNT(*) FROM jobs; → 2 jobs');",
+                  "    console.log('   2. Chạy queue: php artisan queue:work');",
+                  "} else {",
+                  "    console.log('❌ Failed:', pm.response.code);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gia\": 2600000000,\n  \"mo_ta\": \"Update test - Giá mới từ Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/bat-dong-san/{{bds_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["bat-dong-san", "{{bds_id}}"]
+            }
+          },
+          "description": "🔥 **EVENT 2: BatDongSanUpdated**\n\n**Flow:**\n1. Update BDS (thay đổi giá - field quan trọng)\n2. Fire Event: BatDongSanUpdated::dispatch($bds, $oldData)\n3. Listener nhận thấy giá thay đổi\n4. Dispatch 2 jobs:\n   - SendNotificationJob (thông báo)\n   - AIDefinePriceJob (retrigger AI)\n5. API trả response\n\n**Kết quả kiểm tra:**\n- Logs sẽ có \"Re-trigger AI pricing for BDS\"\n- Bảng jobs: SELECT COUNT(*) FROM jobs; → 2\n- Queue xử lý cả 2 jobs"
+        },
+        {
+          "name": "EVENT 3️⃣: Tạo Giao Dịch (GiaoDichCreated)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('giao_dich_id', jsonData.data.id);",
+                  "    ",
+                  "    console.log('✅ Giao dịch created successfully');",
+                  "    console.log('📊 Giao dịch ID:', jsonData.data.id);",
+                  "    console.log('💰 Giá:', jsonData.data.gia_giao_dich);",
+                  "    console.log('');",
+                  "    ",
+                  "    console.log('🔥 Event GiaoDichCreated được fire!');",
+                  "    console.log('📢 Listener dispatch 2 jobs:');",
+                  "    console.log('   1. SendNotificationJob cho BUYER');",
+                  "    console.log('   2. SendNotificationJob cho SELLER');",
+                  "    console.log('');",
+                  "    console.log('✅ Kiểm tra:');",
+                  "    console.log('   1. SELECT COUNT(*) FROM jobs; → 2');",
+                  "    console.log('   2. Chạy queue xem 2 notification được gửi');",
+                  "} else {",
+                  "    console.log('❌ Failed:', pm.response.code);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bat_dong_san_id\": {{bds_id}},\n  \"moi_gioi_id\": {{moi_gioi_id}},\n  \"khach_hang_id\": null,\n  \"gia_giao_dich\": 2500000000,\n  \"mo_ta\": \"Giao dịch test từ Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/giao-dich",
+              "host": ["{{base_url}}"],
+              "path": ["giao-dich"]
+            }
+          },
+          "description": "🔥 **EVENT 3: GiaoDichCreated**\n\n**Flow:**\n1. Tạo Giao dịch mới\n2. Fire Event: GiaoDichCreated::dispatch($gaoDich)\n3. Listener dispatch thông báo cho buyer\n4. Listener dispatch thông báo cho seller\n5. Cả 2 jobs vào queue\n\n**Kết quả kiểm tra:**\n- Logs: \"GiaoDich created - notifications sent\"\n- Bảng jobs: 2 SendNotificationJob\n- Queue xử lý cả 2"
+        },
+        {
+          "name": "EVENT 4️⃣: Mua Gói Tin (GoiTinPurchased)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    ",
+                  "    console.log('✅ Gói tin purchase successfully');",
+                  "    console.log('📦 Gói tin:', jsonData.data.goi_tin);",
+                  "    console.log('📊 Số lượng:', jsonData.data.quantity);",
+                  "    console.log('💰 Tổng tiền:', jsonData.data.total_price);",
+                  "    console.log('');",
+                  "    ",
+                  "    console.log('🔥 Event GoiTinPurchased được fire!');",
+                  "    console.log('📢 Listener xử lý:');",
+                  "    console.log('   1. Ghi lịch sử mua vào lich_su_goi_tins');",
+                  "    console.log('   2. Cập nhật quota môi giới');",
+                  "    console.log('');",
+                  "    console.log('✅ Kiểm tra:');",
+                  "    console.log('   1. SELECT * FROM lich_su_goi_tins ORDER BY created_at DESC;');",
+                  "    console.log('   2. Check quota môi giới tăng');",
+                  "} else {",
+                  "    console.log('❌ Failed:', pm.response.code);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goi_tin_id\": {{goi_tin_id}},\n  \"moi_gioi_id\": {{moi_gioi_id}},\n  \"quantity\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/goi-tin/purchase",
+              "host": ["{{base_url}}"],
+              "path": ["goi-tin", "purchase"]
+            }
+          },
+          "description": "🔥 **EVENT 4: GoiTinPurchased**\n\n**Flow:**\n1. Mua Gói tin (với số lượng)\n2. Fire Event: GoiTinPurchased::dispatch($goiTin, $moiGioi, $quantity, $totalPrice)\n3. Listener ghi lịch sử mua\n4. Listener cập nhật quota\n\n**Kết quả kiểm tra:**\n- Logs: \"GoiTinPurchased - Package purchased\"\n- Bảng lich_su_goi_tins: có record mới\n- Quota môi giới tăng"
+        }
+      ]
+    },
+    {
+      "name": "📊 CHECK QUEUE STATUS",
+      "item": [
+        {
+          "name": "🔍 Check Jobs (SQL Query - Copy nhé)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "console.log('');",
+                  "console.log('════════════════════════════════════════════════════════');",
+                  "console.log('🔍 SQL Queries để check queue status');",
+                  "console.log('════════════════════════════════════════════════════════');",
+                  "console.log('');",
+                  "",
+                  "console.log('1️⃣ Xem jobs trong queue:');",
+                  "console.log('   SELECT id, queue, attempts, created_at FROM jobs;');",
+                  "console.log('');",
+                  "",
+                  "console.log('2️⃣ Đếm jobs:');",
+                  "console.log('   SELECT COUNT(*) as total_jobs FROM jobs;');",
+                  "console.log('');",
+                  "",
+                  "console.log('3️⃣ Xem failed jobs:');",
+                  "console.log('   SELECT * FROM failed_jobs;');",
+                  "console.log('');",
+                  "",
+                  "console.log('4️⃣ Xem lịch sử gói tin:');",
+                  "console.log('   SELECT * FROM lich_su_goi_tins ORDER BY created_at DESC;');",
+                  "console.log('');",
+                  "",
+                  "console.log('5️⃣ Xóa tất cả jobs (danger!):');",
+                  "console.log('   DELETE FROM jobs;');",
+                  "console.log('');",
+                  "",
+                  "console.log('════════════════════════════════════════════════════════');",
+                  "console.log('📝 Artisan Commands');",
+                  "console.log('════════════════════════════════════════════════════════');",
+                  "console.log('');",
+                  "",
+                  "console.log('1️⃣ Chạy queue worker:');",
+                  "console.log('   php artisan queue:work');",
+                  "console.log('');",
+                  "",
+                  "console.log('2️⃣ Queue worker verbose:');",
+                  "console.log('   php artisan queue:work -v');",
+                  "console.log('');",
+                  "",
+                  "console.log('3️⃣ Clear queue:');",
+                  "console.log('   php artisan queue:flush');",
+                  "console.log('');",
+                  "",
+                  "console.log('4️⃣ Monitor queue (real-time):');",
+                  "console.log('   php artisan queue:monitor');",
+                  "console.log('');",
+                  "",
+                  "console.log('════════════════════════════════════════════════════════');",
+                  "console.log('📚 Logs');",
+                  "console.log('════════════════════════════════════════════════════════');",
+                  "console.log('');",
+                  "",
+                  "console.log('1️⃣ Xem logs real-time:');",
+                  "console.log('   tail -f storage/logs/laravel.log');",
+                  "console.log('');",
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/",
+            "description": "❌ Không cần chạy - đây là reference\n\nCopy-paste SQL queries hoặc artisan commands vào terminal/MySQL"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 WORKFLOW REKOMENDASI",
+      "item": [
+        {
+          "name": "WORKFLOW: Test Semua Events",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "console.log('');",
+                  "console.log('════════════════════════════════════════════════════════');",
+                  "console.log('📋 WORKFLOW - Test Semua Events');",
+                  "console.log('════════════════════════════════════════════════════════');",
+                  "console.log('');",
+                  "",
+                  "console.log('STEP 1: Setup Environment');",
+                  "console.log('  ☐ Buka Postman');",
+                  "console.log('  ☐ Klik Environment (icon mata)');",
+                  "console.log('  ☐ Edit/Create environment');",
+                  "console.log('  ☐ Add variables:');",
+                  "console.log('    - base_url: http://localhost:8000/api');",
+                  "console.log('    - admin_token: (kosong)');",
+                  "    console.log('    - bds_id: (kosong)');",
+                  "console.log('    - moi_gioi_id: 1');",
+                  "console.log('    - goi_tin_id: 1');",
+                  "console.log('  ☐ Save & Set active');",
+                  "console.log('');",
+                  "",
+                  "console.log('STEP 2: Terminal Preparation (3 tabs)');",
+                  "console.log('');",
+                  "",
+                  "console.log('  Terminal 1 (Queue Worker):');",
+                  "console.log('    $ php artisan queue:work -v');",
+                  "console.log('    (Xem jobs được xử lý real-time)');",
+                  "console.log('');",
+                  "",
+                  "console.log('  Terminal 2 (Logs):');",
+                  "console.log('    $ tail -f storage/logs/laravel.log');",
+                  "console.log('    (Xem logs real-time)');",
+                  "console.log('');",
+                  "",
+                  "console.log('  Terminal 3 (MySQL):');",
+                  "console.log('    $ mysql -u root');",
+                  "console.log('    > USE be_bds_kltn_t6;');",
+                  "console.log('    > (sẵn sàng chạy SELECT từ SQL cheat sheet)');",
+                  "console.log('');",
+                  "",
+                  "console.log('STEP 3: Postman - Chạy Requests (Lần Lượt)');",
+                  "console.log('');",
+                  "",
+                  "console.log('  1️⃣ Admin Login');",
+                  "console.log('    → Thấy admin_token trong console');",
+                  "console.log('');",
+                  "",
+                  "console.log('  2️⃣ EVENT 1: Tạo BDS');",
+                  "console.log('    → Xem Terminal 1: job được process');",
+                  "console.log('    → Xem Terminal 2: \"Notification job dispatched\"');",
+                  "console.log('    → MySQL: SELECT COUNT(*) FROM jobs; → 1');",
+                  "console.log('');",
+                  "",
+                  "console.log('  3️⃣ EVENT 2: Update BDS');",
+                  "console.log('    → 2 jobs dispatch (notification + AI pricing)');",
+                  "console.log('    → Xem Terminal 1: 2 jobs process');",
+                  "console.log('    → MySQL: SELECT COUNT(*) FROM jobs; → 0 (semua selesai)');",
+                  "console.log('');",
+                  "",
+                  "console.log('  4️⃣ EVENT 3: Tạo Giao Dịch');",
+                  "console.log('    → 2 SendNotificationJob (buyer + seller)');",
+                  "console.log('    → Terminal 1: xproses keduanya');",
+                  "console.log('');",
+                  "",
+                  "console.log('  5️⃣ EVENT 4: Mua Gói Tin');",
+                  "console.log('    → Listener update lịch sử + quota');",
+                  "console.log('    → MySQL: SELECT * FROM lich_su_goi_tins;');",
+                  "console.log('');",
+                  "",
+                  "console.log('STEP 4: Verifikasi');",
+                  "console.log('');",
+                  "",
+                  "console.log('  ✅ Logs memiliki semua \"Notification job dispatched\"');",
+                  "console.log('  ✅ Queue worker memproses Jobs');",
+                  "console.log('  ✅ Jobs table kosong setelah xproses');",
+                  "console.log('  ✅ Lịch sự gói tin tercatat');",
+                  "console.log('');",
+                  "",
+                  "console.log('════════════════════════════════════════════════════════');",
+                  "console.log('🎉 Done! Anda sudah memahami Events & Queue!');",
+                  "console.log('════════════════════════════════════════════════════════');",
+                  "console.log('');",
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/"
+          },
+          "description": "Panduan step-by-step untuk test semua events"
+        }
+      ]
+    }
+  ]
+}

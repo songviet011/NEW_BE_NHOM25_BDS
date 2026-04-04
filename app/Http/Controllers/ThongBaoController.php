@@ -9,18 +9,21 @@ use Illuminate\Support\Facades\Auth;
 
 class ThongBaoController extends Controller
 {
+    // Trong Controller của Môi giới
     public function getThongBao()
     {
         $user = Auth::guard('sanctum')->user();
-        if ($user) {
-            $thongBaos = ThongBao::where('moi_gioi_id', $user->id) // Assume field
-                ->with('yeuThich.bds') // Link to YeuThich
-                ->orderBy('created_at', 'desc')
-                ->paginate(10);
 
-            return response()->json(['status' => 1, 'data' => $thongBaos]);
-        } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
-        }
+        // Lấy danh sách yêu thích liên quan đến các BĐS của môi giới này
+        $activities = \App\Models\YeuThich::where('moi_gioi_id', $user->id)
+    ->with(['khachHang', 'batDongSan'])
+    ->orderBy('created_at', 'desc')
+    ->limit(5)
+    ->get();
+
+        return response()->json([
+            'status' => 1,
+            'data'   => $activities
+        ]);
     }
 }

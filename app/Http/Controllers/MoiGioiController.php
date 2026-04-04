@@ -7,12 +7,15 @@ use App\Http\Requests\MoiGioiLoginRequest;
 use App\Http\Requests\MoiGioiRegisterRequest;
 use App\Http\Requests\SearchRequest;
 use App\Http\Requests\UpdateMoiGioiRequest;
+use App\Http\Requests\updatePasswordMoiGioiRequest;
 use App\Models\MoiGioi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpFoundation\Request;
+use App\Models\KhachHang;
+use Illuminate\Http\Request;
 
 class MoiGioiController extends Controller
 {
@@ -37,6 +40,28 @@ class MoiGioiController extends Controller
                 'status' => 'error',
                 'message' => 'Email hoặc mật khẩu không đúng'
             ], 401);
+        }
+    }
+
+    public function updatePassword(updatePasswordMoiGioiRequest $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+        $data = KhachHang::where('id', $user->id)
+            ->where('password', $request->old_password)
+            ->first();
+        if ($data) {
+            $data->update([
+                'password' => $request->password,
+            ]);
+            return response()->json([
+                'status'    => 1,
+                'message'   => 'Cập nhật mật khẩu thành công!',
+            ]);
+        } else {
+            return response()->json([
+                'status'    => 0,
+                'message'   => 'Mật khẩu cũ không đúng!',
+            ]);
         }
     }
 
@@ -137,27 +162,90 @@ class MoiGioiController extends Controller
         }
     }
 
-    public function logout(): JsonResponse
+    public function logout(Request $request)
     {
         /** @var MoiGioi|null $user */
-        $user = Auth::guard('sanctum')->user();
-
+         $user = Auth::guard('sanctum')->user();
         if ($user) {
-            $token = $user->currentAccessToken();
-
-            if ($token) {
-                $token->delete();
-            }
-
+            $user->currentAccessToken()->delete();
             return response()->json([
-                'status' => 1,
-                'message' => 'Đăng xuất thành công',
+                'status' => 'success',
+                'message' => 'Đăng xuất thành công'
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Không tìm thấy người dùng hoặc token không hợp lệ'
+            ], 401);
+        }
+    }
+
+    //Gửi OTP
+    public function sendOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $user = MoiGioi::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Email không tồn tại'
             ]);
         }
 
+        $otp = rand(100000, 999999);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            [
+                'token' => $otp,
+                'created_at' => now()
+            ]
+        );
+
         return response()->json([
-            'status' => 0,
-            'message' => 'Có lỗi xảy ra',
+            'status' => 1,
+            'message' => 'OTP đã gửi',
+            'otp' => $otp // dev thôi
+        ]);
+    }
+    
+    //Reset password
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required',
+            'password' => 'required|min:6'
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->otp)
+            ->first();
+
+        if (!$record) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'OTP không đúng'
+            ]);
+        }
+
+        $user = MoiGioi::where('email', $request->email)->first();
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->delete();
+
+        return response()->json([
+            'status' => 1,
+            'message' => 'Đổi mật khẩu thành công'
         ]);
     }
 
