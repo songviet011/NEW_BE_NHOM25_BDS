@@ -18,15 +18,11 @@ class BatDongSan extends Model
         'loai_id',
         'trang_thai_id',
         'moi_gioi_id',
-        'tinh_id',
-        'quan_id',
         'dia_chi_id',
         'so_phong_ngu',
         'so_phong_tam',
         'is_duyet',
         'is_noi_bat',
-        'vi_do',
-        'kinh_do',
     ];
 
     protected $casts = [
@@ -49,16 +45,6 @@ class BatDongSan extends Model
     public function moiGioi(): BelongsTo
     {
         return $this->belongsTo(MoiGioi::class, 'moi_gioi_id');
-    }
-
-    public function tinh(): BelongsTo
-    {
-        return $this->belongsTo(TinhThanh::class, 'tinh_id');
-    }
-
-    public function quan(): BelongsTo
-    {
-        return $this->belongsTo(QuanHuyen::class, 'quan_id');
     }
 
     public function diaChi(): BelongsTo

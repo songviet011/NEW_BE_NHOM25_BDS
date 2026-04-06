@@ -26,7 +26,7 @@ class MoiGioiController extends Controller
             'password' => $request->password,
         ]);
 
-         if ($user) {
+        if ($user) {
             $user = Auth::guard('moi_gioi')->user();
             $token = $user->createToken('auth_token')->plainTextToken;
             return response()->json([
@@ -102,15 +102,15 @@ class MoiGioiController extends Controller
         ]);
     }
 
-    public function register(MoiGioiRegisterRequest $request): JsonResponse
+    public function register(MoiGioiRegisterRequest $request)
     {
         $moiGioi = MoiGioi::create([
             'ten' => $request->input('ten'),
             'email' => $request->input('email'),
             'so_dien_thoai' => $request->input('so_dien_thoai'),
             'password' => Hash::make($request->input('password')),
-            'zalo_link' => $request->input('zalo_link'),
-            'mo_ta' => $request->input('mo_ta'),
+            'zalo_link' => $request->input('zalo_link') ?? '', 
+            'mo_ta' => $request->input('mo_ta') ?? '',
             'is_active' => true,
         ]);
 
@@ -125,7 +125,6 @@ class MoiGioiController extends Controller
             ],
         ]);
     }
-
     public function profile(): JsonResponse
     {
         /** @var MoiGioi|null $user */
@@ -148,7 +147,7 @@ class MoiGioiController extends Controller
 
     public function checkToken(Request $request)
     {
-         $user = Auth::guard('sanctum')->user();
+        $user = Auth::guard('sanctum')->user();
         if ($user) {
             return response()->json([
                 'status' => 'success',
@@ -165,7 +164,7 @@ class MoiGioiController extends Controller
     public function logout(Request $request)
     {
         /** @var MoiGioi|null $user */
-         $user = Auth::guard('sanctum')->user();
+        $user = Auth::guard('sanctum')->user();
         if ($user) {
             $user->currentAccessToken()->delete();
             return response()->json([
@@ -212,7 +211,7 @@ class MoiGioiController extends Controller
             'otp' => $otp // dev thôi
         ]);
     }
-    
+
     //Reset password
     public function resetPassword(Request $request)
     {

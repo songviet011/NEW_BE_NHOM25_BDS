@@ -19,36 +19,43 @@ class AdminMiddleware
 
     public function handle(Request $request, Closure $next): Response
     {
+        // $user = Auth::guard('sanctum')->user();
+
+        // // nếu không có session → dùng Sanctum token
+        // if (!$user) {
+        //     $token = $request->bearerToken();
+
+        //     if ($token) {
+        //         $accessToken = PersonalAccessToken::findToken($token);
+
+        //         if ($accessToken && $accessToken->tokenable instanceof \App\Models\Admin) {
+        //             $user = $accessToken->tokenable;
+        //         }
+        //     }
+        // }
+
+        // if (!$user) {
+        //     return response()->json([
+        //         'message' => 'Bạn cần đăng nhập để thực hiện chức năng này'
+        //     ], 401);
+        // }
+
+        // if (!($user instanceof \App\Models\Admin)) {
+        //     return response()->json([
+        //         'message' => 'Bạn cần đăng nhập Admin tai khoan'
+        //     ], 401);
+        // }
+
+        // // set lại user cho guard admin
+        // Auth::guard('sanctum')->setUser($user);
+
+        // return $next($request);
         $user = Auth::guard('sanctum')->user();
-
-        // nếu không có session → dùng Sanctum token
-        if (!$user) {
-            $token = $request->bearerToken();
-
-            if ($token) {
-                $accessToken = PersonalAccessToken::findToken($token);
-
-                if ($accessToken && $accessToken->tokenable instanceof \App\Models\Admin) {
-                    $user = $accessToken->tokenable;
-                }
-            }
+        if ($user && $user instanceof \App\Models\Admin) {
+            return $next($request);
         }
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'Bạn cần đăng nhập để thực hiện chức năng này'
-            ], 401);
-        }
-
-        if (!($user instanceof \App\Models\Admin)) {
-            return response()->json([
-                'message' => 'Bạn cần đăng nhập Admin tai khoan'
-            ], 401);
-        }
-
-        // set lại user cho guard admin
-        Auth::guard('sanctum')->setUser($user);
-
-        return $next($request);
+        return response()->json([
+            'message' => 'Bạn cần đăng nhập để thực hiện chức năng này'
+        ], 401);
     }
 }

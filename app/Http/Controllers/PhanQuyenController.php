@@ -14,7 +14,6 @@ class PhanQuyenController extends Controller
     {
         $login = Auth::guard('admin')->user();
 
-        // ✅ super → cho qua
         if (!$login->is_super) {
             $id_chuc_nang = 58;
             $id_chuc_vu = $login->id_chuc_vu;

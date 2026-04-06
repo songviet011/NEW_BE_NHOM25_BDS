@@ -15,9 +15,11 @@ use App\Http\Controllers\AIDinhGiaController;
 use App\Http\Controllers\ChatBotController;
 use App\Http\Controllers\ChucNangController;
 use App\Http\Controllers\ChucVuController;
+use App\Http\Controllers\ClientHomeController;
 use App\Http\Controllers\DiaChiController;
 use App\Http\Controllers\LichSuGoiTinController;
 use App\Http\Controllers\LoaiBatDongSanController;
+use App\Http\Controllers\MapController;
 use App\Http\Controllers\PhanQuyenController;
 use App\Http\Controllers\QuanHuyenController;
 use App\Http\Controllers\TinhThanhController;
@@ -30,47 +32,40 @@ use App\Models\LoaiBatDongSan;
 //--------------------- AUTH + CHECK TOKEN-----------------------------
 
 Route::prefix('admin')->group(function () {
-    Route::post('/dang-nhap', [AdminController::class, 'login']);
-    Route::get('/dang-xuat', [AdminController::class, 'logout']);
-    Route::get('/check-token', [AdminController::class, 'checkToken']);
+    Route::post('/dang-nhap', [AdminController::class, 'login']); // đã test postman
+    Route::get('/dang-xuat', [AdminController::class, 'logout']);  // đã test postman
+    Route::get('/check-token', [AdminController::class, 'checkToken']); // đã test postman
     Route::post('/forgot-password/send-otp', [AdminController::class, 'sendOtp']);
     Route::post('/forgot-password/reset', [AdminController::class, 'resetPassword']);
 });
 
 Route::prefix('khach-hang')->group(function () {
-    Route::post('/dang-nhap', [KhachHangController::class, 'login']);
-    Route::post('/register', [KhachHangController::class, 'register']);
-    Route::get('/check-token', [KhachHangController::class, 'checkToken']);
+    Route::post('/dang-nhap', [KhachHangController::class, 'login']); // đã test postman
+    Route::post('/register', [KhachHangController::class, 'register']); // đã test postman
+    Route::get('/check-token', [KhachHangController::class, 'checkToken']); // đã test postman
     Route::post('/forgot-password/send-otp', [KhachHangController::class, 'sendOtp']);
     Route::post('/forgot-password/reset', [KhachHangController::class, 'resetPassword']);
 });
 
 Route::prefix('moi-gioi')->group(function () {
-    Route::post('/dang-nhap', [MoiGioiController::class, 'login']);
-    Route::post('/dang-ky', [MoiGioiController::class, 'register']);
-    Route::get('/check-token', [MoiGioiController::class, 'checkToken']);
+    Route::post('/dang-nhap', [MoiGioiController::class, 'login']); // đã test postman
+    Route::post('/dang-ky', [MoiGioiController::class, 'register']); // đã test postman
+    Route::get('/check-token', [MoiGioiController::class, 'checkToken']); // đã test postman
     Route::post('/forgot-password/send-otp', [MoiGioiController::class, 'sendOtp']);
     Route::post('/forgot-password/reset', [MoiGioiController::class, 'resetPassword']);
 });
 
-//---------------------------PUBLIC---------------------------
-Route::get('/tinh-thanh', [TinhThanhController::class, 'getTinhThanh']);
-Route::get('/quan-huyen', [QuanHuyenController::class, 'getQuanHuyen']);
-Route::get('/loai-bds', [LoaiBatDongSanController::class, 'getAll']);
-
+//---------------------------Client Home (Public)--------------------------
 Route::prefix('bds')->group(function () {
     // Bất Động Sản
-    Route::get('/', [BatDongSanController::class, 'getAllPublic']);
+    Route::get('/', [ClientHomeController::class, 'getAllPublic']);
     // Tìm Kiếm 
-    Route::post('/tim-kiem', [BatDongSanController::class, 'search']);
-    // Lấy môi giới theo BDS
-    Route::get('/{id}/moi-gioi', [BatDongSanController::class, 'getMoiGioi']);
-    // Chi tiết BDS
-    Route::get('/{id}', [BatDongSanController::class, 'xemChiTiet']);
-    //MAP (HIỂN THỊ BĐS THEO KHU VỰC)
-    Route::get('/map-data', [BatDongSanController::class, 'map']);
+    Route::post('/tim-kiem', [ClientHomeController::class, 'search']);
 });
 
+Route::get('/tinh-thanh', [TinhThanhController::class, 'getTinhThanh']); //đã test postman 
+Route::get('/quan-huyen', [QuanHuyenController::class, 'getQuanHuyen']); //đã test postman ?tinh_id=1
+Route::get('/loai-bds', [LoaiBatDongSanController::class, 'getAll']);
 //----------------------------ADMIN---------------------------
 
 Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
@@ -78,11 +73,11 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
     Route::get('/dang-xuat-tat-ca', [AdminController::class, 'logoutAll']);
 
     //PROFILE ADMIN 
-    Route::get('/profile', [AdminController::class, 'profile']);
-    Route::post('/update-profile', [AdminController::class, 'updateProfile']);
+    Route::get('/profile', [AdminController::class, 'profile']); // đã test postman
+    Route::post('/update-profile', [AdminController::class, 'updateProfile']); // đã test postman
 
     //TIM KIẾM CHO ADMIN
-    Route::post('/khach-hang/search', [KhachHangController::class, 'search']);
+    Route::post('/khach-hang/search', [KhachHangController::class, 'search']); 
     Route::post('/moi-gioi/search', [MoiGioiController::class, 'search']);
 
     //QUẢN LÝ KHÁCH HÀNG
@@ -99,13 +94,22 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
         Route::post('/delete', [MoiGioiController::class, 'destroy']);
     });
 
-    //QUẢN LÝ BẤT ĐỘNG SẢN
+    //QUẢN LÝ BẤT ĐỘNG SẢN (xong)
     Route::prefix('bds')->group(function () {
         Route::get('/data', [BatDongSanController::class, 'getData']);
+        Route::get('/{id}', [BatDongSanController::class, 'xemChiTietBDS']);
         Route::post('/duyet', [BatDongSanController::class, 'duyetTin']);
         Route::post('/delete', [BatDongSanController::class, 'delete']);
         Route::post('/change-status', [BatDongSanController::class, 'changeStatus']);
         Route::post('/tim-kiem', [BatDongSanController::class, 'searchAdmin']);
+    });
+
+    //QUẢN LÝ LOẠI BĐS
+    Route::prefix('loai-bds')->group(function () {
+        Route::get('/data', [LoaiBatDongSanController::class, 'getData']); // đã test postman
+        Route::post('/create', [LoaiBatDongSanController::class, 'store']); // đã test postman
+        Route::post('/update/{id}', [LoaiBatDongSanController::class, 'update']); // đã test postman
+        Route::delete('/delete/{id}', [LoaiBatDongSanController::class, 'destroy']); // đã test postman
     });
 
     //QUẢN LÝ GÓI TIN
@@ -154,7 +158,7 @@ Route::prefix('moi-gioi')->middleware('MoiGioiMiddleware')->group(function () {
 
     //QUẢN LÝ BĐS
     Route::prefix('bds')->group(function () {
-        Route::get('/data', [BatDongSanController::class, 'dataMoiGioi']);
+        Route::get('/data', [BatDongSanController::class, 'getDataDanhChoMoiGioi']);
         Route::post('/create', [BatDongSanController::class, 'store']);
         Route::post('/update', [BatDongSanController::class, 'update']);
         Route::post('/delete', [BatDongSanController::class, 'destroy']);
@@ -183,9 +187,16 @@ Route::prefix('khach-hang')->middleware('KhachHangMiddleware')->group(function (
 
 
     //QUẢN LÝ BĐS
-    Route::get('/loai-bds', [LoaiBatDongSanController::class, 'getAll']);
+    Route::get('/loai-bds', [LoaiBatDongSanController::class, 'getAll']); //đã test postman
 
+    //TÌM KIẾM ĐỊA CHỈ
+    Route::get('/dia-chi', [DiaChiController::class, 'getDiaChi']); // đã test postman ?keyword=123
+    Route::get('/dia-chi/{id}', [DiaChiController::class, 'show']);
+    Route::get('/bds-khu-vuc', [DiaChiController::class, 'getBdsByKhuVuc']); // đã test postman ?tinh_id=1&quan_id=1
 
+    //MAP (HIỂN THỊ BĐS THEO KHU VỰC)
+
+    Route::get('/map-data', [MapController::class, 'map']);
 
     //YÊU THÍCH (THẢ TIM)
     Route::post('/bds/yeu-thich', [YeuThichController::class, 'like']);

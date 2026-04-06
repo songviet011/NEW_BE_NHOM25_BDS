@@ -2,29 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\QuanHuyenRequest;
 use App\Models\QuanHuyen;
 use Illuminate\Http\Request;
 
 class QuanHuyenController extends Controller
 {
-    public function getQuanHuyen(Request $request)
+    public function getQuanHuyen(QuanHuyenRequest $request)
     {
-        $tinhId = $request->tinh_id;
-
-        if (!$tinhId) {
-            return response()->json([
-                'status' => 0,
-                'message' => 'Thiếu tinh_id'
-            ]);
-        }
-
-        $quanHuyens = QuanHuyen::where('tinh_id', $tinhId)
+        $data = QuanHuyen::where('tinh_id', $request->tinh_id)
             ->select('id', 'ten')
+            ->orderBy('ten', 'ASC')
             ->get();
 
         return response()->json([
-            'status' => 1,
-            'data' => $quanHuyens
+            'status' => true,
+            'data' => $data
         ]);
     }
 }

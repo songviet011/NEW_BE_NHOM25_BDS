@@ -19,8 +19,8 @@ class DiaChi extends Model
     ];
 
     protected $casts = [
-        'lat' => 'decimal:7',
-        'lng' => 'decimal:7',
+        'lat' => 'float',
+        'lng' => 'float',
     ];
 
     public function tinh(): BelongsTo

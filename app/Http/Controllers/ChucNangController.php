@@ -11,33 +11,22 @@ use Illuminate\Support\Facades\Auth;
 class ChucNangController extends Controller
 {
     public function getData(Request $request)
-{
-    $login = Auth::guard('admin')->user();
-
-    // ✅ SUPER ADMIN → bypass toàn bộ phân quyền
-    if ($login->is_super) {
+    {
+        $id_chuc_nang = 4;
+        $login = Auth::guard('sanctum')->user();
+        $id_chuc_vu = $login->id_chuc_vu;
+        $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
+            ->where('id_chuc_nang', $id_chuc_nang)
+            ->first();
+        if (!$check_quyen) {
+            return response()->json([
+                'data' => false,
+                'message' => "bạn không có quyền thực hiện chức năng này!"
+            ]);
+        }
+        $data = ChucNang::all();
         return response()->json([
-            'data' => ChucNang::all(),
+            'data' => $data,
         ]);
     }
-
-    // ❗ Các admin thường → check như cũ
-    $id_chuc_nang = 57;
-    $id_chuc_vu = $login->id_chuc_vu;
-
-    $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
-        ->where('id_chuc_nang', $id_chuc_nang)
-        ->first();
-
-    if (!$check_quyen) {
-        return response()->json([
-            'data' => false,
-            'message' => "bạn không có quyền thực hiện chức năng này!"
-        ]);
-    }
-
-    return response()->json([
-        'data' => ChucNang::all(),
-    ]);
-}
 }

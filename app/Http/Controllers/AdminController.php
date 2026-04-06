@@ -15,31 +15,31 @@ use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
 {
-    public function login(AdminLoginRequest $request)
+   public function login(AdminLoginRequest $request)
     {
-        $user = Auth::guard('admin')->attempt([
-            'email' => $request->email,
-            'password' => $request->password,
-        ]);
+        // Bước 1: Tìm user theo email
+        $admin = Admin::where('email', $request->email)->first();
 
-        if ($user) {
-            $user = Auth::guard('admin')->user();
-            $token = $user->createToken('auth_token')->plainTextToken;
+        // Bước 2: Kiểm tra tồn tại và mật khẩu đúng
+        if (!$admin || !Hash::check($request->password, $admin->password)) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Dang nhap thanh cong',
-                'token' => $token,
-                'data' => $user
-            ], 200);
-        } else {
-            return response()->json([
-                'status' => 'error',
+                'status' => false,
                 'message' => 'Email hoặc mật khẩu không đúng'
             ], 401);
         }
 
+        // Bước 3: Xóa token cũ (optional - để tránh nhiều token rác)
+        // $admin->tokens()->delete();
+
+        // Bước 4: Tạo token mới
+        $token = $admin->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'data' => $request->validate(),
+            'status' => true,
+            'message' => 'Đăng nhập thành công',
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'data' => $admin
         ], 200);
     }
 
@@ -77,7 +77,6 @@ class AdminController extends Controller
 
     public function updateProfile(AdminUpdateProfileRequest $request)
     {
-        /** @var Admin|null $user */
         $user = Auth::guard('sanctum')->user();
         if ($user) {
             $user->ten = $request->input('ten');
