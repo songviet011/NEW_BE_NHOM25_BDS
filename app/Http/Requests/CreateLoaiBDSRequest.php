@@ -14,7 +14,7 @@ class CreateLoaiBDSRequest extends FormRequest
     public function rules()
     {
         return [
-            'ten_loai' => 'required|string|max:255|unique:loai_bds,ten_loai',
+            'ten_loai' => 'required|string|max:255|unique:loai_bat_dong_sans,ten_loai',
         ];
     }
 

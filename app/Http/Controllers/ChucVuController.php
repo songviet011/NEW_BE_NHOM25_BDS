@@ -16,7 +16,7 @@ class ChucVuController extends Controller
     public function getData()
     {
         $id_chuc_nang = 52;
-        $login = Auth::guard('admin')->user();
+        $login = Auth::guard('sanctum')->user();
         $id_chuc_vu = $login->id_chuc_vu;
         $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
             ->where('id_chuc_nang', $id_chuc_nang)
@@ -35,7 +35,7 @@ class ChucVuController extends Controller
     public function store(ChucVucreateRequest $request)
     {
         $id_chuc_nang = 51;
-        $login = Auth::guard('admin')->user();
+        $login = Auth::guard('sanctum')->user();
         $id_chuc_vu = $login->id_chuc_vu;
         $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
             ->where('id_chuc_nang', $id_chuc_nang)
@@ -58,7 +58,7 @@ class ChucVuController extends Controller
     public function update(ChucVuUpdateRequest $request)
     {
         $id_chuc_nang = 53;
-        $login = Auth::guard('admin')->user();
+        $login = Auth::guard('sanctum')->user();
         $id_chuc_vu = $login->id_chuc_vu;
         $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
             ->where('id_chuc_nang', $id_chuc_nang)
@@ -82,7 +82,7 @@ class ChucVuController extends Controller
     public function destroy(ChucVuDeleteRequest $request)
     {
         $id_chuc_nang = 54;
-        $login = Auth::guard('admin')->user();
+        $login = Auth::guard('sanctum')->user();
         $id_chuc_vu = $login->id_chuc_vu;
         $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
             ->where('id_chuc_nang', $id_chuc_nang)

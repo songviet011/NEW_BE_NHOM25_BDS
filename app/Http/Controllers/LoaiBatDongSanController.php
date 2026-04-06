@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CreateLoaiBDSRequest;
 use App\Http\Requests\UpdateLoaiBDSRequest;
 use App\Models\LoaiBatDongSan;
+use App\Models\PhanQuyen;
 use App\Models\TinhThanh;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,29 +16,49 @@ class LoaiBatDongSanController extends Controller
     // Lấy dữ liệu loại BĐS 
     public function getData(Request $request)
     {
-        $data = LoaiBatDongSan::all();
-        if ($data) {
-            return response()->json([
-                'status' => true,
-                'data' => $data
-            ]);
-        } else {
+        $id_chuc_nang = 62; // ID chức năng xem loại BĐS
+        $user = Auth::guard('sanctum')->user();
+
+        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
+            ->where('id_chuc_nang', $id_chuc_nang)
+            ->first();
+
+        if (!$user->is_super &&  !$check) {
             return response()->json([
                 'status' => false,
-                'message' => "Có lỗi xảy ra"
-            ]);
+                'message' => "Bạn không có quyền thực hiện chức năng này"
+            ], 403);
         }
+
+        $data = LoaiBatDongSan::all();
+
+        return response()->json([
+            'status' => true,
+            'data' => $data
+        ]);
     }
 
     //Tạo loại BĐS mới
     public function store(CreateLoaiBDSRequest $request)
     {
+        $id_chuc_nang = 63; // ID chức năng xem loại BĐS
+        $user = Auth::guard('sanctum')->user();
+        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
+            ->where('id_chuc_nang', $id_chuc_nang)
+            ->first();
+        if (!$user->is_super &&  !$check) {
+            return response()->json([
+                'status' => false,
+                'message' => "Bạn không có quyền thực hiện chức năng này"
+            ], 403);
+        }
         $data = LoaiBatDongSan::create([
             'ten_loai' => $request->ten_loai,
         ]);
+
         return response()->json([
-            'status' => true,
-            'message' => 'Loại BĐS đã được tạo thành công',
+            'status' => 1,
+            'message' => 'Tạo thành công',
             'data' => $data
         ]);
     }
@@ -45,9 +66,21 @@ class LoaiBatDongSanController extends Controller
     //Cập nhật loại BĐS
     public function update(UpdateLoaiBDSRequest $request, $id)
     {
+        $id_chuc_nang = 64; // ID chức năng xem loại BĐS
+        $user = Auth::guard('sanctum')->user();
+        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
+            ->where('id_chuc_nang', $id_chuc_nang)
+            ->first();
+        if (!$user->is_super &&  !$check) {
+            return response()->json([
+                'status' => false,
+                'message' => "Bạn không có quyền thực hiện chức năng này"
+            ], 403);
+        }
         $data = LoaiBatDongSan::findOrFail($id);
-        $data->update($request->validated());
-
+        $data->update([
+            'ten_loai' => $request->ten_loai
+        ]);
         return response()->json([
             'status' => true,
             'message' => 'Loại BĐS đã được cập nhật thành công',
@@ -58,6 +91,17 @@ class LoaiBatDongSanController extends Controller
     //Xóa loại BĐS
     public function destroy($id)
     {
+        $id_chuc_nang = 65; // ID chức năng xem loại BĐS
+        $user = Auth::guard('sanctum')->user();
+        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
+            ->where('id_chuc_nang', $id_chuc_nang)
+            ->first();
+        if (!$user->is_super && !$check) {
+            return response()->json([
+                'status' => false,
+                'message' => "Bạn không có quyền thực hiện chức năng này"
+            ], 403);
+        }
         $data = LoaiBatDongSan::findOrFail($id);
         $data->delete();
         return response()->json([

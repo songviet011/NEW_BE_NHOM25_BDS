@@ -49,7 +49,6 @@ class DiaChiController extends Controller
     public function getBdsByKhuVuc(DiaChiRequest $request)
     {
         $validated = $request->validated();
-
         $query = BatDongSan::with(['diaChi.tinh', 'diaChi.quan'])
             ->where('is_duyet', true) // Chỉ lấy bài đã duyệt
             ->whereHas('diaChi', function ($q) use ($validated) {

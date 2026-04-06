@@ -454,7 +454,7 @@ class ChucNangSeeder extends Seeder
             ],
             // ==================== KHÁCH HÀNG - MUA GÓI ====================
             [
-                'id' => 48, 
+                'id' => 48,
                 'ten_chuc_nang' => 'Mua gói -> Trở thành môi giới',
                 'url_chuc_nang' => '/api/khach-hang/mua-goi',
                 'methods_chuc_nang' => 'POST',
@@ -481,7 +481,8 @@ class ChucNangSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
-            [   'id' => 51, //ChucVuCrl
+            [
+                'id' => 51, //ChucVuCrl
                 'ten_chuc_nang' => 'Thêm Mới Chức Vụ',
                 'url_chuc_nang' => '/api/admin/chuc-vu/create',
                 'methods_chuc_nang' => 'POST',
@@ -489,7 +490,7 @@ class ChucNangSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
-            [   
+            [
                 'id' => 52, //ChucVuCrl
                 'ten_chuc_nang' => 'Lấy dữ liệu chức vụ',
                 'url_chuc_nang' => '/api/admin/chuc-vu/data',
@@ -552,6 +553,108 @@ class ChucNangSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
+            [
+                'id' => 59,
+                'ten_chuc_nang' => 'Xem chi tiết bất động sản',
+                'url_chuc_nang' => '/api/admin/bds/{id}',
+                'methods_chuc_nang' => 'GET',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin lấy dữ liệu chi tiết của một bất động sản.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'id' => 60,
+                'ten_chuc_nang' => 'Tìm kiếm bất động sản',
+                'url_chuc_nang' => '/api/admin/bds/search',
+                'methods_chuc_nang' => 'POST',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin tìm kiếm bất động sản.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'id' => 61,
+                'ten_chuc_nang' => 'Thay đổi trạng thái bất động sản',
+                'url_chuc_nang' => '/api/admin/bds/change-status',
+                'methods_chuc_nang' => 'POST',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin thay đổi trạng thái của một bất động sản.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'id' => 62,
+                'ten_chuc_nang' => 'Lấy loại bất động sản',
+                'url_chuc_nang' => '/api/admin/loai-bds/data',
+                'methods_chuc_nang' => 'GET',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin lấy dữ liệu về các loại bất động sản.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'id' => 63,
+                'ten_chuc_nang' => 'Tạo mới loại bất động sản',
+                'url_chuc_nang' => '/api/admin/loai-bds/create',
+                'methods_chuc_nang' => 'POST',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin tạo mới loại bất động sản.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+             [
+                'id' => 64,
+                'ten_chuc_nang' => 'Cập nhật loại bất động sản',
+                'url_chuc_nang' => '/api/admin/loai-bds/update/{id}',
+                'methods_chuc_nang' => 'PUT',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin cập nhật thông tin của một loại bất động sản.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+             [
+                'id' => 65,
+                'ten_chuc_nang' => 'Xóa loại bất động sản',
+                'url_chuc_nang' => '/api/admin/loai-bds/delete/{id}',
+                'methods_chuc_nang' => 'DELETE',
+                'mo_ta_chuc_nang' => 'Chức năng cho phép admin xóa một loại bất động sản.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            //  [
+            //     'id' => 65,
+            //     'ten_chuc_nang' => 'Lấy dữ liệu hướng bất động sản',
+            //     'url_chuc_nang' => '/api/admin/du-lieu/huong-bds',
+            //     'methods_chuc_nang' => 'GET',
+            //     'mo_ta_chuc_nang' => 'Chức năng cho phép admin lấy dữ liệu về các hướng bất động sản.',
+            //     'created_at' => Carbon::now(),
+            //     'updated_at' => Carbon::now(),
+            //  ],
+            //  [
+            //     'id' => 66,
+            //     'ten_chuc_nang' => 'Lấy dữ liệu pháp lý bất động sản',
+            //     'url_chuc_nang' => '/api/admin/du-lieu/phap-ly-bds',
+            //     'methods_chuc_nang' => 'GET',
+            //     'mo_ta_chuc_nang' => 'Chức năng cho phép admin lấy dữ liệu về các loại pháp lý bất động sản.',
+            //     'created_at' => Carbon::now(),
+            //     'updated_at' => Carbon::now(),
+            //  ],
+            //  [
+            //     'id' => 67,
+            //     'ten_chuc_nang' => 'Lấy dữ liệu hướng dẫn sử dụng',
+            //     'url_chuc_nang' => '/api/admin/du-lieu/huong-dan-su-dung',
+            //     'methods_chuc_nang' => 'GET',
+            //     'mo_ta_chuc_nang' => 'Chức năng cho phép admin lấy dữ liệu về các hướng dẫn sử dụng.',
+            //     'created_at' => Carbon::now(),
+            //     'updated_at' => Carbon::now(),
+            //  ],
+            //  [
+            //     'id' => 68,
+            //     'ten_chuc_nang' => 'Lấy dữ liệu loại hình bất động sản',
+            //     'url_chuc_nang' => '/api/admin/du-lieu/loai-hinh-bds',
+            //     'methods_chuc_nang' => 'GET',
+            //     'mo_ta_chuc_nang' => 'Chức năng cho phép admin lấy dữ liệu về các loại hình bất động sản.',
+            //     'created_at' => Carbon::now(),
+            //     'updated_at' => Carbon::now(),
+            //  ],
+
+
+
         ]);
     }
 }

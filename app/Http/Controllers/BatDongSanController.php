@@ -38,7 +38,7 @@ class BatDongSanController extends Controller
         $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
             ->where('id_chuc_nang', $id_chuc_nang)
             ->first();
-        if (!$check) {
+        if (!$user->is_super &&  !$check) {
             return response()->json([
                 'status' => false,
                 'message' => "Bạn không có quyền thực hiện chức năng này"
@@ -66,7 +66,7 @@ class BatDongSanController extends Controller
         $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
             ->where('id_chuc_nang', $id_chuc_nang)
             ->first();
-        if (!$check) {
+        if (!$user->is_super &&  !$check) {
             return response()->json([
                 'status' => false,
                 'message' => "Bạn không có quyền thực hiện chức năng này"
@@ -92,7 +92,7 @@ class BatDongSanController extends Controller
         $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
             ->where('id_chuc_nang', $id_chuc_nang)
             ->first();
-        if (!$check) {
+        if (!$user->is_super &&  !$check) {
             return response()->json([
                 'status' => false,
                 'message' => "Bạn không có quyền thực hiện chức năng này"
@@ -126,7 +126,7 @@ class BatDongSanController extends Controller
         $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
             ->where('id_chuc_nang', $id_chuc_nang)
             ->first();
-        if (!$check) {
+        if (!$user->is_super &&  !$check) {
             return response()->json([
                 'status' => false,
                 'message' => "Bạn không có quyền thực hiện chức năng này"
@@ -154,7 +154,7 @@ class BatDongSanController extends Controller
         $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
             ->where('id_chuc_nang', $id_chuc_nang)
             ->first();
-        if (!$check) {
+        if (!$user->is_super &&  !$check) {
             return response()->json([
                 'status' => false,
                 'message' => "Bạn không có quyền thực hiện chức năng này"
@@ -187,7 +187,7 @@ class BatDongSanController extends Controller
         $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
             ->where('id_chuc_nang', $id_chuc_nang)
             ->first();
-        if (!$check) {
+        if (!$user->is_super &&  !$check) {
             return response()->json([
                 'status' => false,
                 'message' => "Bạn không có quyền thực hiện chức năng này"

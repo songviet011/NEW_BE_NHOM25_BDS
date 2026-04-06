@@ -104,20 +104,20 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
         Route::post('/tim-kiem', [BatDongSanController::class, 'searchAdmin']);
     });
 
-    //QUẢN LÝ LOẠI BĐS
+    //QUẢN LÝ LOẠI BĐS (xong)
     Route::prefix('loai-bds')->group(function () {
         Route::get('/data', [LoaiBatDongSanController::class, 'getData']); // đã test postman
         Route::post('/create', [LoaiBatDongSanController::class, 'store']); // đã test postman
-        Route::post('/update/{id}', [LoaiBatDongSanController::class, 'update']); // đã test postman
+        Route::put('/update/{id}', [LoaiBatDongSanController::class, 'update']); // đã test postman
         Route::delete('/delete/{id}', [LoaiBatDongSanController::class, 'destroy']); // đã test postman
     });
 
     //QUẢN LÝ GÓI TIN
     Route::prefix('goi-tin')->group(function () {
-        Route::get('/data', [GoiTinController::class, 'getData']);
-        Route::post('/create', [GoiTinController::class, 'store']);
-        Route::post('/update', [GoiTinController::class, 'update']);
-        Route::post('/delete', [GoiTinController::class, 'destroy']);
+        Route::get('/data', [GoiTinController::class, 'getData']); // đã test postman
+        Route::post('/create', [GoiTinController::class, 'store']); // đã test postman
+        Route::put('/update', [GoiTinController::class, 'update']); // đã test postman
+        Route::delete('/delete/{id}', [GoiTinController::class, 'destroy']); // đã test postman
         Route::get('/lich-su-mua', [LichSuGoiTinController::class, 'lichSuMua']);
     });
 

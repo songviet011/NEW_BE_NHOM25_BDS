@@ -15,7 +15,7 @@ class UpdateLoaiBDSRequest extends FormRequest
     {
         return [
             'id' => 'required|integer|exists:loai_bat_dong_sans,id',
-            'ten_loai' => 'required|string|max:255|unique:loai_bat_dong_sans,ten_loai,' . $this->id,
+            'ten_loai' => 'required|string|max:255|unique:loai_bat_dong_sans,ten_loai,'
         ];
     }
 

@@ -44,4 +44,42 @@ class GiaoDichController extends Controller
             'deals_today'    => $dealsToday
         ]);
     }
+
+    public function muaGoi(MuaGoiTinRequest $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $goiTin = GoiTin::find($request->goi_tin_id);
+            if (!$goiTin) {
+                return response()->json(['status' => 0, 'message' => 'Gói tin không tồn tại']);
+            }
+
+            // Giả sử thanh toán success
+            $giaoDich = GiaoDich::create([
+                'moi_gioi_id' => $user->id, // or khach_hang_id if KhachHang
+                'goi_tin_id' => $request->goi_tin_id,
+                'so_tien' => $goiTin->gia,
+                'phuong_thuc' => $request->phuong_thuc ?? 'cash',
+                'trang_thai' => 'success',
+                'ma_giao_dich' => 'TXN' . time(),
+            ]);
+
+            $ngayKetThuc = now()->addDays($goiTin->so_ngay);
+
+            LichSuGoiTin::create([
+                'moi_gioi_id' => $user->id,
+                'goi_tin_id' => $request->goi_tin_id,
+                'ngay_bat_dau' => now(),
+                'ngay_ket_thuc' => $ngayKetThuc,
+            ]);
+
+            return response()->json([
+                'status' => 1,
+                'message' => 'Mua gói thành công',
+                'data' => $giaoDich
+            ]);
+        } else {
+            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        }
+    }
 }

@@ -17,7 +17,6 @@ class AdminController extends Controller
 {
    public function login(AdminLoginRequest $request)
     {
-        // Bước 1: Tìm user theo email
         $admin = Admin::where('email', $request->email)->first();
 
         // Bước 2: Kiểm tra tồn tại và mật khẩu đúng

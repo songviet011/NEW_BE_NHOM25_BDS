@@ -7,25 +7,28 @@ use Illuminate\Support\Facades\DB;
 
 class PhanQuyenSeeder extends Seeder
 {
-
     public function run(): void
-    {
-        DB::table('phan_quyens')->delete();
-        DB::table('phan_quyens')->truncate();
-        // Nhân Viên Kiểm Duyệt
-        $hr_permissions = [5];
-        foreach ($hr_permissions as $permission) {
-            DB::table('phan_quyens')->insert([
-                ['id_chuc_vu' => 1, 'id_chuc_nang' => $permission],
-            ]);
-        }
+{
+    DB::table('phan_quyens')->delete();
 
-        $all_permissions = DB::table('chuc_nangs')->pluck('id')->toArray();
-        foreach ($all_permissions as $permission) {
-            DB::table('phan_quyens')->insert([
-                'id_chuc_vu' => 2,
-                'id_chuc_nang' => $permission,
-            ]);
-        }
+    // Lấy TẤT CẢ chức năng trong hệ thống
+    $all_permissions = DB::table('chuc_nangs')->pluck('id')->toArray();
+
+    // Admin (id_chuc_vu = 2) có TẤT CẢ quyền
+    foreach ($all_permissions as $permission) {
+        DB::table('phan_quyens')->insert([[
+            'id_chuc_vu' => 2,  // ID của Admin
+            'id_chuc_nang' => $permission,
+        ]]);
     }
+
+    // Các role khác (Nhân Viên...) chỉ có quyền cụ thể
+    $hr_permissions = [5];
+    foreach ($hr_permissions as $permission) {
+        DB::table('phan_quyens')->insert([[
+            'id_chuc_vu' => 1,  // ID của Nhân Viên
+            'id_chuc_nang' => $permission,
+        ]]);
+    }
+}
 }
