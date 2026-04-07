@@ -19,7 +19,7 @@ class ChucVucreateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ten_chuc_vu' => 'required|string|max:255',
+            'ten_chuc_vu' => 'required|string|max:255|unique:chuc_vus,ten_chuc_vu',
         ];
     }
     public function messages(): array
@@ -28,6 +28,7 @@ class ChucVucreateRequest extends FormRequest
             'ten_chuc_vu.required' => 'Tên chức vụ không được để trống',
             'ten_chuc_vu.string' => 'Tên chức vụ phải là chuỗi',
             'ten_chuc_vu.max' => 'Tên chức vụ không được vượt quá 255 ký tự',
+            'ten_chuc_vu.unique' => 'Tên chức vụ đã tồn tại',
         ];
     }
 }

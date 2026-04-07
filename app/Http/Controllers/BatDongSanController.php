@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\DB;
 // ============================================================
 use App\Events\BatDongSanCreated;
 use App\Events\BatDongSanUpdated;
+use App\Http\Requests\SearchBatDongSanAdminRequest;
 use App\Models\PhanQuyen;
 
 class BatDongSanController extends Controller
@@ -44,14 +45,14 @@ class BatDongSanController extends Controller
                 'message' => "Bạn không có quyền thực hiện chức năng này"
             ]);
         }
-        $data = BatDongSan::join('bat_dong_sans', 'loai_bat_dong_sans.id', 'bat_dong_sans.loai_id')
-            ->join('trang_thai_bat_dong_sans', 'trang_thai_bat_dong_sans.id', 'bat_dong_sans.trang_thai_id')
-            ->join('tinh_thanhs', 'tinh_thanhs.id', 'bat_dong_sans.tinh_id')
-            ->join('quan_huyens', 'quan_huyens.id', 'bat_dong_sans.quan_id')
-            ->join('dia_chis', 'dia_chis.id', 'bat_dong_sans.dia_chi_id')
-            ->join('hinh_anh_bat_dong_sans', 'hinh_anh_bat_dong_sans.bds_id', 'bat_dong_sans.id')
-            ->select('bat_dong_sans.*', 'hinh_anh_bat_dong_sans.url', 'loai_bat_dong_sans.ten_loai', 'dia_chis.dia_chi_chi_tiet', 'tinh_thanhs.ten_tinh', 'quan_huyens.ten_quan', 'trang_thai_bat_dong_sans.ten_trang_thai')
-            ->get();
+        $data = BatDongSan::with([
+            'loai',
+            'trangThai',
+            'diaChi.tinh',
+            'diaChi.quan',
+            'hinhAnh' // Lấy danh sách ảnh
+        ])->get(); // Hoặc ->paginate(20) nếu dữ liệu nhiều
+
         return response()->json([
             'status' => true,
             'data' => $data
@@ -59,7 +60,7 @@ class BatDongSanController extends Controller
     }
 
     // Tìm kiếm BDS cho admin (có thể tìm theo tiêu đề, mô tả, giá, loại, địa chỉ)
-    public function searchAdmin(Request $request) // Chính xác
+    public function searchAdmin(SearchBatDongSanAdminRequest $request) // Chính xác
     {
         $id_chuc_nang = 60; // ID tìm kiếm BDS cho admin
         $user = Auth::guard('sanctum')->user();
@@ -72,12 +73,35 @@ class BatDongSanController extends Controller
                 'message' => "Bạn không có quyền thực hiện chức năng này"
             ]);
         }
-        $noi_dung = '%' . $request->noi_dung_tim . '%';
+        // Lấy đúng keyword từ request
+        $keyword = $request->keyword;
+
+        if (!$keyword || trim($keyword) === '') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Vui lòng nhập từ khóa tìm kiếm'
+            ], 400);
+        }
+
+        $noi_dung = '%' . $keyword . '%';
+
+        // Tìm kiếm
         $data = BatDongSan::where('tieu_de', 'like', $noi_dung)
             ->orWhere('mo_ta', 'like', $noi_dung)
             ->orWhere('gia', 'like', $noi_dung)
             ->orWhere('loai_id', 'like', $noi_dung)
-            ->orWhere('dia_chi_id', 'like', $noi_dung)->get();
+            ->orWhere('dia_chi_id', 'like', $noi_dung)
+            ->get();
+
+        // Kiểm tra nếu không có kết quả
+        if ($data->isEmpty()) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Không tìm thấy bất động sản nào phù hợp',
+                'data' => []
+            ]);
+        }
+
         return response()->json([
             'status' => true,
             'data' => $data
@@ -193,22 +217,14 @@ class BatDongSanController extends Controller
                 'message' => "Bạn không có quyền thực hiện chức năng này"
             ]);
         }
-        $data = BatDongSan::join('bat_dong_sans', 'loai_bat_dong_sans.id', '=', 'bat_dong_sans.loai_id')
-            ->join('moi_giois', 'moi_giois.id', '=', 'bat_dong_sans.moi_gioi_id')
-            ->join('tinh_thanhs', 'tinh_thanhs.id', '=', 'bat_dong_sans.tinh_id')
-            ->join('quan_huyens', 'quan_huyens.id', '=', 'bat_dong_sans.quan_id')
-            ->join('dia_chis', 'dia_chis.id', '=', 'bat_dong_sans.dia_chi_id')
-            ->join('hinh_anh_bat_dong_sans', 'hinh_anh_bat_dong_sans.bds_id', 'bat_dong_sans.id')
-            ->where('bat_dong_sans.id', $id)
-            ->select(
-                'bat_dong_sans.*',
-                'hinh_anh_bat_dong_sans.url',
-                'loai_bat_dong_sans.ten_loai',
-                'moi_giois.ten_moi_gioi',
-                'dia_chis.dia_chi_chi_tiet',
-                'tinh_thanhs.ten_tinh',
-                'quan_huyens.ten_quan'
-            )
+        $data = BatDongSan::with([
+            'hinhAnh',
+            'loai',
+            'moiGioi',
+            'diaChi',
+            'diaChi.tinh',
+            'diaChi.quan'
+        ])
             ->get();
         return response()->json([
             'status' => true,

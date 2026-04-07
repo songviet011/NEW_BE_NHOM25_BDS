@@ -77,7 +77,7 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
     Route::post('/update-profile', [AdminController::class, 'updateProfile']); // đã test postman
 
     //TIM KIẾM CHO ADMIN
-    Route::post('/khach-hang/search', [KhachHangController::class, 'search']); 
+    Route::post('/khach-hang/search', [KhachHangController::class, 'search']);
     Route::post('/moi-gioi/search', [MoiGioiController::class, 'search']);
 
     //QUẢN LÝ KHÁCH HÀNG
@@ -91,17 +91,17 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
     Route::prefix('moi-gioi')->group(function () {
         Route::get('/data', [MoiGioiController::class, 'getData']);
         Route::post('/update', [MoiGioiController::class, 'update']);
-        Route::post('/delete', [MoiGioiController::class, 'destroy']);
+        Route::post('/delete', [MoiGioiController::class, 'destroy']); 
     });
 
     //QUẢN LÝ BẤT ĐỘNG SẢN (xong)
     Route::prefix('bds')->group(function () {
-        Route::get('/data', [BatDongSanController::class, 'getData']);
-        Route::get('/{id}', [BatDongSanController::class, 'xemChiTietBDS']);
-        Route::post('/duyet', [BatDongSanController::class, 'duyetTin']);
-        Route::post('/delete', [BatDongSanController::class, 'delete']);
-        Route::post('/change-status', [BatDongSanController::class, 'changeStatus']);
-        Route::post('/tim-kiem', [BatDongSanController::class, 'searchAdmin']);
+        Route::get('/data', [BatDongSanController::class, 'getData']); // đã test postman
+        Route::get('/{id}', [BatDongSanController::class, 'xemChiTietBDS']); // đã test postman
+        Route::post('/duyet', [BatDongSanController::class, 'duyetTin']); // đã test postman
+        Route::post('/delete', [BatDongSanController::class, 'delete']); // đã test postman
+        Route::post('/change-status', [BatDongSanController::class, 'changeStatus']); // đã test postman
+        Route::post('/tim-kiem', [BatDongSanController::class, 'searchAdmin']); // đã test postman
     });
 
     //QUẢN LÝ LOẠI BĐS (xong)
@@ -121,28 +121,37 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
         Route::get('/lich-su-mua', [LichSuGoiTinController::class, 'lichSuMua']);
     });
 
-    //THỐNG KÊ
-    Route::post('/doanh-thu', [ThongKeController::class, 'doanhThu']);
-    Route::post('/user', [ThongKeController::class, 'user']);
-
+    //THỐNG KÊ (Dashboard)
+    Route::prefix('dashboard')->group(function () {
+        // Dashboard Stats (4 cards) TẦNG 1
+        Route::get('/stats', [ThongKeController::class, 'getDashboardStats']); // đã test postman
+        // Dashboard Chart (biểu đồ) TẦNG 2
+        Route::post('/revenue-chart', [ThongKeController::class, 'getRevenueChart']); // đã test postman
+        // Khách hàng yêu thích BĐS gần đây
+        Route::get('/recent-favorites', [ThongKeController::class, 'getRecentFavorites']); // đã test postman    
+        // Giao dịch gần đây (5 giao dịch mới nhất) Tầng 3
+        Route::get('/recent-package-purchases', [ThongKeController::class, 'getRecentPackagePurchases']); // đã test postman
+    });
+    
+ 
     //GIAO DỊCH
-    Route::get('/giao-dich/data', [GiaoDichController::class, 'getData']);
+    Route::get('/giao-dich/data', [GiaoDichController::class, 'getData']); 
 
     //CHỨC VỤ
     Route::prefix('chuc-vu')->group(function () {
-        Route::get('/data', [ChucVuController::class, 'getData']);
-        Route::post('/create', [ChucVuController::class, 'store']);
-        Route::post('/update', [ChucVuController::class, 'update']);
-        Route::post('/delete', [ChucVuController::class, 'destroy']);
+        Route::get('/data', [ChucVuController::class, 'getData']); // đã test postman
+        Route::post('/create', [ChucVuController::class, 'store']); // đã test postman
+        Route::post('/update', [ChucVuController::class, 'update']); // đã test postman
+        Route::post('/delete', [ChucVuController::class, 'destroy']); // đã test postman
     });
     //CHỨC NĂNG
-    Route::get('/chuc-nang/data', [ChucNangController::class, 'getData']);
+    Route::get('/chuc-nang/data', [ChucNangController::class, 'getData']); // đã test postman
 
     // PHÂN QUYỀN
     Route::prefix('phan-quyen')->group(function () {
-        Route::get('/data/{id_chuc_vu}', [PhanQuyenController::class, 'getData']);
-        Route::post('/chuc-vu/create', [PhanQuyenController::class, 'store']);
-        Route::post('/chuc-vu/delete', [PhanQuyenController::class, 'destroy']);
+        Route::get('/data/{id_chuc_vu}', [PhanQuyenController::class, 'getData']); // đã test postman
+        Route::post('/chuc-vu/create', [PhanQuyenController::class, 'store']); // đã test postman
+        Route::post('/chuc-vu/delete', [PhanQuyenController::class, 'destroy']); // đã test postman
     });
 });
 
