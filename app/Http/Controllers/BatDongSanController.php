@@ -309,8 +309,7 @@ class BatDongSanController extends Controller
         $data->fill($updateData);
         $data->is_duyet = false;
         $data->save();
-        //Event
-        // BatDongSanUpdated::dispatch($data, $oldData);
+        
         return response()->json([
             'status' => true,
             'message' => 'Cập nhật data thành công và đang chờ duyệt lại',
