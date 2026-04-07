@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DeleteMoiGioiRequest;
 use App\Http\Requests\DestroyRequest;
 use App\Http\Requests\MoiGioiLoginRequest;
 use App\Http\Requests\MoiGioiRegisterRequest;
+use App\Http\Requests\SearchMoiGioiRequest;
 use App\Http\Requests\SearchRequest;
 use App\Http\Requests\UpdateMoiGioiRequest;
 use App\Http\Requests\updatePasswordMoiGioiRequest;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Models\KhachHang;
+use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
 
 class MoiGioiController extends Controller
@@ -90,14 +93,14 @@ class MoiGioiController extends Controller
             $user->save();
 
             return response()->json([
-                'status' => 1,
+                'status' => true,
                 'message' => 'Cập nhật thành công',
                 'data' => $user,
             ]);
         }
 
         return response()->json([
-            'status' => 0,
+            'status' => false,
             'message' => 'Có lỗi xảy ra',
         ]);
     }
@@ -109,7 +112,7 @@ class MoiGioiController extends Controller
             'email' => $request->input('email'),
             'so_dien_thoai' => $request->input('so_dien_thoai'),
             'password' => Hash::make($request->input('password')),
-            'zalo_link' => $request->input('zalo_link') ?? '', 
+            'zalo_link' => $request->input('zalo_link') ?? '',
             'mo_ta' => $request->input('mo_ta') ?? '',
             'is_active' => true,
         ]);
@@ -117,7 +120,7 @@ class MoiGioiController extends Controller
         $token = $moiGioi->createToken('moi-gioi-token')->plainTextToken;
 
         return response()->json([
-            'status' => 1,
+            'status' => true,
             'message' => 'Đăng ký thành công',
             'data' => [
                 'token' => $token,
@@ -132,15 +135,15 @@ class MoiGioiController extends Controller
 
         if ($user) {
             return response()->json([
-                'status' => 1,
+                'status' => true,
                 'data' => $user,
             ]);
         } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+            return response()->json(['status' => false, 'message' => "Có lỗi xảy ra"]);
         }
 
         return response()->json([
-            'status' => 0,
+            'status' => false,
             'message' => 'Có lỗi xảy ra',
         ]);
     }
@@ -190,7 +193,7 @@ class MoiGioiController extends Controller
 
         if (!$user) {
             return response()->json([
-                'status' => 0,
+                'status' => false,
                 'message' => 'Email không tồn tại'
             ]);
         }
@@ -206,7 +209,7 @@ class MoiGioiController extends Controller
         );
 
         return response()->json([
-            'status' => 1,
+            'status' => true,
             'message' => 'OTP đã gửi',
             'otp' => $otp // dev thôi
         ]);
@@ -228,7 +231,7 @@ class MoiGioiController extends Controller
 
         if (!$record) {
             return response()->json([
-                'status' => 0,
+                'status' => false,
                 'message' => 'OTP không đúng'
             ]);
         }
@@ -243,114 +246,123 @@ class MoiGioiController extends Controller
             ->delete();
 
         return response()->json([
-            'status' => 1,
+            'status' => true,
             'message' => 'Đổi mật khẩu thành công'
         ]);
     }
 
-    public function getData(SearchRequest $request): JsonResponse
+    // Admin lấy danh sách môi giới
+    public function getData(Request $request)
     {
-        /** @var MoiGioi|null $user */
         $user = Auth::guard('sanctum')->user();
-
         if ($user) {
-            $query = MoiGioi::query();
-
-            if ($request->filled('search')) {
-                $search = $request->input('search');
-
-                $query->where(function ($q) use ($search) {
-                    $q->where('ten', 'like', '%' . $search . '%')
-                        ->orWhere('email', 'like', '%' . $search . '%')
-                        ->orWhere('so_dien_thoai', 'like', '%' . $search . '%');
-                });
-            }
+            $data = MoiGioi::query();
 
             return response()->json([
-                'status' => 1,
-                'data' => $query->paginate(10),
+                'status' => true,
+                'data' => $data->get()
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => "Có lỗi xảy ra"
+            ]);
+        }
+    }
+
+    // Admin tìm kiếm môi giới
+    public function search(SearchMoiGioiRequest $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => "Có lỗi xảy ra"
+            ], 401);
+        }
+
+        $keyword = $request->keyword;
+        $data = MoiGioi::where('ten', 'like', '%' . $keyword . '%')
+            ->orWhere('email', 'like', '%' . $keyword . '%')
+            ->orWhere('so_dien_thoai', 'like', '%' . $keyword . '%')
+            ->orWhere('mo_ta', 'like', '%' . $keyword . '%')
+            ->orWhere('zalo_link', 'like', '%' . $keyword . '%')
+            ->get();
+
+        if ($data->isEmpty()) {
+            return response()->json([
+                'status' => true,  // Vẫn là true vì request hợp lệ, chỉ là không có kết quả
+                'message' => 'Không tìm thấy môi giới nào phù hợp với từ khóa "' . $keyword . '"',
+                'data' => []
             ]);
         }
 
         return response()->json([
-            'status' => 0,
-            'message' => 'Có lỗi xảy ra',
+            'status' => true,
+            'data' => $data
         ]);
-    }
-
-    public function search(SearchRequest $request): JsonResponse
-    {
-        return $this->getData($request);
     }
 
     public function update(UpdateMoiGioiRequest $request): JsonResponse
     {
-        /** @var MoiGioi|null $user */
+        $id_chuc_nang = 17;
         $user = Auth::guard('sanctum')->user();
-
-        if ($user) {
-            $moiGioi = MoiGioi::find($request->input('id'));
-
-            if (! $moiGioi) {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Không tìm thấy',
-                ]);
-            }
-
-            if ($request->filled('ten')) {
-                $moiGioi->ten = $request->input('ten');
-            }
-
-            if ($request->filled('so_dien_thoai')) {
-                $moiGioi->so_dien_thoai = $request->input('so_dien_thoai');
-            }
-
-            if ($request->has('is_active')) {
-                $moiGioi->is_active = $request->boolean('is_active');
-            }
-
-            $moiGioi->save();
-
+        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
+            ->where('id_chuc_nang', $id_chuc_nang)
+            ->first();
+        if (!$user->is_super &&  !$check) {
             return response()->json([
-                'status' => 1,
-                'message' => 'Cập nhật thành công',
-                'data' => $moiGioi,
+                'status' => false,
+                'message' => "Bạn không có quyền thực hiện chức năng này"
             ]);
         }
-
+        $data = MoiGioi::find($request->id);
+        if (!$data) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Không tìm thấy môi giới'
+            ], 404);
+        }
+        $data->update([
+            'ten' => $request->ten,
+            'so_dien_thoai' => $request->so_dien_thoai,
+            'email' => $request->email,
+            'mo_ta' => $request->mo_ta,
+            'zalo_link' => $request->zalo_link,
+            'is_active' => $request->is_active,
+        ]);
         return response()->json([
-            'status' => 0,
-            'message' => 'Có lỗi xảy ra',
+            'status' => true,
+            'message' => 'Cập nhật thành công',
+            'data' => $data
         ]);
     }
 
-    public function destroy(DestroyRequest $request): JsonResponse
+    public function destroy(DeleteMoiGioiRequest $request)
     {
-        /** @var MoiGioi|null $user */
+        $id_chuc_nang = 18;
         $user = Auth::guard('sanctum')->user();
-
-        if ($user) {
-            $moiGioi = MoiGioi::find($request->input('id'));
-
-            if (! $moiGioi) {
-                return response()->json([
-                    'status' => 0,
-                    'message' => 'Không tìm thấy',
-                ]);
-            }
-
-            $moiGioi->delete();
-
+        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
+            ->where('id_chuc_nang', $id_chuc_nang)
+            ->first();
+        if (!$user->is_super && !$check) {
             return response()->json([
-                'status' => 1,
-                'message' => 'Xóa thành công',
-            ]);
+                'status' => false,
+                'message' => "Bạn không có quyền thực hiện chức năng này"
+            ], 403);
         }
 
+        $data = MoiGioi::find($request->id);
+        if ($data) {
+            $data->delete();
+            return response()->json([
+                'status' => true,
+                'message' => 'Xóa thành công'
+            ]);
+        }
         return response()->json([
-            'status' => 0,
-            'message' => 'Có lỗi xảy ra',
-        ]);
+            'status' => false,
+            'message' => 'Không tìm thấy môi giới để xóa'
+        ], 404);
     }
 }

@@ -57,7 +57,7 @@ class LoaiBatDongSanController extends Controller
         ]);
 
         return response()->json([
-            'status' => 1,
+            'status' => true,
             'message' => 'Tạo thành công',
             'data' => $data
         ]);

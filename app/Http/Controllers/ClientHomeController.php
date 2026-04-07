@@ -15,7 +15,7 @@ class ClientHomeController extends Controller
             ->where('is_duyet', true);
 
         return response()->json([
-            'status' => 1,
+            'status' => true,
             'data' => $query->paginate(10)
         ]);
     }
@@ -24,10 +24,10 @@ class ClientHomeController extends Controller
     // {
     //     $bds = BatDongSan::with(['loai', 'trangThai', 'moiGioi', 'tinh', 'quan', 'diaChi', 'hinhAnh'])->find($id);
     //     if ($bds) {
-    //         return response()->json(['status' => 1, 'data' => $bds]);
+    //         return response()->json(['status' => true, 'data' => $bds]);
     //     }
     //     return response()->json([
-    //         'status' => 0,
+    //         'status' => false,
     //         'message' => 'Không tìm thấy bất động sản'
     //     ]);
     // }
@@ -36,10 +36,10 @@ class ClientHomeController extends Controller
     // {
     //     $bds = BatDongSan::find($id);
     //     if ($bds) {
-    //         return response()->json(['status' => 1, 'data' => $bds->moiGioi]);
+    //         return response()->json(['status' => true, 'data' => $bds->moiGioi]);
     //     }
     //     return response()->json([
-    //         'status' => 0,
+    //         'status' => false,
     //         'message' => 'Không tìm thấy thông tin'
     //     ]);
     // }
@@ -56,6 +56,6 @@ class ClientHomeController extends Controller
 
         $query->where('is_duyet', true);
 
-        return response()->json(['status' => 1, 'data' => $query->with(['loai', 'moiGioi'])->paginate(10)]);
+        return response()->json(['status' => true, 'data' => $query->with(['loai', 'moiGioi'])->paginate(10)]);
     }
 }

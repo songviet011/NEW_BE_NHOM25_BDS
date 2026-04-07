@@ -15,7 +15,7 @@ class LichSuGoiTinController extends Controller
             ->paginate(10);
 
         return response()->json([
-            'status' => 1,
+            'status' => true,
             'data' => $data
         ]);
     }

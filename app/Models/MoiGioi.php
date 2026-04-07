@@ -23,14 +23,21 @@ class MoiGioi extends Authenticatable
         'mo_ta',
         'zalo_link',
         'is_active',
+        'so_tin_con_lai', 
+        'ngay_het_han_goi',  
     ];
 
     protected $hidden = [
         'password',
+        'remember_token',
     ];
 
+    // Tự động ép kiểu
     protected $casts = [
+        'password' => 'hashed',
         'is_active' => 'boolean',
+        'so_tin_con_lai' => 'integer',
+        'ngay_het_han_goi' => 'datetime',
     ];
 
     public function batDongSans(): HasMany

@@ -76,22 +76,20 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
     Route::get('/profile', [AdminController::class, 'profile']); // đã test postman
     Route::post('/update-profile', [AdminController::class, 'updateProfile']); // đã test postman
 
-    //TIM KIẾM CHO ADMIN
-    Route::post('/khach-hang/search', [KhachHangController::class, 'search']);
-    Route::post('/moi-gioi/search', [MoiGioiController::class, 'search']);
-
     //QUẢN LÝ KHÁCH HÀNG
     Route::prefix('khach-hang')->group(function () {
-        Route::get('/data', [KhachHangController::class, 'getData']);
-        Route::post('/update', [KhachHangController::class, 'update']);
-        Route::post('/delete', [KhachHangController::class, 'destroy']);
+        Route::get('/data', [KhachHangController::class, 'getData']); // đã test postman
+        Route::post('/update', [KhachHangController::class, 'update']); // đã test postman
+        Route::post('/delete', [KhachHangController::class, 'destroy']); // đã test postman
+        Route::post('/search', [KhachHangController::class, 'search']); // đã test postman ?keyword=abc
     });
 
     //QUẢN LÝ MÔI GIỚI
     Route::prefix('moi-gioi')->group(function () {
-        Route::get('/data', [MoiGioiController::class, 'getData']);
-        Route::post('/update', [MoiGioiController::class, 'update']);
-        Route::post('/delete', [MoiGioiController::class, 'destroy']); 
+        Route::get('/data', [MoiGioiController::class, 'getData']); // đã test postman
+        Route::post('/update', [MoiGioiController::class, 'update']); // đã test postman
+        Route::post('/delete', [MoiGioiController::class, 'destroy']); // đã test postman
+        Route::post('/search', [MoiGioiController::class, 'search']); // đã test postman ?keyword=abc
     });
 
     //QUẢN LÝ BẤT ĐỘNG SẢN (xong)
@@ -132,10 +130,10 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
         // Giao dịch gần đây (5 giao dịch mới nhất) Tầng 3
         Route::get('/recent-package-purchases', [ThongKeController::class, 'getRecentPackagePurchases']); // đã test postman
     });
-    
- 
+
+
     //GIAO DỊCH
-    Route::get('/giao-dich/data', [GiaoDichController::class, 'getData']); 
+    Route::get('/giao-dich/data', [GiaoDichController::class, 'getData']);
 
     //CHỨC VỤ
     Route::prefix('chuc-vu')->group(function () {
@@ -181,7 +179,8 @@ Route::prefix('moi-gioi')->middleware('MoiGioiMiddleware')->group(function () {
     Route::get('/thong-bao', [ThongBaoController::class, 'getThongBao']);
 
     //GIAO DỊCH
-    Route::get('/giao-dich/data', [GiaoDichController::class, 'dataMoiGioi']);
+    Route::post('/payment/create', [GiaoDichController::class, 'createPayment']);
+    Route::get('/payment/vnpay-ipn', [GiaoDichController::class, 'handleVnPayCallback']); // VNPay sẽ gọi POST/GET tùy config
 });
 
 //---------------------------KHÁCH HÀNG----------------------------
@@ -204,12 +203,12 @@ Route::prefix('khach-hang')->middleware('KhachHangMiddleware')->group(function (
     Route::get('/bds-khu-vuc', [DiaChiController::class, 'getBdsByKhuVuc']); // đã test postman ?tinh_id=1&quan_id=1
 
     //MAP (HIỂN THỊ BĐS THEO KHU VỰC)
-
-    Route::get('/map-data', [MapController::class, 'map']);
+    Route::get('/map/bat-dong-san', [MapController::class, 'getBatDongSanMap']); // đã test postman ?bounds={"north":10,"south":9,"east":106,"west":105}&min_price=1000000000&max_price=5000000000&loai_id=1
+    Route::get('/map/nearby', [MapController::class, 'getNearbyProperties']); // đã test postman ?lat=10.762622&lng=106.660172&radius=5
 
     //YÊU THÍCH (THẢ TIM)
-    Route::post('/bds/yeu-thich', [YeuThichController::class, 'like']);
-    Route::get('/bds/yeu-thich/data', [YeuThichController::class, 'getData']);
+    Route::post('/bds/yeu-thich', [YeuThichController::class, 'like']); // đã test postman
+    Route::get('/bds/yeu-thich/data', [YeuThichController::class, 'getData']); // đã test postman
 
     //MUA GÓI → TRỞ THÀNH MÔI GIỚI
     Route::post('/mua-goi', [GoiTinController::class, 'muaGoi']);
@@ -217,7 +216,7 @@ Route::prefix('khach-hang')->middleware('KhachHangMiddleware')->group(function (
 
 //------------------------------AI--------------------------
 //ĐỊNH GIÁ BĐS
-Route::post('/ai/dinh-gia', [AIDinhGiaController::class, 'predictPrice']);
+Route::post('/ai/dinh-gia', [AIDinhGiaController::class, 'predictPrice']); //chưa làm
 
 //CHATBOT
-Route::post('/chatbot', [TrainChatController::class, 'chat']);
+Route::post('/chatbot', [TrainChatController::class, 'chat']); //chưa làm

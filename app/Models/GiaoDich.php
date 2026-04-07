@@ -16,15 +16,18 @@ class GiaoDich extends Model
         'phuong_thuc',
         'trang_thai',
         'ma_giao_dich',
+        'ma_vnp_txn_ref',
     ];
 
     protected $casts = [
-        'so_tien' => 'decimal:0',
+        'so_tien' => 'decimal:2',
+        'created_at' => 'datetime',
     ];
 
-    public function moiGioi(): BelongsTo
+    // Quan hệ (Relationship)
+    public function moiGioi()
     {
-        return $this->belongsTo(MoiGioi::class);
+        return $this->belongsTo(MoiGioi::class, 'moi_gioi_id');
     }
 
     public function goiTin(): BelongsTo

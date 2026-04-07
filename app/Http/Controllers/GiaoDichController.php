@@ -2,84 +2,125 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GoiTin;
 use App\Models\GiaoDich;
+use App\Models\MoiGioi;
+use App\Services\VnPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class GiaoDichController extends Controller
 {
-    public function getData(Request $request)
+    protected $vnPay;
+
+    public function __construct(VnPayService $vnPay)
     {
-        // 1. Lấy danh sách giao dịch kèm thông tin Môi giới và Gói tin
-        $query = GiaoDich::with(['moiGioi', 'goiTin'])
-            ->orderBy('created_at', 'desc');
+        $this->vnPay = $vnPay;
+    }
 
-        // 2. Xử lý tìm kiếm (Nếu Admin nhập ô tìm kiếm)
-        if ($request->search) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('ma_giao_dich', 'like', "%$search%")
-                    ->orWhereHas('moiGioi', function ($sq) use ($search) {
-                        $sq->where('ten', 'like', "%$search%");
-                    });
-            });
-        }
+    /**
+     * 1. Tạo đơn hàng & Redirect sang VNPay
+     * POST /api/payment/create
+     */
+    public function createPayment(Request $request)
+    {
+        $request->validate([
+            'goi_tin_id' => 'required|exists:goi_tins,id'
+        ]);
 
-        // 3. Phân trang
-        $giaoDichs = $query->paginate(10);
+        $user = Auth::guard('sanctum')->user();
+        if (!$user) return response()->json(['status' => false, 'message' => 'Chưa đăng nhập'], 401);
 
-        // 4. Tính toán thống kê nhanh (Để fix lỗi NaN ở giao diện)
-        // Chỉ tính những giao dịch có trạng thái 'success'
-        $totalRevenue = GiaoDich::where('trang_thai', 'success')->sum('so_tien');
-        $totalDeals = GiaoDich::where('trang_thai', 'success')->count();
-        $dealsToday = GiaoDich::where('trang_thai', 'success')
-            ->whereDate('created_at', now())
-            ->count();
+        $goiTin = GoiTin::findOrFail($request->goi_tin_id);
+
+        // Tạo mã giao dịch duy nhất
+        $orderCode = 'GOPKG' . time() . rand(100, 999);
+
+        
+        // Lưu đơn hàng pending
+        $transaction = GiaoDich::create([
+            'ma_giao_dich' => $orderCode,
+            'user_id'      => $user->id,
+            'goi_tin_id'   => $goiTin->id,
+            'so_tien'      => $goiTin->gia,
+            'trang_thai'   => 'pending'
+        ]);
+
+        // Tạo URL thanh toán
+        $paymentUrl = $this->vnPay->createPaymentUrl(
+            $orderCode,
+            $goiTin->gia,
+            $this->vnPay->getIpAddress(),
+            "Thanh toan goi tin: {$goiTin->ten_goi}"
+        );
 
         return response()->json([
-            'status'         => 1,
-            'data'           => $giaoDichs,
-            'total_revenue'  => $totalRevenue,
-            'total_deals'    => $totalDeals,
-            'deals_today'    => $dealsToday
+            'status' => true,
+            'data' => [
+                'payment_url' => $paymentUrl,
+                'order_code'  => $orderCode
+            ]
         ]);
     }
 
-    public function muaGoi(MuaGoiTinRequest $request)
+    /**
+     * 2. Xử lý Callback/IPN từ VNPay
+     * GET /api/payment/vnpay-ipn
+     */
+    public function handleVnPayCallback(Request $request)
     {
-        $user = Auth::guard('sanctum')->user();
-        if ($user) {
-            $goiTin = GoiTin::find($request->goi_tin_id);
-            if (!$goiTin) {
-                return response()->json(['status' => 0, 'message' => 'Gói tin không tồn tại']);
-            }
-
-            // Giả sử thanh toán success
-            $giaoDich = GiaoDich::create([
-                'moi_gioi_id' => $user->id, // or khach_hang_id if KhachHang
-                'goi_tin_id' => $request->goi_tin_id,
-                'so_tien' => $goiTin->gia,
-                'phuong_thuc' => $request->phuong_thuc ?? 'cash',
-                'trang_thai' => 'success',
-                'ma_giao_dich' => 'TXN' . time(),
-            ]);
-
-            $ngayKetThuc = now()->addDays($goiTin->so_ngay);
-
-            LichSuGoiTin::create([
-                'moi_gioi_id' => $user->id,
-                'goi_tin_id' => $request->goi_tin_id,
-                'ngay_bat_dau' => now(),
-                'ngay_ket_thuc' => $ngayKetThuc,
-            ]);
-
-            return response()->json([
-                'status' => 1,
-                'message' => 'Mua gói thành công',
-                'data' => $giaoDich
-            ]);
-        } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+        // 1. Verify chữ ký
+        if (!$this->vnPay->verifySignature($request->all())) {
+            \Log::error('VNPay IPN: Invalid signature', $request->all());
+            return response()->json(['RspCode' => '97', 'Message' => 'Invalid signature'], 400);
         }
+
+        $orderCode = $request->input('vnp_TxnRef');
+        $amount    = $request->input('vnp_Amount') / 100; // Chia lại 100
+        $responseCode = $request->input('vnp_ResponseCode');
+        $vnpTxnRef = $request->input('vnp_TransactionNo');
+
+        // 2. Tìm đơn hàng
+        $transaction = GiaoDich::where('ma_giao_dich', $orderCode)->first();
+        if (!$transaction) {
+            return response()->json(['RspCode' => '01', 'Message' => 'Order not found'], 404);
+        }
+
+        // 3. Chống xử lý trùng (Idempotency)
+        if ($transaction->trang_thai === 'success') {
+            return response()->json(['RspCode' => '02', 'Message' => 'Already processed'], 200);
+        }
+
+        // 4. Kiểm tra số tiền khớp
+        if ($amount != $transaction->so_tien) {
+            $transaction->update(['trang_thai' => 'failed']);
+            return response()->json(['RspCode' => '04', 'Message' => 'Amount mismatch'], 400);
+        }
+
+        // 5. Xử lý thanh toán thành công
+        if ($responseCode == '00') {
+            DB::transaction(function () use ($transaction, $vnpTxnRef) {
+                $transaction->update([
+                    'trang_thai'     => 'success',
+                    'ma_vnp_txn_ref' => $vnpTxnRef
+                ]);
+
+                $goiTin = GoiTin::find($transaction->goi_tin_id);
+                $user   = MoiGioi::find($transaction->user_id);
+
+                // ✅ Kích hoạt gói tin
+                $user->so_tin_con_lai   = ($user->so_tin_con_lai ?? 0) + $goiTin->so_luong_tin;
+                $user->ngay_het_han_goi = Carbon::now()->addDays($goiTin->so_ngay);
+                $user->save();
+            });
+
+            return response()->json(['RspCode' => '00', 'Message' => 'Success'], 200);
+        }
+
+        // 6. Thanh toán thất bại/hủy
+        $transaction->update(['trang_thai' => 'failed']);
+        return response()->json(['RspCode' => '00', 'Message' => 'Payment failed'], 200);
     }
 }

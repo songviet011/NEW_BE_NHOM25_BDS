@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class DeleteKhachHangRequest extends FormRequest
+class DeleteMoiGioiRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -15,7 +16,7 @@ class DeleteKhachHangRequest extends FormRequest
     {
         return [
 
-            'id' => 'required|integer|exists:khach_hangs,id',
+            'id' => 'required|integer|exists:moi_giois,id',
         ];
     }
 
@@ -24,7 +25,7 @@ class DeleteKhachHangRequest extends FormRequest
         return [
             'id.required' => 'ID là bắt buộc',
             'id.integer'  => 'ID phải là số',
-            'id.exists'   => 'Khách hàng không tồn tại',
+            'id.exists'   => 'Môi giới không tồn tại',
         ];
     }
 }

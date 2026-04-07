@@ -16,13 +16,13 @@ class ThongBaoController extends Controller
 
         // Lấy danh sách yêu thích liên quan đến các BĐS của môi giới này
         $activities = \App\Models\YeuThich::where('moi_gioi_id', $user->id)
-    ->with(['khachHang', 'batDongSan'])
-    ->orderBy('created_at', 'desc')
-    ->limit(5)
-    ->get();
+            ->with(['khachHang', 'batDongSan'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
 
         return response()->json([
-            'status' => 1,
+            'status' => true,
             'data'   => $activities
         ]);
     }

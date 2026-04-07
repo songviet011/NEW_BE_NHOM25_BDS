@@ -21,7 +21,7 @@ class AIDinhGiaController extends Controller
             $tinh_id = $request->input('tinh_id');
 
             if (empty($loai_id) || empty($dien_tich) || empty($tinh_id)) {
-                 return response()->json(['status' => 0, 'message' => 'Vui lòng nhập đủ thông tin loại, tỉnh, diện tích']);
+                return response()->json(['status' => false, 'message' => 'Vui lòng nhập đủ thông tin loại, tỉnh, diện tích']);
             }
 
             // Simple ML placeholder - mean price by loai/dien_tich/tinh
@@ -32,14 +32,14 @@ class AIDinhGiaController extends Controller
             $predicted = $avgPrice ?: 0;
 
             return response()->json([
-                'status' => 1,
+                'status' => true,
                 'data' => [
                     'gia_du_doan' => $predicted,
                     'note' => 'Cần ML model thật (php-ml or Python API)',
                 ]
             ]);
         } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+            return response()->json(['status' => false, 'message' => "Có lỗi xảy ra"]);
         }
     }
 }

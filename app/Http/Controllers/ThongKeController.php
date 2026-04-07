@@ -27,7 +27,7 @@ class ThongKeController extends Controller
             $giaoDichCount = GiaoDich::where('trang_thai', 'success')->count();
 
             return response()->json([
-                'status' => 1,
+                'status' => true,
                 'data' => [
                     'moi_gioi' => $moiGioiCount,
                     'khach_hang' => $khachHangCount,
@@ -36,7 +36,7 @@ class ThongKeController extends Controller
                 ]
             ]);
         } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+            return response()->json(['status' => false, 'message' => "Có lỗi xảy ra"]);
         }
     }
 
@@ -46,7 +46,7 @@ class ThongKeController extends Controller
         $user = Auth::guard('sanctum')->user();
 
         if (!$user) {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"], 401);
+            return response()->json(['status' => false, 'message' => "Có lỗi xảy ra"], 401);
         }
 
         $request->validate([
@@ -125,7 +125,7 @@ class ThongKeController extends Controller
         $user = Auth::guard('sanctum')->user();
 
         if (!$user) {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"], 401);
+            return response()->json(['status' => false, 'message' => "Có lỗi xảy ra"], 401);
         }
 
         $limit = $request->input('limit', 5);
@@ -157,7 +157,7 @@ class ThongKeController extends Controller
             });
 
         return response()->json([
-            'status' => 1,
+            'status' => true,
             'data' => $favorites
         ]);
     }
@@ -168,7 +168,7 @@ class ThongKeController extends Controller
         $user = Auth::guard('sanctum')->user();
 
         if (!$user) {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"], 401);
+            return response()->json(['status' => false, 'message' => "Có lỗi xảy ra"], 401);
         }
         $limit = $request->input('limit', 5);
         // Giả sử bạn có bảng giao_dich hoặc goi_tin_da_mua
@@ -197,7 +197,7 @@ class ThongKeController extends Controller
             });
 
         return response()->json([
-            'status' => 1,
+            'status' => true,
             'data' => $purchases
         ]);
     }

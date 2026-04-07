@@ -15,7 +15,7 @@ use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
 {
-   public function login(AdminLoginRequest $request)
+    public function login(AdminLoginRequest $request)
     {
         $admin = Admin::where('email', $request->email)->first();
 
@@ -63,7 +63,7 @@ class AdminController extends Controller
         $user = Auth::guard('sanctum')->user();
         if ($user) {
             return response()->json([
-                'status' => 1,
+                'status' => true,
                 'data' => $user
             ]);
         } else {
@@ -83,7 +83,7 @@ class AdminController extends Controller
             $user->save();
 
             return response()->json([
-                'status' => 1,
+                'status' => true,
                 'message' => "Cập nhật thành công",
                 'data' => $user
             ]);
@@ -141,7 +141,7 @@ class AdminController extends Controller
 
         if (!$user) {
             return response()->json([
-                'status' => 0,
+                'status' => false,
                 'message' => 'Email không tồn tại'
             ]);
         }
@@ -157,7 +157,7 @@ class AdminController extends Controller
         );
 
         return response()->json([
-            'status' => 1,
+            'status' => true,
             'message' => 'OTP đã gửi',
             'otp' => $otp // dev thôi
         ]);
@@ -179,7 +179,7 @@ class AdminController extends Controller
 
         if (!$record) {
             return response()->json([
-                'status' => 0,
+                'status' => false,
                 'message' => 'OTP không đúng'
             ]);
         }
@@ -194,7 +194,7 @@ class AdminController extends Controller
             ->delete();
 
         return response()->json([
-            'status' => 1,
+            'status' => true,
             'message' => 'Đổi mật khẩu thành công'
         ]);
     }

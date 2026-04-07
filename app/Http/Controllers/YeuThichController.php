@@ -27,7 +27,7 @@ class YeuThichController extends Controller
             } else {
                 $bds = BatDongSan::find($bds_id);
                 if (!$bds) {
-                    return response()->json(['status' => 0, 'message' => 'Không tìm thấy BDS']);
+                    return response()->json(['status' => false, 'message' => 'Không tìm thấy BDS']);
                 }
                 YeuThich::create([
                     'moi_gioi_id' => $bds->moi_gioi_id,
@@ -38,9 +38,12 @@ class YeuThichController extends Controller
                 $message = 'Đã thích';
             }
 
-            return response()->json(['status' => 1, 'message' => $message]);
+            return response()->json([
+                'status' => true,
+                'message' => $message
+            ]);
         } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+            return response()->json(['status' => false, 'message' => "Có lỗi xảy ra"]);
         }
     }
 
@@ -52,9 +55,13 @@ class YeuThichController extends Controller
                 ->with('batDongSan', 'batDongSan.moiGioi')
                 ->paginate(10);
 
-            return response()->json(['status' => 1, 'data' => $yeuThichs]);
+            return response()->json([
+                'status' => true, 
+                'data' => $yeuThichs]);
         } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+            return response()->json([
+                'status' => false, 
+                'message' => "Có lỗi xảy ra"]);
         }
     }
 }

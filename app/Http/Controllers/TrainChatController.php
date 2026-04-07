@@ -17,9 +17,9 @@ class TrainChatController extends Controller
             // Placeholder - cần OpenAI or local LLM
             $response = "Chat về BDS: {$message}. Cần config OpenAI key.";
 
-            return response()->json(['status' => 1, 'data' => ['reply' => $response]]);
+            return response()->json(['status' => true, 'data' => ['reply' => $response]]);
         } else {
-            return response()->json(['status' => 0, 'message' => "Có lỗi xảy ra"]);
+            return response()->json(['status' => false, 'message' => "Có lỗi xảy ra"]);
         }
     }
 }
