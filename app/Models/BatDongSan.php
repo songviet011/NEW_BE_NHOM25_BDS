@@ -52,8 +52,26 @@ class BatDongSan extends Model
         return $this->belongsTo(DiaChi::class, 'dia_chi_id');
     }
 
-    public function hinhAnh(): HasMany
+    public function hinhAnh()
     {
-        return $this->hasMany(HinhAnhBatDongSan::class, 'bds_id');
+        return $this->hasMany(HinhAnhBatDongSan::class, 'bds_id')
+            ->orderBy('thu_tu', 'asc');
+    }
+
+    public function anhDaiDien()
+    {
+        return $this->hasOne(HinhAnhBatDongSan::class, 'bds_id')
+            ->where('is_anh_dai_dien', true);
+    }
+    
+    public function getAnhDaiDienUrlAttribute()
+    {
+        $anh = $this->anhDaiDien()->first();
+        if ($anh) {
+            return asset('storage/' . $anh->url);
+        }
+        // Fallback: lấy ảnh đầu tiên nếu chưa có ảnh đại diện
+        $first = $this->hinhAnh()->first();
+        return $first ? asset('storage/' . $first->url) : null;
     }
 }

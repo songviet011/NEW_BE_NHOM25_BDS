@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 class VnPayService
@@ -7,29 +8,43 @@ class VnPayService
     private $hashSecret;
     private $url;
     private $returnUrl;
+    private $ipnUrl;
 
     public function __construct()
+    {
+        $this->loadConfig();
+    }
+
+    private function loadConfig()
     {
         $this->tmnCode = env('VNP_TMN_CODE');
         $this->hashSecret = env('VNP_HASH_SECRET');
         $this->url = env('VNP_URL');
         $this->returnUrl = env('VNP_RETURN_URL');
+        $this->ipnUrl = env('VNP_IPN_URL');
     }
 
-    /**
-     * Tạo URL thanh toán
-     */
-    public function createPaymentUrl($orderCode, $amount, $ip, $info)
+
+    //Tạo URL thanh toán
+    public function createPaymentUrl($orderCode, $amount, $ip, $info, $returnUrl = null)
     {
         $vnp_Url = $this->url;
-        $vnp_Returnurl = $this->returnUrl;
+        $vnp_Returnurl = $returnUrl ?: $this->returnUrl;
         $vnp_TmnCode = $this->tmnCode;
         $vnp_HashSecret = $this->hashSecret;
+        // Debug: Log config
+        \Log::info('VNPAY Config Check', [
+            'url' => $vnp_Url,
+            'tmn_code' => $vnp_TmnCode,
+            'hash_secret' => substr($vnp_HashSecret, 0, 10) . '...',
+            'ipn_url' => $this->ipnUrl,
+            'return_url' => $vnp_Returnurl,
+        ]);
 
         $vnp_TxnRef = $orderCode;
         $vnp_OrderInfo = $info;
         $vnp_OrderType = 'billpayment';
-        $vnp_Amount = $amount * 100; // ⚠️ VNPay yêu cầu nhân 100
+        $vnp_Amount = $amount * 100;
         $vnp_Locale = 'vn';
         $vnp_IpAddr = $ip;
         $vnp_CreateDate = date('YmdHis');
@@ -49,13 +64,19 @@ class VnPayService
             "vnp_TxnRef" => $vnp_TxnRef,
         ];
 
+        // Debug: Log input data
+        \Log::info('VNPAY Input Data', $inputData);
+
         ksort($inputData);
         $query = "";
         $i = 0;
         $hashdata = "";
         foreach ($inputData as $key => $value) {
-            if ($i == 1) $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
-            else $hashdata .= urlencode($key) . "=" . urlencode($value);
+            if ($i == 1) {
+                $hashdata .= '&' . urlencode($key) . "=" . urlencode($value);
+            } else {
+                $hashdata .= urlencode($key) . "=" . urlencode($value);
+            }
             $i = 1;
             $query .= urlencode($key) . "=" . urlencode($value) . '&';
         }
@@ -64,12 +85,13 @@ class VnPayService
         $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
         $vnp_Url .= 'vnp_SecureHash=' . $vnpSecureHash;
 
+        // Debug: Log final URL (first 200 chars)
+        \Log::info('VNPAY Final URL', ['url' => substr($vnp_Url, 0, 200) . '...']);
+
         return $vnp_Url;
     }
-
-    /**
-     * Xác thực chữ ký IPN/Return
-     */
+    
+    //Xác thực chữ ký IPN/Return
     public function verifySignature($requestData)
     {
         $vnp_SecureHash = $requestData['vnp_SecureHash'];

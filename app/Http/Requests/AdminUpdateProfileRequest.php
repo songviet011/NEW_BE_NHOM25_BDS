@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class AdminUpdateProfileRequest extends FormRequest
 {
@@ -15,23 +14,20 @@ class AdminUpdateProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ten' => 'required|string|max:255',
-            'email' => [
-                'required',
-                'email',
-                Rule::unique('admins', 'email')->ignore($this->user()?->getAuthIdentifier()),
-            ],
+            'ten'   => "required|string|max:255",
+            'email' => "required|email|unique:admins,email," . $this->user()?->id,
         ];
     }
 
     public function messages(): array
     {
         return [
-            'ten.required' => 'Tên là bắt buộc',
-            'ten.string' => 'Tên phải là chuỗi ký tự',
-            'email.required' => 'Email là bắt buộc',
-            'email.email' => 'Email phải là định dạng email hợp lệ',
-            'email.unique' => 'Email đã tồn tại',
+            'ten.required'     => 'Tên không được để trống.',
+            'ten.string'       => 'Tên phải là chuỗi ký tự.',
+            'ten.max'          => 'Tên không được vượt quá 255 ký tự.',
+            'email.required'   => 'Email không được để trống.',
+            'email.email'      => 'Email không đúng định dạng.',
+            'email.unique'     => 'Email này đã được sử dụng.',
         ];
     }
 }

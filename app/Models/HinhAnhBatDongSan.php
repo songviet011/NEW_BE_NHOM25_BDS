@@ -12,10 +12,13 @@ class HinhAnhBatDongSan extends Model
     protected $fillable = [
         'bds_id',
         'url',
+        'thu_tu',
+        'is_anh_dai_dien',
     ];
 
     protected $casts = [
-        //
+        'is_anh_dai_dien' => 'boolean',
+        'thu_tu' => 'integer',
     ];
 
     public function batDongSan(): BelongsTo

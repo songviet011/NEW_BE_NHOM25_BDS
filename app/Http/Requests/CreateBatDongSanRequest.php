@@ -26,6 +26,8 @@ class CreateBatDongSanRequest extends FormRequest
             'so_phong_ngu' => 'nullable|integer|min:0',
             'so_phong_tam' => 'nullable|integer|min:0',
             'is_noi_bat' => 'nullable|boolean',
+            'hinh_anh'        => 'nullable|array|max:10',
+            'hinh_anh.*'      => 'image|mimes:jpg,jpeg,png|max:5120',
         ];
     }
 
@@ -44,6 +46,11 @@ class CreateBatDongSanRequest extends FormRequest
             'tinh_id.exists' => 'Tỉnh không tồn tại',
             'quan_id.exists' => 'Quận không tồn tại',
             'dia_chi_id.exists' => 'Địa chỉ không tồn tại',
+            'hinh_anh.array'        => 'Hình ảnh phải là danh sách file',
+            'hinh_anh.max'          => 'Chỉ được upload tối đa 10 ảnh',
+            'hinh_anh.*.image'      => 'File phải là hình ảnh',
+            'hinh_anh.*.mimes'      => 'Hình ảnh phải có định dạng: jpg, jpeg, png',
+            'hinh_anh.*.max'        => 'Mỗi ảnh không được vượt quá 5MB',
         ];
     }
 }

@@ -19,13 +19,8 @@ use App\Http\Requests\DestroyRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
-// ============================================================
-// IMPORT EVENTS
-// ============================================================
-use App\Events\BatDongSanCreated;
-use App\Events\BatDongSanUpdated;
 use App\Http\Requests\SearchBatDongSanAdminRequest;
+use App\Http\Requests\UpdateImageBatDongSanRequest;
 use App\Models\PhanQuyen;
 
 class BatDongSanController extends Controller
@@ -237,55 +232,73 @@ class BatDongSanController extends Controller
     public function getDataDanhChoMoiGioi(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
-        if ($user) {
-            $data = BatDongSan::query()
-                ->join('loai_bat_dong_sans', 'bat_dong_sans.loai_id', '=', 'loai_bat_dong_sans.id')
-                ->join('trang_thai_bat_dong_sans', 'bat_dong_sans.trang_thai_id', '=', 'trang_thai_bat_dong_sans.id')
-                ->join('dia_chis', 'bat_dong_sans.dia_chi_id', '=', 'dia_chis.id')
-                ->join('tinh_thanhs', 'dia_chis.tinh_id', '=', 'tinh_thanhs.id')
-                ->join('quan_huyens', 'dia_chis.quan_id', '=', 'quan_huyens.id')
-                ->where('bat_dong_sans.moi_gioi_id', $user->id)
-                ->select(
-                    'bat_dong_sans.tieu_de',
-                    'bat_dong_sans.gia',
-                    'bat_dong_sans.dien_tich',
-                    'dia_chis.dia_chi_chi_tiet as dia_chi',
-                    'quan_huyens.ten as ten_quan',
-                    'tinh_thanhs.ten as ten_tinh',
-                    'loai_bat_dong_sans.ten as ten_loai',
-                    'trang_thai_bat_dong_sans.ten as ten_trang_thai'
-                )
-                ->get();
 
+        if (!$user) {
             return response()->json([
-                'status' => true,
-                'data'   => $data
-            ]);
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => "Có lỗi xảy ra"
-            ]);
+                'status'  => false,
+                'message' => 'Chưa đăng nhập hoặc token không hợp lệ!'
+            ], 401);
         }
+
+        $data = BatDongSan::with([
+            'loai',          // Lấy thông tin loại BĐS
+            'trangThai',     // Lấy thông tin trạng thái
+            'diaChi.quan',   // Lấy quận
+            'diaChi.tinh',    // Lấy tỉnh
+            'hinhAnh'
+        ])
+            ->where('moi_gioi_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Lấy danh sách BĐS thành công!',
+            'data'    => $data
+        ]);
     }
 
-    // tạo bài đăng BDS (Dành cho môi giới,admin chỉ có thể duyệt khách hàng không có quyền này)
+    // Tạo bài đăng BĐS (Dành cho môi giới)
     public function store(CreateBatDongSanRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
 
-        $data = $request->validated();
+        $batDongSan = BatDongSan::create([
+            'tieu_de'       => $request->tieu_de,
+            'gia'           => $request->gia,
+            'dien_tich'     => $request->dien_tich,
+            'loai_id'       => $request->loai_id,
+            'trang_thai_id' => $request->trang_thai_id,
+            'mo_ta'         => $request->mo_ta,
+            'dia_chi_id'    => $request->dia_chi_id,
+            'so_phong_ngu'  => $request->so_phong_ngu,
+            'so_phong_tam'  => $request->so_phong_tam,
+            'is_noi_bat'    => $request->is_noi_bat ?? false,
+            'moi_gioi_id'   => $user->id,  //Gán ID môi giới hiện tại
+            'is_duyet'      => false,      //Mặc định chờ duyệt
+        ]);
 
-        $data['moi_gioi_id'] = $user->id;
-        $data['is_duyet'] = false;
-        $data['is_noi_bat'] = $data['is_noi_bat'] ?? false;
+        if ($request->hasFile('hinh_anh')) {
+            foreach ($request->file('hinh_anh') as $index => $file) {
+                $path = $file->store('bds/' . $batDongSan->id, 'public');
 
-        $batDongSan = BatDongSan::create($data);
+                HinhAnhBatDongSan::create([
+                    'bds_id'          => $batDongSan->id,
+                    'url'             => $path,
+                    'thu_tu'          => $index,
+                    'is_anh_dai_dien' => false,
+                ]);
+            }
+        }
 
         return response()->json([
-            'status' => true,
-            'message' => 'Tạo BDS thành công và đang chờ duyệt',
-            'data' => $batDongSan
+            'status'  => true,
+            'message' => 'Tạo BĐS thành công và đang chờ duyệt',
+            'data'    => [
+                'id' => $batDongSan->id,
+                'tieu_de' => $batDongSan->tieu_de,
+                'anh_dai_dien' => $batDongSan->anh_dai_dien_url, //Trả về luôn URL ảnh bìa
+            ]
         ], 201);
     }
 
@@ -309,7 +322,7 @@ class BatDongSanController extends Controller
         $data->fill($updateData);
         $data->is_duyet = false;
         $data->save();
-        
+
         return response()->json([
             'status' => true,
             'message' => 'Cập nhật data thành công và đang chờ duyệt lại',
@@ -318,7 +331,7 @@ class BatDongSanController extends Controller
     }
 
     // Xóa bài đăng BDS (Dành cho môi giới, admin chỉ có thể duyệt khách hàng không có quyền này)
-    public function destroy(DestroyRequest $request)
+    public function destroy(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
         $data = BatDongSan::find($request->id);
@@ -332,6 +345,56 @@ class BatDongSanController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Xóa bài đăng thành công'
+        ]);
+    }
+
+    public function setImage(UpdateImageBatDongSanRequest $request, $id)
+    {
+        $bds = BatDongSan::find($id);
+
+        // Kiểm tra BĐS tồn tại
+        if (!$bds) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Bất động sản không tồn tại!',
+            ], 404);
+        }
+
+        // Kiểm tra phân quyền: Chỉ môi giới sở hữu BĐS mới được sửa
+        $user = Auth::guard('sanctum')->user();
+        if ($bds->moi_gioi_id !== $user->id) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Bạn không có quyền sửa ảnh của BĐS này!',
+            ], 403);
+        }
+
+        // Kiểm tra ảnh thuộc về BĐS này (tránh thao tác chéo)
+        $anh = HinhAnhBatDongSan::where('id', $request->anh_id)
+            ->where('bds_id', $id)
+            ->first();
+
+        if (!$anh) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Ảnh không thuộc về BĐS này!',
+            ], 400);
+        }
+
+        // Bỏ đánh dấu ảnh đại diện cũ của BĐS này
+        HinhAnhBatDongSan::where('bds_id', $id)
+            ->update(['is_anh_dai_dien' => false]);
+
+        // Đánh dấu ảnh mới là đại diện
+        $anh->update(['is_anh_dai_dien' => true]);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Đã chọn ảnh đại diện thành công!',
+            'data'    => [
+                'anh_id' => $anh->id,
+                'anh_dai_dien_url' => asset('storage/' . $anh->url)
+            ]
         ]);
     }
 }

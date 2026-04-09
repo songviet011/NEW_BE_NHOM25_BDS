@@ -19,7 +19,6 @@ class AdminController extends Controller
     {
         $admin = Admin::where('email', $request->email)->first();
 
-        // Bước 2: Kiểm tra tồn tại và mật khẩu đúng
         if (!$admin || !Hash::check($request->password, $admin->password)) {
             return response()->json([
                 'status' => false,
@@ -27,10 +26,6 @@ class AdminController extends Controller
             ], 401);
         }
 
-        // Bước 3: Xóa token cũ (optional - để tránh nhiều token rác)
-        // $admin->tokens()->delete();
-
-        // Bước 4: Tạo token mới
         $token = $admin->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -77,20 +72,21 @@ class AdminController extends Controller
     public function updateProfile(AdminUpdateProfileRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
-        if ($user) {
-            $user->ten = $request->input('ten');
-            $user->email = $request->input('email');
-            $user->save();
+        $data = Admin::find($user->id);
+        if ($data) {
+            $data->update([
+                'ten'   => $request->ten,
+                'email' => $request->email,
+            ]);
 
             return response()->json([
-                'status' => true,
-                'message' => "Cập nhật thành công",
-                'data' => $user
+                'status'  => true,
+                'message' => 'Cập nhật thông tin thành công!',
             ]);
         } else {
             return response()->json([
-                'status'  => 0,
-                'message' => "Có lỗi xảy ra",
+                'status'  => false,
+                'message' => 'Thông tin admin không tồn tại!',
             ]);
         }
     }

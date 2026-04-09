@@ -56,16 +56,20 @@ Route::prefix('moi-gioi')->group(function () {
 });
 
 //---------------------------Client Home (Public)--------------------------
-Route::prefix('bds')->group(function () {
-    // Bất Động Sản
-    Route::get('/', [ClientHomeController::class, 'getAllPublic']);
-    // Tìm Kiếm 
-    Route::post('/tim-kiem', [ClientHomeController::class, 'search']);
-});
+
+// Bất Động Sản
+Route::get('/bat-dong-san', [ClientHomeController::class, 'getAllPublic']);
+// Xem chi tiết bất động sản
+Route::get('/bat-dong-san/{id}', [ClientHomeController::class, 'xemChiTiet']);
+// Tìm Kiếm 
+Route::post('/tim-kiem', [ClientHomeController::class, 'search']);
 
 Route::get('/tinh-thanh', [TinhThanhController::class, 'getTinhThanh']); //đã test postman 
 Route::get('/quan-huyen', [QuanHuyenController::class, 'getQuanHuyen']); //đã test postman ?tinh_id=1
 Route::get('/loai-bds', [LoaiBatDongSanController::class, 'getAll']);
+Route::any('/payment/vnpay-ipn', [GiaoDichController::class, 'handleVnPayCallback']);
+Route::any('/payment/vnpay-return', [GiaoDichController::class, 'handleVnPayCallback']);
+
 //----------------------------ADMIN---------------------------
 
 Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
@@ -169,6 +173,7 @@ Route::prefix('moi-gioi')->middleware('MoiGioiMiddleware')->group(function () {
         Route::post('/create', [BatDongSanController::class, 'store']);
         Route::post('/update', [BatDongSanController::class, 'update']);
         Route::post('/delete', [BatDongSanController::class, 'destroy']);
+        Route::post('/{id}/anh-dai-dien', [BatDongSanController::class, 'setImage']);
     });
 
     //MUA GÓI
@@ -179,8 +184,7 @@ Route::prefix('moi-gioi')->middleware('MoiGioiMiddleware')->group(function () {
     Route::get('/thong-bao', [ThongBaoController::class, 'getThongBao']);
 
     //GIAO DỊCH
-    Route::post('/payment/create', [GiaoDichController::class, 'createPayment']);
-    Route::get('/payment/vnpay-ipn', [GiaoDichController::class, 'handleVnPayCallback']); // VNPay sẽ gọi POST/GET tùy config
+    Route::post('/payment/create', [GiaoDichController::class, 'createPayment']); //đã test postman
 });
 
 //---------------------------KHÁCH HÀNG----------------------------

@@ -1,94 +1,205 @@
-# Prompt tạo Frontend Bootstrap cho hệ thống Bất Động Sản
+# Đặc tả Frontend cho hệ thống Bất Động Sản
 
-Hãy tạo một hệ thống frontend web responsive bằng Bootstrap 5 cho một nền tảng bất động sản. Hệ thống có 2 khu vực lớn:
+## 1. Mục tiêu
 
-1. Admin Portal
-2. Client Portal
+Tạo một frontend web responsive bằng **Bootstrap 5** cho hệ thống sàn giao dịch bất động sản. Hệ thống có 3 vai trò chính:
 
-Trong Client Portal có 3 trạng thái người dùng:
+1. **Admin**
+2. **Môi Giới**
+3. **Khách Hàng**
 
-1. Khách vãng lai chưa đăng nhập
-2. Khách hàng đã đăng nhập
-3. Môi giới đã đăng nhập
+Ngoài ra còn có khu vực **Public/Guest** để xem danh sách bất động sản công khai trước khi đăng nhập.
 
-Phong cách giao diện cần hiện đại, chuyên nghiệp, dễ tin cậy, thiên về lĩnh vực bất động sản. Ưu tiên tông màu xanh navy, trắng, xám sáng, điểm nhấn vàng nhạt hoặc xanh ngọc cho CTA. Toàn bộ UI dùng Bootstrap 5, Bootstrap Icons, card, table, modal, offcanvas, dropdown, toast, pagination, tabs, accordion. Không dùng phong cách quá màu mè. Phải responsive tốt trên desktop, tablet và mobile.
+Frontend cần phục vụ đồng thời:
 
-## 1. Tổng quan hệ thống
+1. Website tra cứu bất động sản cho người dùng phổ thông.
+2. Khu vực tài khoản cho khách hàng.
+3. Khu vực quản lý tin đăng cho môi giới.
+4. Khu vực quản trị hệ thống cho admin.
 
-Đây là hệ thống quản lý và đăng tin bất động sản. Backend hiện tại là Laravel API với các nhóm chức năng chính:
+Ngôn ngữ giao diện: **Tiếng Việt**.
 
-1. Quản lý đăng nhập riêng cho Admin, Khách hàng, Môi giới
-2. Danh sách bất động sản public cho người dùng ngoài hệ thống
-3. Tìm kiếm bất động sản theo tỉnh, loại, giá, tiêu đề
-4. Xem chi tiết bất động sản
-5. Xem môi giới phụ trách bất động sản
-6. Hiển thị bất động sản trên bản đồ theo tọa độ địa chỉ
-7. Khách hàng yêu thích bất động sản
-8. Môi giới đăng tin, sửa tin, xóa tin, theo dõi thông báo khi khách hàng thả tim
-9. Môi giới mua gói đăng tin
-10. Admin duyệt tin, đổi trạng thái tin, quản lý user, quản lý gói tin, thống kê, giao dịch, vai trò, phân quyền
-11. Có module AI định giá bất động sản
-12. Có module chatbot tư vấn bất động sản
+## 2. Công nghệ và phong cách giao diện
 
-Lưu ý quan trọng để thiết kế FE:
+Yêu cầu tạo giao diện theo các nguyên tắc sau:
 
-1. Bất động sản public chỉ hiển thị khi `is_duyet = true`
-2. Bất động sản có 2 lớp trạng thái:
-   - Trạng thái kiểm duyệt: `is_duyet`
-   - Trạng thái kinh doanh: `trang_thai_id`
-3. Khi môi giới sửa tin, backend đang reset lại `is_duyet = false`, vì vậy FE phải hiển thị rõ trạng thái "chờ duyệt lại"
-4. Tính năng yêu thích là dạng toggle thích hoặc bỏ thích
-5. Môi giới nhận thông báo khi khách hàng thả tim vào tin của mình
-6. Mua gói hiện tại backend đang xử lý thanh toán thành công ngay sau khi chọn gói
+1. Dùng **Bootstrap 5** làm nền tảng giao diện.
+2. Dùng **Bootstrap Icons** cho icon.
+3. Không dùng phong cách quá hiện đại kiểu glassmorphism; ưu tiên giao diện rõ ràng, sạch, dễ dùng, thiên về dashboard doanh nghiệp.
+4. Tất cả trang phải responsive tốt trên desktop, tablet và mobile.
+5. Dùng layout chuẩn Bootstrap như `container`, `container-fluid`, `row`, `col`, `card`, `table`, `badge`, `modal`, `offcanvas`, `toast`, `pagination`, `nav-tabs`, `dropdown`.
+6. Form phải có validate trực quan, thông báo lỗi ngay dưới input.
+7. Các thao tác tạo, sửa, xóa, duyệt, đổi trạng thái phải có modal xác nhận hoặc toast feedback.
+8. Màn hình tải dữ liệu nên có skeleton hoặc spinner.
+9. Trang trống dữ liệu phải có empty state đẹp, rõ ý nghĩa.
 
-## 2. Yêu cầu UI/UX chung
+## 3. Định hướng nhận diện giao diện
 
-Tạo 2 shell giao diện tách biệt:
+### 3.1 Tông màu
 
-1. `Admin Portal`
-   - Có sidebar trái cố định trên desktop
-   - Header trên cùng có avatar admin, dropdown profile, logout
-   - Nội dung chính dạng dashboard app
-   - Dùng table cho các màn quản trị
+1. Màu chủ đạo: xanh navy hoặc xanh dương đậm.
+2. Màu phụ: xanh ngọc nhạt hoặc cyan nhẹ.
+3. Màu nhấn:
+4. Thành công: xanh lá.
+5. Chờ xử lý: vàng/cam.
+6. Lỗi hoặc bị từ chối: đỏ.
+7. Thông tin trung tính: xám nhạt và trắng.
 
-2. `Client Portal`
-   - Có top navbar public
-   - Có home page theo kiểu landing page kết hợp listing
-   - Có trang danh sách, trang chi tiết, trang bản đồ
-   - Có dashboard mini cho khách hàng và dashboard riêng cho môi giới
+### 3.2 Font và cảm giác
 
-Yêu cầu responsive:
+1. Giao diện cần cảm giác tin cậy, nghiêm túc, phù hợp lĩnh vực bất động sản.
+2. Dùng typography rõ ràng, tiêu đề lớn, giá tiền nổi bật.
+3. Card bất động sản nên có ảnh lớn, badge trạng thái, giá rõ, diện tích rõ.
 
-1. Mobile: sidebar chuyển thành offcanvas
-2. Table trên mobile có thể scroll ngang hoặc chuyển thành card list
-3. Bộ lọc listing trên mobile dùng offcanvas filter
-4. Form dài phải chia section rõ ràng
-5. Nút chính phải rõ, to, dễ bấm
+## 4. Kiến trúc tổng thể frontend
 
-Component nên có:
+Chia frontend thành 4 khu vực:
 
-1. `Navbar`
-2. `Sidebar`
-3. `Page header`
-4. `Stats cards`
-5. `Data table`
-6. `Search bar`
-7. `Filter panel`
-8. `Property card`
-9. `Broker card`
-10. `Gallery carousel`
-11. `Map section`
-12. `Notification dropdown`
-13. `Modal confirm`
-14. `Toast success/error`
-15. `Empty state`
-16. `Skeleton loading`
+1. **Public**
+2. **Khách Hàng**
+3. **Môi Giới**
+4. **Admin**
 
-## 3. Dữ liệu chính cần phản ánh trên giao diện
+### 4.1 Khu vực Public
 
-### 3.1. Bất động sản
+Bao gồm:
 
-Các field chính:
+1. Trang chủ.
+2. Danh sách bất động sản công khai.
+3. Chi tiết bất động sản.
+4. Tìm kiếm bất động sản.
+5. Đăng nhập/đăng ký khách hàng.
+6. Đăng nhập/đăng ký môi giới.
+7. Quên mật khẩu theo từng vai trò.
+
+### 4.2 Khu vực Khách Hàng
+
+Bao gồm:
+
+1. Hồ sơ cá nhân.
+2. Đổi mật khẩu.
+3. Danh sách bất động sản yêu thích.
+4. Tìm kiếm địa chỉ.
+5. Xem bất động sản theo khu vực.
+6. Xem bất động sản trên bản đồ.
+7. Tìm bất động sản gần vị trí.
+8. Mua gói để nâng cấp thành môi giới.
+
+### 4.3 Khu vực Môi Giới
+
+Bao gồm:
+
+1. Hồ sơ cá nhân.
+2. Đổi mật khẩu.
+3. Quản lý bất động sản của tôi.
+4. Tạo tin đăng mới.
+5. Cập nhật tin đăng.
+6. Xóa tin đăng.
+7. Xem thông báo khách hàng thả tim.
+8. Xem gói tin.
+9. Thanh toán mua gói qua VNPay.
+10. Theo dõi số tin còn lại và ngày hết hạn gói.
+
+### 4.4 Khu vực Admin
+
+Bao gồm:
+
+1. Dashboard tổng quan.
+2. Quản lý khách hàng.
+3. Quản lý môi giới.
+4. Quản lý bất động sản.
+5. Duyệt tin.
+6. Đổi trạng thái bất động sản.
+7. Quản lý loại bất động sản.
+8. Quản lý gói tin.
+9. Xem lịch sử mua gói.
+10. Quản lý chức vụ.
+11. Quản lý chức năng.
+12. Phân quyền theo chức vụ.
+13. Hồ sơ admin.
+14. Đăng xuất một thiết bị hoặc tất cả thiết bị.
+
+## 5. Layout chuẩn cho từng khu vực
+
+### 5.1 Public Layout
+
+1. Header cố định trên cùng.
+2. Logo bên trái.
+3. Menu chính: Trang chủ, Bất động sản, Tìm kiếm, Đăng nhập, Đăng ký.
+4. Nút CTA nổi bật: “Đăng tin”, “Đăng ký môi giới”, “Xem bản đồ”.
+5. Hero section có form tìm kiếm nhanh.
+6. Phần danh sách bất động sản hiển thị dạng grid card.
+7. Footer có thông tin liên hệ, điều khoản, hỗ trợ.
+
+### 5.2 Layout cho Khách Hàng và Môi Giới
+
+1. Dùng layout dashboard 2 cột.
+2. Sidebar trái cố định trên desktop, offcanvas trên mobile.
+3. Topbar có avatar, tên người dùng, chuông thông báo, dropdown tài khoản.
+4. Nội dung chính ở bên phải.
+5. Mỗi trang dùng `card` để nhóm nội dung.
+
+### 5.3 Layout cho Admin
+
+1. Sidebar trái nhiều nhóm menu.
+2. Topbar có ô tìm kiếm nhanh, avatar admin, nút đăng xuất.
+3. Dashboard dùng nhiều card KPI và biểu đồ.
+4. Các module quản lý dùng table, filter bar, modal form.
+
+## 6. Menu chi tiết theo vai trò
+
+### 6.1 Menu Public
+
+1. Trang chủ
+2. Danh sách bất động sản
+3. Tìm kiếm nâng cao
+4. Đăng nhập khách hàng
+5. Đăng ký khách hàng
+6. Đăng nhập môi giới
+7. Đăng ký môi giới
+
+### 6.2 Menu Khách Hàng
+
+1. Trang khám phá bất động sản
+2. Yêu thích
+3. Bản đồ khu vực
+4. Hồ sơ cá nhân
+5. Đổi mật khẩu
+6. Nâng cấp thành môi giới
+7. Đăng xuất
+
+### 6.3 Menu Môi Giới
+
+1. Tổng quan
+2. Bất động sản của tôi
+3. Đăng tin mới
+4. Gói tin
+5. Thông báo
+6. Hồ sơ cá nhân
+7. Đổi mật khẩu
+8. Đăng xuất
+
+### 6.4 Menu Admin
+
+1. Dashboard
+2. Quản lý khách hàng
+3. Quản lý môi giới
+4. Quản lý bất động sản
+5. Quản lý loại bất động sản
+6. Quản lý gói tin
+7. Lịch sử mua gói
+8. Giao dịch
+9. Chức vụ
+10. Chức năng
+11. Phân quyền
+12. Hồ sơ admin
+13. Đăng xuất
+
+## 7. Dữ liệu nghiệp vụ chính cần hiển thị
+
+### 7.1 Bất động sản
+
+Trường dữ liệu chính:
 
 1. `id`
 2. `tieu_de`
@@ -98,33 +209,716 @@ Các field chính:
 6. `loai_id`
 7. `trang_thai_id`
 8. `moi_gioi_id`
-9. `tinh_id`
-10. `quan_id`
-11. `dia_chi_id`
-12. `so_phong_ngu`
-13. `so_phong_tam`
-14. `is_duyet`
-15. `is_noi_bat`
-16. danh sách `hinhAnh`
-17. địa chỉ chi tiết qua `diaChi`
-18. môi giới phụ trách qua `moiGioi`
+9. `dia_chi_id`
+10. `so_phong_ngu`
+11. `so_phong_tam`
+12. `is_duyet`
+13. `is_noi_bat`
+14. danh sách `hinh_anh`
+15. thông tin `địa chỉ`, `tỉnh`, `quận`
+16. thông tin `môi giới`
 
-### 3.2. Loại bất động sản
+### 7.2 Môi giới
 
-Ví dụ seed data hiện có:
+Trường dữ liệu chính:
 
-1. Căn hộ
-2. Nhà phố
-3. Nhà riêng
-4. Đất nền
-5. Kho xưởng
-6. Văn phòng
-7. Cửa hàng
-8. Trang trại
+1. `id`
+2. `ten`
+3. `email`
+4. `so_dien_thoai`
+5. `avatar`
+6. `mo_ta`
+7. `zalo_link`
+8. `is_active`
+9. `so_tin_con_lai`
+10. `ngay_het_han_goi`
 
-### 3.3. Trạng thái bất động sản
+### 7.3 Khách hàng
 
-Ví dụ seed data hiện có:
+Trường dữ liệu chính:
+
+1. `id`
+2. `ten`
+3. `email`
+4. `so_dien_thoai`
+5. `is_active`
+
+### 7.4 Gói tin
+
+Trường dữ liệu chính:
+
+1. `id`
+2. `ten_goi`
+3. `gia`
+4. `so_ngay`
+5. `so_luong_tin`
+
+### 7.5 Giao dịch
+
+Trường dữ liệu chính:
+
+1. `id`
+2. `moi_gioi_id`
+3. `goi_tin_id`
+4. `so_tien`
+5. `phuong_thuc`
+6. `trang_thai`
+7. `ma_giao_dich`
+8. `ma_vnp_txn_ref`
+9. `created_at`
+
+### 7.6 Địa chỉ
+
+Trường dữ liệu chính:
+
+1. `tinh_id`
+2. `quan_id`
+3. `dia_chi_chi_tiet`
+4. `lat`
+5. `lng`
+
+## 8. Màn hình Public chi tiết
+
+### 8.1 Trang chủ
+
+Trang chủ cần có:
+
+1. Hero section lớn với ảnh nền bất động sản.
+2. Thanh tìm kiếm nhanh ngay giữa hero.
+3. Các ô filter nhanh:
+4. Loại bất động sản.
+5. Tỉnh thành.
+6. Giá tối thiểu.
+7. Giá tối đa.
+8. Từ khóa tiêu đề.
+9. Khối “Bất động sản nổi bật”.
+10. Khối “Bất động sản mới nhất”.
+11. Khối “Danh mục loại bất động sản”.
+12. Banner mời đăng ký môi giới.
+13. Footer có thông tin công ty và hỗ trợ.
+
+### 8.2 Danh sách bất động sản công khai
+
+Trang danh sách cần có:
+
+1. Sidebar filter bên trái trên desktop.
+2. Filter mở bằng offcanvas trên mobile.
+3. Vùng kết quả dạng card grid.
+4. Phân trang ở cuối danh sách.
+5. Sắp xếp theo:
+6. Giá tăng dần.
+7. Giá giảm dần.
+8. Mới nhất.
+9. Nổi bật.
+
+Mỗi card bất động sản hiển thị:
+
+1. Ảnh đại diện.
+2. Tiêu đề.
+3. Giá.
+4. Diện tích.
+5. Loại bất động sản.
+6. Tên môi giới.
+7. Badge “Nổi bật” nếu `is_noi_bat = true`.
+8. Badge trạng thái duyệt hoặc trạng thái giao dịch nếu cần.
+9. Nút xem chi tiết.
+10. Nút thả tim nếu đã đăng nhập khách hàng.
+
+### 8.3 Chi tiết bất động sản
+
+Trang chi tiết cần có:
+
+1. Gallery ảnh lớn ở đầu trang.
+2. Thông tin chính ở cột trái.
+3. Box liên hệ môi giới ở cột phải.
+4. Section mô tả chi tiết.
+5. Section thông tin kỹ thuật.
+6. Section địa chỉ và bản đồ vị trí.
+7. Section bất động sản liên quan.
+
+Thông tin kỹ thuật cần hiển thị:
+
+1. Giá.
+2. Diện tích.
+3. Số phòng ngủ.
+4. Số phòng tắm.
+5. Loại bất động sản.
+6. Trạng thái bất động sản.
+7. Tỉnh.
+8. Quận.
+9. Địa chỉ chi tiết.
+
+Box môi giới cần có:
+
+1. Avatar.
+2. Tên môi giới.
+3. Mô tả ngắn.
+4. Số điện thoại.
+5. Link Zalo.
+6. Nút gọi điện.
+7. Nút chat Zalo.
+8. Nút thả tim.
+
+### 8.4 Hành vi đặc biệt khi khách chưa đăng nhập
+
+Backend hiện tại có logic ẩn thông tin khi là guest. Frontend phải hỗ trợ rõ hành vi này:
+
+1. Ẩn số điện thoại môi giới.
+2. Ẩn link Zalo.
+3. Ẩn địa chỉ chi tiết.
+4. Mô tả bị cắt ngắn.
+5. Hiển thị badge hoặc alert: “Đăng nhập để xem thông tin liên hệ đầy đủ”.
+6. Hiển thị nút CTA dẫn tới đăng nhập/đăng ký.
+
+Nếu API trả `is_guest_view = true` thì UI phải bật chế độ khóa dữ liệu liên hệ.
+
+## 9. Màn hình Khách Hàng chi tiết
+
+### 9.1 Đăng nhập khách hàng
+
+Form gồm:
+
+1. Email
+2. Mật khẩu
+3. Checkbox ghi nhớ đăng nhập nếu muốn
+4. Nút đăng nhập
+5. Link quên mật khẩu
+6. Link đăng ký tài khoản mới
+
+### 9.2 Đăng ký khách hàng
+
+Form gồm:
+
+1. Họ tên
+2. Email
+3. Số điện thoại
+4. Mật khẩu
+5. Nhập lại mật khẩu
+6. Checkbox đồng ý điều khoản
+7. Nút đăng ký
+
+### 9.3 Quên mật khẩu khách hàng
+
+Luồng 2 bước:
+
+1. Bước 1 nhập email để nhận OTP.
+2. Bước 2 nhập email, OTP và mật khẩu mới.
+
+Giao diện nên tách thành stepper hoặc 2 card liền mạch.
+
+### 9.4 Hồ sơ khách hàng
+
+Trang hồ sơ gồm:
+
+1. Card thông tin cơ bản.
+2. Form cập nhật họ tên.
+3. Form cập nhật số điện thoại.
+4. Có thể cho phép cập nhật password trực tiếp ở form riêng.
+5. Nút lưu thay đổi.
+
+### 9.5 Đổi mật khẩu khách hàng
+
+Form gồm:
+
+1. Mật khẩu cũ
+2. Mật khẩu mới
+3. Nhập lại mật khẩu mới
+4. Nút cập nhật
+
+### 9.6 Danh sách yêu thích
+
+Trang này hiển thị danh sách bất động sản mà khách hàng đã thả tim.
+
+Giao diện cần có:
+
+1. Grid card hoặc table card responsive.
+2. Ảnh đại diện bất động sản.
+3. Tiêu đề.
+4. Giá.
+5. Môi giới phụ trách.
+6. Nút xem chi tiết.
+7. Nút bỏ yêu thích.
+
+### 9.7 Tìm kiếm địa chỉ
+
+Tạo một màn hình hoặc module search địa chỉ gồm:
+
+1. Ô nhập từ khóa.
+2. Gợi ý realtime tối đa 5 kết quả.
+3. Kết quả hiển thị:
+4. Địa chỉ chi tiết.
+5. Quận.
+6. Tỉnh.
+7. Nút “Xem bất động sản trong khu vực”.
+
+### 9.8 Bất động sản theo khu vực
+
+Trang này hiển thị danh sách bất động sản đã duyệt theo tỉnh/quận.
+
+Giao diện cần có:
+
+1. Bộ lọc tỉnh thành.
+2. Dropdown quận huyện phụ thuộc tỉnh.
+3. Danh sách kết quả dạng card.
+4. Phân trang 20 item.
+
+### 9.9 Bản đồ bất động sản
+
+Đây là màn hình rất quan trọng cho khách hàng.
+
+Yêu cầu giao diện:
+
+1. Chia 2 cột:
+2. Cột trái là bộ lọc.
+3. Cột phải là bản đồ lớn.
+4. Marker hiển thị các bất động sản có tọa độ.
+5. Click marker mở popup nhỏ.
+6. Popup hiển thị:
+7. Ảnh đại diện.
+8. Tiêu đề.
+9. Giá format đẹp.
+10. Diện tích.
+11. Địa chỉ.
+12. Tên môi giới.
+13. Số điện thoại môi giới nếu đã đăng nhập.
+14. Nút xem chi tiết.
+
+Bộ lọc trên bản đồ gồm:
+
+1. Khoảng giá.
+2. Loại bất động sản.
+3. Khu vực đang xem trên map.
+4. Nút reset filter.
+
+### 9.10 Tìm bất động sản gần vị trí
+
+Có thể làm thành tab phụ trong màn hình bản đồ.
+
+Form tìm gần vị trí gồm:
+
+1. Vĩ độ.
+2. Kinh độ.
+3. Bán kính km.
+4. Nút tìm kiếm.
+
+Kết quả hiển thị:
+
+1. Danh sách các bất động sản gần vị trí.
+2. Khoảng cách ước tính.
+3. Nút xem chi tiết trên bản đồ.
+
+### 9.11 Mua gói để nâng cấp thành môi giới
+
+Tạo một trang CTA nâng cấp tài khoản.
+
+Giao diện cần có:
+
+1. Giới thiệu quyền lợi khi trở thành môi giới.
+2. Danh sách gói tin dưới dạng pricing card.
+3. Mỗi card hiển thị:
+4. Tên gói.
+5. Giá.
+6. Số ngày.
+7. Số lượng tin được đăng.
+8. Nút mua ngay.
+
+Lưu ý:
+
+1. Route nâng cấp đã khai báo nhưng backend chưa hoàn thiện đầy đủ.
+2. Frontend vẫn nên thiết kế sẵn trang pricing đẹp và có modal xác nhận mua gói.
+
+## 10. Màn hình Môi Giới chi tiết
+
+### 10.1 Đăng nhập môi giới
+
+Form gồm:
+
+1. Email
+2. Mật khẩu
+3. Nút đăng nhập
+4. Link quên mật khẩu
+5. Link đăng ký môi giới
+
+### 10.2 Đăng ký môi giới
+
+Form gồm:
+
+1. Họ tên
+2. Email
+3. Số điện thoại
+4. Mật khẩu
+5. Nhập lại mật khẩu
+6. Link Zalo
+7. Mô tả bản thân
+8. Nút đăng ký
+
+### 10.3 Quên mật khẩu môi giới
+
+Luồng giống khách hàng:
+
+1. Gửi OTP qua email.
+2. Nhập OTP và mật khẩu mới.
+
+### 10.4 Dashboard môi giới
+
+Trang tổng quan môi giới nên có:
+
+1. Card số tin còn lại.
+2. Card ngày hết hạn gói.
+3. Card tổng số tin đã đăng.
+4. Card số tin đang chờ duyệt.
+5. Card số tin nổi bật.
+6. Khu vực thông báo mới nhất.
+7. Danh sách bất động sản gần đây.
+
+### 10.5 Hồ sơ môi giới
+
+Form hiển thị và chỉnh sửa:
+
+1. Tên
+2. Email
+3. Số điện thoại
+4. Link Zalo
+5. Mô tả
+6. Avatar giả lập hoặc khu vực avatar
+7. Trạng thái gói hiện tại
+8. Số tin còn lại
+9. Ngày hết hạn gói
+
+### 10.6 Đổi mật khẩu môi giới
+
+Form gồm:
+
+1. Mật khẩu cũ
+2. Mật khẩu mới
+3. Nhập lại mật khẩu mới
+4. Nút cập nhật
+
+### 10.7 Danh sách bất động sản của tôi
+
+Đây là màn hình table quản lý chính của môi giới.
+
+Bảng cần có cột:
+
+1. Tiêu đề
+2. Giá
+3. Diện tích
+4. Địa chỉ
+5. Quận
+6. Tỉnh
+7. Loại bất động sản
+8. Trạng thái
+9. Tình trạng duyệt
+10. Ngày tạo
+11. Thao tác
+
+Thao tác gồm:
+
+1. Xem nhanh
+2. Chỉnh sửa
+3. Xóa
+
+Badge nên có:
+
+1. Chờ duyệt
+2. Đã duyệt
+3. Bị từ chối
+4. Đã bán
+5. Cho thuê
+6. Nổi bật
+
+### 10.8 Tạo tin đăng bất động sản
+
+Nên tạo giao diện form nhiều nhóm rõ ràng.
+
+Nhóm thông tin cơ bản:
+
+1. Tiêu đề
+2. Mô tả
+3. Giá
+4. Diện tích
+5. Loại bất động sản
+6. Trạng thái bất động sản
+7. Đánh dấu nổi bật
+
+Nhóm thông tin chi tiết:
+
+1. Số phòng ngủ
+2. Số phòng tắm
+
+Nhóm vị trí:
+
+1. Tỉnh thành
+2. Quận huyện
+3. Địa chỉ có sẵn hoặc chọn `dia_chi_id`
+4. Có thể thêm khu vực xem trước bản đồ
+
+Nhóm media:
+
+1. Khu vực tải ảnh hoặc nhập URL ảnh.
+2. Gallery preview.
+
+Lưu ý quan trọng:
+
+1. Khi môi giới tạo tin, backend đặt `is_duyet = false`.
+2. FE phải hiển thị thông báo rõ: “Tin đăng đã tạo thành công và đang chờ admin duyệt”.
+
+### 10.9 Cập nhật tin đăng
+
+Giao diện gần giống form tạo tin.
+
+Lưu ý:
+
+1. Khi cập nhật tin, backend cũng đưa tin về trạng thái chờ duyệt lại.
+2. FE phải hiển thị cảnh báo trước khi lưu: “Sau khi chỉnh sửa, tin sẽ chờ duyệt lại”.
+
+### 10.10 Xóa tin đăng
+
+1. Dùng modal xác nhận.
+2. Nêu rõ tiêu đề tin sắp xóa.
+3. Sau khi xóa, hiển thị toast thành công.
+
+### 10.11 Thông báo khách hàng thả tim
+
+Tạo một màn hình hoặc dropdown thông báo.
+
+Mỗi thông báo hiển thị:
+
+1. Tên khách hàng.
+2. Tên bất động sản.
+3. Nội dung thông báo.
+4. Thời gian.
+5. Trạng thái đã đọc/chưa đọc nếu muốn dựng UI.
+
+Lưu ý:
+
+1. Backend hiện trả về 5 hoạt động mới nhất.
+2. Chưa thấy API đánh dấu đã đọc, nên UI chỉ cần read-only.
+
+### 10.12 Gói tin và thanh toán
+
+Tạo một trang mua gói chuyên biệt cho môi giới.
+
+Màn hình gồm:
+
+1. Header giới thiệu quyền lợi gói tin.
+2. Card hiển thị gói hiện tại.
+3. Card hiển thị số tin còn lại.
+4. Card hiển thị ngày hết hạn.
+5. Danh sách pricing card của các gói.
+
+Mỗi pricing card hiển thị:
+
+1. Tên gói.
+2. Giá tiền.
+3. Số ngày hiệu lực.
+4. Số lượng tin đăng.
+5. Nút “Thanh toán qua VNPay”.
+
+Flow thanh toán:
+
+1. Người dùng bấm mua gói.
+2. Mở modal xác nhận thông tin gói.
+3. Gọi API tạo thanh toán.
+4. Nhận `payment_url`.
+5. Redirect sang VNPay.
+6. Sau khi quay về hệ thống, hiển thị trang kết quả thanh toán.
+
+### 10.13 Trang kết quả thanh toán
+
+Trang này cần 3 trạng thái:
+
+1. Thanh toán thành công.
+2. Thanh toán thất bại.
+3. Đơn đang chờ xác nhận.
+
+Thông tin cần hiển thị:
+
+1. Mã giao dịch.
+2. Tên gói.
+3. Số tiền.
+4. Trạng thái.
+5. Nút quay lại trang gói tin.
+
+## 11. Màn hình Admin chi tiết
+
+### 11.1 Đăng nhập admin
+
+Form đơn giản, nghiêm túc:
+
+1. Email
+2. Mật khẩu
+3. Nút đăng nhập
+4. Link quên mật khẩu
+
+### 11.2 Quên mật khẩu admin
+
+Luồng tương tự:
+
+1. Nhập email nhận OTP.
+2. Nhập OTP và mật khẩu mới.
+
+### 11.3 Dashboard admin
+
+Dashboard admin là màn hình quan trọng nhất.
+
+Tầng 1 gồm 4 KPI card:
+
+1. Tổng số môi giới
+2. Tổng số khách hàng
+3. Tổng số bất động sản đã duyệt
+4. Tổng số giao dịch thành công
+
+Tầng 2 gồm biểu đồ:
+
+1. Biểu đồ doanh thu theo ngày
+2. Biểu đồ số giao dịch theo ngày
+3. Bộ lọc thời gian:
+4. 7 ngày
+5. 30 ngày
+6. 3 tháng
+7. 6 tháng
+8. 1 năm
+9. Hoặc khoảng ngày custom
+
+Tầng 3 gồm 2 bảng/card:
+
+1. Khách hàng vừa thả tim gần đây
+2. Giao dịch mua gói gần đây
+
+Mỗi block cần có:
+
+1. Tiêu đề block
+2. Nút xem thêm
+3. Empty state nếu không có dữ liệu
+
+### 11.4 Hồ sơ admin
+
+Form gồm:
+
+1. Tên admin
+2. Email
+3. Nút cập nhật
+4. Nút đăng xuất tất cả thiết bị
+
+### 11.5 Quản lý khách hàng
+
+Màn hình dạng table quản trị.
+
+Bộ lọc đầu trang:
+
+1. Ô tìm kiếm theo tên/email/số điện thoại
+2. Dropdown trạng thái active/inactive
+3. Nút làm mới
+
+Bảng gồm cột:
+
+1. ID
+2. Họ tên
+3. Email
+4. Số điện thoại
+5. Trạng thái kích hoạt
+6. Ngày tạo
+7. Thao tác
+
+Thao tác:
+
+1. Xem nhanh
+2. Chỉnh sửa
+3. Xóa
+
+Modal sửa khách hàng gồm:
+
+1. Tên
+2. Email
+3. Số điện thoại
+4. Công tắc active/inactive
+
+### 11.6 Quản lý môi giới
+
+Gần giống quản lý khách hàng nhưng nhiều trường hơn.
+
+Bảng gồm:
+
+1. ID
+2. Họ tên
+3. Email
+4. Số điện thoại
+5. Zalo link
+6. Mô tả
+7. Trạng thái
+8. Số tin còn lại
+9. Ngày hết hạn gói
+10. Thao tác
+
+Modal sửa môi giới gồm:
+
+1. Tên
+2. Email
+3. Số điện thoại
+4. Mô tả
+5. Zalo link
+6. Công tắc active/inactive
+
+### 11.7 Quản lý bất động sản
+
+Đây là module rất quan trọng.
+
+Trang quản lý bất động sản cần có:
+
+1. Thanh filter đầu trang.
+2. Ô tìm kiếm từ khóa.
+3. Filter theo loại bất động sản.
+4. Filter theo trạng thái.
+5. Filter theo tình trạng duyệt.
+6. Nút làm mới.
+
+Bảng hoặc grid quản trị cần hiển thị:
+
+1. Ảnh đại diện.
+2. Tiêu đề.
+3. Giá.
+4. Diện tích.
+5. Loại bất động sản.
+6. Trạng thái bất động sản.
+7. Môi giới đăng tin.
+8. Tỉnh/Quận.
+9. Cờ đã duyệt hay chưa.
+10. Cờ nổi bật.
+11. Ngày tạo.
+12. Thao tác.
+
+Thao tác admin:
+
+1. Xem chi tiết.
+2. Duyệt hoặc bỏ duyệt tin.
+3. Đổi trạng thái bất động sản.
+4. Xóa tin.
+
+### 11.8 Chi tiết bất động sản cho admin
+
+Trang hoặc modal chi tiết cần có:
+
+1. Gallery ảnh.
+2. Toàn bộ thông tin bất động sản.
+3. Thông tin môi giới đăng.
+4. Thông tin địa chỉ đầy đủ.
+5. Nút duyệt tin.
+6. Nút đổi trạng thái.
+7. Nút xóa.
+
+### 11.9 Duyệt tin bất động sản
+
+Thiết kế UX cần rõ ràng:
+
+1. Nút duyệt là toggle.
+2. Nếu tin chưa duyệt, nút hiển thị “Duyệt”.
+3. Nếu tin đã duyệt, nút hiển thị “Bỏ duyệt”.
+4. Dùng badge màu để phân biệt.
+
+### 11.10 Đổi trạng thái bất động sản
+
+Admin có thể đổi trạng thái như:
 
 1. Chưa duyệt
 2. Đã duyệt
@@ -133,312 +927,26 @@ Ví dụ seed data hiện có:
 5. Đã hết hạn
 6. Bị từ chối
 
-FE phải hiển thị trạng thái bằng badge màu:
+Tạo modal dropdown chọn trạng thái mới rồi xác nhận.
 
-1. `Chờ duyệt`: warning
-2. `Đã duyệt`: success
-3. `Đã bán`: secondary hoặc dark
-4. `Cho thuê`: info
-5. `Hết hạn`: danger
-6. `Bị từ chối`: danger
-7. `Nổi bật`: badge riêng màu vàng
+### 11.11 Quản lý loại bất động sản
 
-### 3.4. Người dùng
+Màn hình CRUD đơn giản:
 
-Có 3 loại user:
+1. Danh sách loại bất động sản.
+2. Nút thêm loại mới.
+3. Nút sửa.
+4. Nút xóa.
 
-1. Admin
-2. Khách hàng
-3. Môi giới
+Form loại bất động sản chỉ cần:
 
-Khách hàng và môi giới có các thông tin:
+1. Tên loại
 
-1. `ten`
-2. `email`
-3. `so_dien_thoai`
-4. `is_active`
+### 11.12 Quản lý gói tin
 
-Môi giới có thêm:
+Màn hình CRUD gói tin cần rất rõ.
 
-1. `avatar`
-2. `mo_ta`
-3. `zalo_link`
-
-### 3.5. Gói tin
-
-Field chính:
-
-1. `ten_goi`
-2. `gia`
-3. `so_ngay`
-4. `so_luong_tin`
-
-### 3.6. Giao dịch
-
-Field chính:
-
-1. `moi_gioi_id`
-2. `goi_tin_id`
-3. `so_tien`
-4. `phuong_thuc`
-5. `trang_thai`
-6. `ma_giao_dich`
-7. `created_at`
-
-### 3.7. Yêu thích và thông báo
-
-Yêu thích lưu:
-
-1. môi giới nhận thông báo
-2. khách hàng thực hiện hành động
-3. bất động sản liên quan
-4. nội dung thông báo
-5. trạng thái đã đọc hoặc chưa đọc
-
-## 4. Kiến trúc trang và điều hướng
-
-## 4.1. Admin Portal
-
-Menu sidebar đề xuất:
-
-1. Dashboard
-2. Quản lý khách hàng
-3. Quản lý môi giới
-4. Quản lý bất động sản
-5. Quản lý gói tin
-6. Lịch sử mua gói
-7. Quản lý giao dịch
-8. Quản lý chức vụ
-9. Quản lý phân quyền
-10. Hồ sơ admin
-
-## 4.2. Client Portal
-
-Menu navbar đề xuất:
-
-1. Trang chủ
-2. Danh sách bất động sản
-3. Bản đồ bất động sản
-4. AI định giá
-5. Chatbot tư vấn
-6. Đăng nhập
-7. Đăng ký
-
-Khi đăng nhập khách hàng:
-
-1. Tài khoản của tôi
-2. Danh sách yêu thích
-3. Cập nhật hồ sơ
-4. Đổi mật khẩu
-5. Nâng cấp gói môi giới
-
-Khi đăng nhập môi giới:
-
-1. Dashboard môi giới
-2. Tin của tôi
-3. Đăng tin mới
-4. Gói tin
-5. Giao dịch
-6. Thông báo
-7. Hồ sơ môi giới
-
-## 5. Đặc tả chi tiết từng màn hình Admin
-
-### 5.1. Trang đăng nhập Admin
-
-Tạo trang đăng nhập riêng cho admin tại route kiểu `/admin/login`.
-
-Thiết kế:
-
-1. Layout chia 2 cột trên desktop
-2. Cột trái là form đăng nhập
-3. Cột phải là ảnh minh họa hoặc block branding của hệ thống quản trị BĐS
-4. Form card bo góc, shadow nhẹ
-5. Có logo, tiêu đề "Admin Bất Động Sản"
-
-Field:
-
-1. Email
-2. Mật khẩu
-3. Checkbox ghi nhớ đăng nhập nếu muốn
-4. Nút đăng nhập
-5. Link quên mật khẩu
-
-Flow quên mật khẩu:
-
-1. Bước nhập email
-2. Bước nhập OTP
-3. Bước nhập mật khẩu mới
-
-### 5.2. Dashboard Admin
-
-Đây là màn landing sau khi admin đăng nhập.
-
-Hiển thị:
-
-1. 4 stats card:
-   - Tổng môi giới
-   - Tổng khách hàng
-   - Tổng bất động sản đã duyệt
-   - Tổng giao dịch thành công
-2. 1 card doanh thu tổng
-3. 1 biểu đồ doanh thu theo ngày
-4. Bộ lọc thời gian:
-   - Từ ngày
-   - Đến ngày
-5. Khu vực cảnh báo:
-   - Tin chờ duyệt
-   - User bị khóa
-   - Giao dịch gần đây
-
-Style:
-
-1. Dùng card Bootstrap
-2. Có icon rõ cho từng stats
-3. Biểu đồ vùng hoặc cột
-
-### 5.3. Quản lý khách hàng
-
-Màn hình dạng table quản trị.
-
-Tính năng:
-
-1. Xem danh sách khách hàng
-2. Tìm kiếm theo tên hoặc email
-3. Phân trang
-4. Chỉnh sửa khách hàng
-5. Khóa hoặc mở khóa tài khoản qua `is_active`
-6. Xóa khách hàng
-
-Table columns:
-
-1. ID
-2. Tên
-3. Email
-4. Số điện thoại
-5. Trạng thái hoạt động
-6. Ngày tạo
-7. Hành động
-
-Action UI:
-
-1. Nút sửa mở modal hoặc drawer
-2. Nút khóa hoặc mở khóa đổi badge và switch
-3. Nút xóa có modal xác nhận
-
-Form sửa:
-
-1. Tên
-2. Số điện thoại
-3. Trạng thái hoạt động
-
-### 5.4. Quản lý môi giới
-
-Màn này tương tự quản lý khách hàng nhưng có thêm thông tin nghề nghiệp.
-
-Tính năng:
-
-1. Xem danh sách môi giới
-2. Tìm kiếm theo tên, email, số điện thoại
-3. Cập nhật thông tin
-4. Bật hoặc tắt tài khoản
-5. Xóa môi giới
-
-Table columns:
-
-1. ID
-2. Tên
-3. Email
-4. Số điện thoại
-5. Zalo link
-6. Mô tả ngắn
-7. Trạng thái hoạt động
-8. Số tin đang có nếu muốn hiển thị thêm
-9. Hành động
-
-Chi tiết môi giới có thể mở drawer:
-
-1. Avatar
-2. Mô tả
-3. Link Zalo
-4. Danh sách tin đã đăng
-5. Lịch sử giao dịch mua gói
-
-### 5.5. Quản lý bất động sản
-
-Đây là màn quan trọng nhất của admin.
-
-Tính năng:
-
-1. Xem toàn bộ tin bất động sản
-2. Lọc theo môi giới
-3. Tìm kiếm theo tiêu đề
-4. Lọc theo tỉnh
-5. Lọc theo loại bất động sản
-6. Lọc theo giá tối thiểu
-7. Duyệt tin
-8. Đổi trạng thái kinh doanh của tin
-9. Xóa tin
-10. Xem chi tiết tin
-
-Table columns:
-
-1. ID
-2. Ảnh đại diện
-3. Tiêu đề
-4. Loại bất động sản
-5. Giá
-6. Diện tích
-7. Tỉnh hoặc quận
-8. Môi giới
-9. Trạng thái kiểm duyệt
-10. Trạng thái kinh doanh
-11. Nổi bật hay không
-12. Ngày tạo
-13. Hành động
-
-Trong mỗi row nên có:
-
-1. Badge `Chờ duyệt` hoặc `Đã duyệt`
-2. Badge trạng thái `Đã bán`, `Cho thuê`, `Hết hạn`
-3. Nút `Xem`
-4. Nút `Duyệt`
-5. Nút `Đổi trạng thái`
-6. Nút `Xóa`
-
-Trang chi tiết tin trong admin hoặc drawer lớn phải hiển thị:
-
-1. Gallery ảnh
-2. Tiêu đề
-3. Mô tả
-4. Giá
-5. Diện tích
-6. Số phòng ngủ
-7. Số phòng tắm
-8. Loại BĐS
-9. Trạng thái
-10. Địa chỉ đầy đủ
-11. Vị trí trên bản đồ
-12. Thông tin môi giới
-13. Trạng thái duyệt
-
-Modal đổi trạng thái:
-
-1. Select trạng thái
-2. Nút cập nhật
-
-### 5.6. Quản lý gói tin
-
-Màn CRUD gói đăng tin.
-
-Tính năng:
-
-1. Xem danh sách gói
-2. Thêm gói mới
-3. Cập nhật gói
-4. Xóa gói
-
-Table columns:
+Bảng hiển thị:
 
 1. ID
 2. Tên gói
@@ -446,800 +954,307 @@ Table columns:
 4. Số ngày
 5. Số lượng tin
 6. Ngày tạo
-7. Hành động
+7. Thao tác
 
-Form thêm hoặc sửa:
+Form thêm/sửa gói:
 
 1. Tên gói
 2. Giá
 3. Số ngày hiệu lực
-4. Số lượng tin được đăng
+4. Số lượng tin đăng
 
-Hiển thị gói theo card song song ở phần preview:
+### 11.13 Lịch sử mua gói
 
-1. Gói Cơ Bản
-2. Gói Tiêu Chuẩn
-3. Gói VIP
-4. Gói Cao Cấp
+Tạo màn hình bảng lịch sử mua gói:
 
-### 5.7. Lịch sử mua gói
+1. Môi giới
+2. Tên gói
+3. Ngày bắt đầu
+4. Ngày kết thúc
+5. Trạng thái còn hiệu lực hay đã hết hạn
 
-Màn admin xem lịch sử môi giới đã mua gói nào.
+### 11.14 Giao dịch
 
-Tính năng:
+Tạo màn hình giao dịch cho admin với table:
 
-1. Danh sách lịch sử mua gói
-2. Phân trang
-3. Xem môi giới
-4. Xem gói
-5. Xem ngày bắt đầu và ngày kết thúc
-
-Table columns:
-
-1. ID
+1. Mã giao dịch
 2. Môi giới
 3. Gói tin
-4. Ngày bắt đầu
-5. Ngày kết thúc
-6. Số ngày còn lại nếu muốn
-7. Trạng thái còn hiệu lực hoặc hết hạn
-
-### 5.8. Quản lý giao dịch
-
-Màn này tập trung vào doanh thu và payment logs.
-
-Tính năng:
-
-1. Xem danh sách giao dịch
-2. Tìm kiếm theo mã giao dịch hoặc tên môi giới
-3. Xem doanh thu tổng
-4. Xem số giao dịch thành công
-5. Xem số giao dịch hôm nay
-6. Phân trang
-
-Table columns:
-
-1. ID
-2. Mã giao dịch
-3. Môi giới
-4. Gói tin
-5. Số tiền
-6. Phương thức thanh toán
-7. Trạng thái
-8. Thời gian tạo
-
-Các stats ở đầu trang:
-
-1. Tổng doanh thu
-2. Tổng giao dịch thành công
-3. Giao dịch hôm nay
-
-### 5.9. Quản lý chức vụ
-
-Màn dành cho quản trị vai trò admin.
-
-Tính năng:
-
-1. Xem danh sách chức vụ
-2. Thêm chức vụ
-3. Sửa chức vụ
-4. Xóa chức vụ
-
-Table columns:
-
-1. ID
-2. Tên chức vụ
-3. Slug chức vụ
-4. Hành động
-
-Ví dụ chức vụ:
-
-1. Nhân viên kiểm duyệt
-2. Admin
-
-### 5.10. Quản lý phân quyền
-
-Màn phân quyền theo chức vụ.
-
-Thiết kế đề xuất:
-
-1. Cột trái là danh sách chức vụ
-2. Cột phải là danh sách chức năng có checkbox hoặc switch
-3. Có nút cấp quyền
-4. Có nút hủy quyền
-
-Mỗi chức năng hiển thị:
-
-1. Tên chức năng
-2. URL API
-3. Method
-4. Mô tả chức năng
-5. Trạng thái đã cấp hay chưa
-
-Nếu là super admin:
-
-1. Thấy toàn bộ chức năng
-2. Có thể chỉnh phân quyền mọi role
-
-### 5.11. Hồ sơ Admin
-
-Màn profile cá nhân:
-
-1. Tên
-2. Email
-3. Cập nhật hồ sơ
-4. Đăng xuất
-5. Đăng xuất tất cả thiết bị
-
-## 6. Đặc tả chi tiết từng màn hình Client
-
-Client Portal phải hiểu theo nghĩa rộng: toàn bộ giao diện dành cho người dùng không phải admin, bao gồm khách vãng lai, khách hàng và môi giới.
-
-### 6.1. Trang chủ public
-
-Trang chủ phải mang cảm giác website bất động sản chuyên nghiệp.
-
-Các khối chính:
-
-1. Hero banner lớn với headline rõ:
-   - "Tìm bất động sản phù hợp cho bạn"
-2. Form tìm kiếm nhanh ngay trong hero:
-   - Tỉnh thành
-   - Loại BĐS
-   - Giá từ
-   - Giá đến
-   - Từ khóa tiêu đề
-   - Nút tìm kiếm
-3. Section bất động sản nổi bật
-4. Section bất động sản mới nhất
-5. Section tìm theo loại bất động sản
-6. Section tìm theo khu vực
-7. Khối giới thiệu về nền tảng
-8. CTA đăng ký làm môi giới
-9. CTA dùng AI định giá
-10. Khối chatbot trợ lý nổi dạng floating button
-
-Property card trên homepage cần có:
-
-1. Ảnh chính
-2. Badge loại
-3. Badge nổi bật nếu có
-4. Tiêu đề
-5. Giá
-6. Diện tích
-7. Số phòng ngủ
-8. Số phòng tắm
-9. Địa chỉ ngắn
-10. Tên môi giới
-11. Nút xem chi tiết
-12. Nút yêu thích nếu user là khách hàng đã đăng nhập
-
-### 6.2. Trang danh sách bất động sản
-
-Đây là trang listing chính.
-
-Layout:
-
-1. Cột trái là filter panel trên desktop
-2. Cột phải là grid danh sách bất động sản
-3. Mobile dùng offcanvas filter
-
-Bộ lọc:
-
-1. Từ khóa tiêu đề
-2. Tỉnh
-3. Loại bất động sản
-4. Giá tối thiểu
-5. Giá tối đa
-
-Tính năng:
-
-1. Tìm kiếm
-2. Sắp xếp theo giá mới nhất hoặc nổi bật nếu muốn thêm UI
-3. Chuyển chế độ grid hoặc list
-4. Phân trang
-5. Empty state khi không có dữ liệu
-
-Mỗi item:
-
-1. Ảnh
-2. Tiêu đề
-3. Giá
-4. Diện tích
-5. Loại
-6. Môi giới
-7. Nút xem chi tiết
-8. Nút yêu thích
-
-### 6.3. Trang chi tiết bất động sản
-
-Đây là trang conversion chính.
-
-Bố cục:
-
-1. Bên trái là gallery ảnh lớn
-2. Bên phải là summary card sticky
-3. Bên dưới là mô tả, thông số, bản đồ, thông tin môi giới
-
-Thông tin phải có:
-
-1. Tiêu đề
-2. Giá
-3. Diện tích
-4. Loại bất động sản
-5. Trạng thái kinh doanh
-6. Số phòng ngủ
-7. Số phòng tắm
-8. Địa chỉ chi tiết
-9. Mô tả đầy đủ
-10. Gallery nhiều ảnh
-11. Thông tin môi giới:
-   - Tên
-   - Số điện thoại
-   - Mô tả
-   - Link Zalo
-12. Bản đồ vị trí lấy từ `diaChi.lat/lng`
-13. Nút yêu thích
-14. Nút liên hệ môi giới
-15. Nút sao chép link
-
-Nên có thêm section:
-
-1. Tin cùng loại
-2. Tin cùng khu vực
-
-### 6.4. Trang bản đồ bất động sản
-
-Trang này dùng API map-data.
-
-Layout đề xuất:
-
-1. Bên trái là danh sách kết quả thu gọn
-2. Bên phải là map lớn
-3. Trên cùng có filter ngắn
-
-Marker popup cần hiển thị:
-
-1. Ảnh đại diện
-2. Giá
-3. Diện tích
-4. Địa chỉ ngắn
-5. Nút xem chi tiết
-
-### 6.5. Trang AI định giá
-
-Đây là trang tính năng nổi bật, nên thiết kế như một công cụ riêng.
-
-Mục tiêu:
-
-1. Cho user nhập thông tin cơ bản
-2. Trả kết quả giá dự đoán
-3. Hiển thị dưới dạng card kết quả rõ ràng
-
-Form nhập:
-
-1. Loại bất động sản
-2. Diện tích
-3. Tỉnh thành
-
-Kết quả:
-
-1. Giá dự đoán
-2. Ghi chú AI
-3. Badge "Beta" hoặc "Ước tính"
-4. CTA xem các tin có giá tương đương
-
-Thiết kế:
-
-1. Form card lớn ở giữa
-2. Result card nổi bật phía dưới
-3. Có background minh họa data, chart hoặc icon AI
-
-### 6.6. Chatbot tư vấn bất động sản
-
-Thiết kế trang chat giống trợ lý tư vấn.
-
-Bố cục:
-
-1. Sidebar trái là gợi ý câu hỏi nhanh
-2. Khung chat chính ở giữa
-3. Ô nhập message phía dưới
-
-Quick prompt:
-
-1. Tìm căn hộ tại TP.HCM
-2. Tư vấn đất nền giá 2 tỷ
-3. Nhà phố cho thuê
-4. Nên mua hay thuê
-
-Message bubble:
-
-1. Tin nhắn user bên phải
-2. Tin nhắn bot bên trái
-3. Timestamp nhỏ
+4. Số tiền
+5. Phương thức
+6. Trạng thái
+7. Mã VNPay
+8. Ngày tạo
 
 Lưu ý:
 
-1. Vì backend chatbot đang là placeholder, FE nên hiển thị nhãn "AI Assistant Beta"
+1. Route giao dịch cho admin đã khai báo.
+2. Nhưng trong backend hiện tại chưa thấy method hoàn chỉnh trong controller để cấp dữ liệu.
+3. Frontend vẫn nên dựng sẵn giao diện bảng giao dịch.
 
-### 6.7. Đăng nhập, đăng ký, quên mật khẩu Client
+### 11.15 Chức vụ
 
-Không gộp Admin vào đây. Đây là auth cho khách hàng và môi giới.
+Màn hình quản lý chức vụ cho admin:
 
-Tạo 1 trang auth dùng tabs hoặc segmented control:
+1. Danh sách chức vụ.
+2. Nút thêm mới.
+3. Nút sửa.
+4. Nút xóa.
 
-1. Tab `Khách hàng`
-2. Tab `Môi giới`
+Thông tin chức vụ:
 
-Các flow cần có:
+1. Tên chức vụ
+2. Slug chức vụ
 
-1. Đăng nhập khách hàng
-2. Đăng ký khách hàng
-3. Quên mật khẩu khách hàng
-4. Đăng nhập môi giới
-5. Đăng ký môi giới
-6. Quên mật khẩu môi giới
+### 11.16 Chức năng
 
-Form khách hàng đăng ký:
+Màn hình danh sách chức năng hệ thống:
 
-1. Tên
-2. Email
-3. Số điện thoại
-4. Mật khẩu
-5. Xác nhận mật khẩu
+1. ID chức năng
+2. Tên chức năng
+3. URL API
+4. Method API
+5. Mô tả chức năng
 
-Form môi giới đăng ký:
+Nên hiển thị read-only dạng table lớn, có tìm kiếm và filter theo method.
 
-1. Tên
-2. Email
-3. Số điện thoại
-4. Mật khẩu
-5. Xác nhận mật khẩu
-6. Link Zalo
-7. Mô tả bản thân
+### 11.17 Phân quyền
 
-Quên mật khẩu:
+Màn hình phân quyền cần trực quan, dễ thao tác.
 
-1. Nhập email
-2. Nhập OTP
-3. Nhập mật khẩu mới
+Đề xuất giao diện:
 
-### 6.8. Khu vực Khách hàng đã đăng nhập
+1. Cột trái là danh sách chức vụ.
+2. Cột phải là danh sách chức năng dạng table hoặc checklist.
+3. Mỗi dòng có:
+4. Tên chức năng.
+5. API URL.
+6. Method.
+7. Mô tả.
+8. Checkbox đã cấp quyền hay chưa.
+9. Nút thêm quyền.
+10. Nút hủy quyền.
 
-#### 6.8.1. Tài khoản của tôi
+UX mong muốn:
 
-Trang tài khoản khách hàng có layout 2 cột:
+1. Chọn một chức vụ.
+2. Nạp danh sách quyền hiện có.
+3. Cho phép cấp quyền từng chức năng.
+4. Có thể làm thêm thao tác chọn nhiều quyền.
 
-1. Cột trái là menu tài khoản
-2. Cột phải là nội dung
+## 12. Thành phần UI dùng lại
 
-Menu:
+Frontend cần xây một bộ component dùng lại thống nhất:
 
-1. Thông tin cá nhân
-2. Bất động sản yêu thích
-3. Đổi mật khẩu
-4. Nâng cấp gói môi giới
+1. `AppNavbar`
+2. `AppSidebar`
+3. `StatCard`
+4. `PropertyCard`
+5. `PropertyTable`
+6. `FilterBar`
+7. `SearchInput`
+8. `ConfirmModal`
+9. `StatusBadge`
+10. `EmptyState`
+11. `LoadingSpinner`
+12. `ToastMessage`
+13. `PricingCard`
+14. `ProfileCard`
+15. `NotificationList`
+16. `MapPanel`
 
-Block thông tin cá nhân:
+## 13. Quy tắc hiển thị badge và trạng thái
 
-1. Tên
-2. Email
-3. Số điện thoại
-4. Nút cập nhật
+### 13.1 Trạng thái duyệt
 
-#### 6.8.2. Danh sách yêu thích
+1. Chờ duyệt: badge vàng
+2. Đã duyệt: badge xanh lá
+3. Bị từ chối: badge đỏ
 
-Tính năng:
+### 13.2 Trạng thái hoạt động tài khoản
 
-1. Xem các bất động sản đã thích
-2. Bỏ thích
-3. Chuyển đến trang chi tiết
-4. Phân trang
+1. Active: badge xanh
+2. Inactive: badge xám hoặc đỏ nhạt
 
-Hiển thị theo dạng card hoặc table card:
+### 13.3 Trạng thái giao dịch
 
-1. Ảnh
-2. Tiêu đề
-3. Giá
-4. Diện tích
-5. Tên môi giới
-6. Nút bỏ thích
-7. Nút xem chi tiết
+1. `pending`: badge vàng
+2. `success`: badge xanh lá
+3. `failed` hoặc `fail`: badge đỏ
+4. `cancelled`: badge xám
 
-#### 6.8.3. Đổi mật khẩu
+### 13.4 Trạng thái bất động sản
 
-Form:
-
-1. Mật khẩu cũ
-2. Mật khẩu mới
-3. Xác nhận mật khẩu mới
-
-#### 6.8.4. Nâng cấp gói môi giới
-
-Thiết kế như trang pricing.
-
-Mục tiêu UI:
-
-1. Hiển thị các gói tin thành dạng card pricing
-2. Có ribbon `Phổ biến` hoặc `VIP`
-3. Chọn phương thức thanh toán
-4. Nút mua gói
-
-Form mua:
-
-1. Chọn gói
-2. Chọn phương thức `cash`, `bank`, `credit_card`
-
-Lưu ý nghiệp vụ:
-
-1. Backend có route khách hàng mua gói với ý định trở thành môi giới
-2. FE nên đặt tên dễ hiểu như `Nâng cấp tài khoản môi giới`
-
-### 6.9. Khu vực Môi giới đã đăng nhập
-
-Môi giới là một phần của Client Portal nhưng cần có dashboard riêng.
-
-#### 6.9.1. Dashboard môi giới
-
-Đây là trang tổng quan sau khi môi giới đăng nhập.
-
-Hiển thị:
-
-1. Số tin đang có
-2. Số tin chờ duyệt
-3. Số tin đã duyệt
-4. Số lượt khách hàng quan tâm gần đây
-5. Số giao dịch mua gói
-6. Gói đang sử dụng hoặc CTA mua gói
-
-Các block chính:
-
-1. Stats cards
-2. Danh sách 5 thông báo mới nhất
-3. Danh sách tin gần đây
-4. CTA đăng tin mới
-
-#### 6.9.2. Tin của tôi
-
-Màn danh sách bất động sản môi giới đã đăng.
-
-Tính năng:
-
-1. Xem danh sách tin
-2. Tạo tin mới
-3. Sửa tin
-4. Xóa tin
-5. Xem trạng thái duyệt
-6. Xem trạng thái kinh doanh
-
-Table columns:
-
-1. ID
-2. Ảnh
-3. Tiêu đề
-4. Giá
-5. Diện tích
-6. Loại
-7. Trạng thái duyệt
-8. Trạng thái kinh doanh
-9. Nổi bật
-10. Ngày tạo
-11. Hành động
-
-Badge nên có:
-
-1. Chờ duyệt
+1. Chưa duyệt
 2. Đã duyệt
-3. Chờ duyệt lại sau chỉnh sửa
-4. Đã bán
-5. Cho thuê
-6. Hết hạn
+3. Đã bán
+4. Cho thuê
+5. Đã hết hạn
+6. Bị từ chối
 
-#### 6.9.3. Đăng tin mới và chỉnh sửa tin
+Mỗi trạng thái cần màu riêng, đồng nhất toàn hệ thống.
 
-Form đăng tin phải rất rõ vì đây là màn nhập dữ liệu quan trọng.
+## 14. Danh sách API nên map vào frontend
 
-Chia thành các section:
+### 14.1 Public
 
-1. Thông tin cơ bản
-2. Thông tin bất động sản
-3. Vị trí
-4. Hình ảnh
-5. Xác nhận đăng tin
+1. `GET /api/bat-dong-san`
+2. `GET /api/bat-dong-san/{id}`
+3. `POST /api/tim-kiem`
+4. `GET /api/tinh-thanh`
+5. `GET /api/quan-huyen`
 
-Field form:
-
-1. Tiêu đề
-2. Mô tả
-3. Giá
-4. Diện tích
-5. Loại bất động sản
-6. Trạng thái kinh doanh
-7. Tỉnh thành
-8. Quận huyện
-9. Địa chỉ chi tiết hoặc chọn địa chỉ có sẵn
-10. Số phòng ngủ
-11. Số phòng tắm
-12. Checkbox `Tin nổi bật`
-13. Khu upload ảnh hoặc nhập URL ảnh
-
-Gợi ý UI:
-
-1. Input group cho giá và diện tích
-2. Select phụ thuộc tỉnh và quận
-3. Gallery preview ảnh
-4. Sticky action bar với nút lưu
-5. Alert nhỏ nhắc rằng sau khi tạo hoặc sửa tin sẽ cần admin duyệt
-
-#### 6.9.4. Gói tin
-
-Trang hiển thị các gói môi giới có thể mua.
-
-Layout:
-
-1. Grid 3 hoặc 4 card
-2. Mỗi card có:
-   - Tên gói
-   - Giá
-   - Số ngày hiệu lực
-   - Số lượng tin
-   - Nút chọn gói
-
-Khi chọn gói:
-
-1. Mở modal xác nhận
-2. Chọn phương thức thanh toán
-3. Xác nhận thanh toán
-4. Hiển thị modal thành công
-
-#### 6.9.5. Thông báo quan tâm
-
-Trang hoặc dropdown thông báo cho môi giới.
-
-Hiển thị:
-
-1. 5 hoặc nhiều hơn thông báo khách hàng thả tim
-2. Tên khách hàng
-3. Tên bất động sản
-4. Thời gian
-5. Trạng thái đã đọc hoặc chưa đọc
-
-UI đề xuất:
-
-1. Notification dropdown ở header
-2. Trang full list dạng timeline hoặc list-group
-
-#### 6.9.6. Giao dịch
-
-Màn xem lịch sử thanh toán của môi giới.
-
-Hiển thị:
-
-1. Mã giao dịch
-2. Gói đã mua
-3. Số tiền
-4. Phương thức thanh toán
-5. Trạng thái
-6. Ngày tạo
-
-Nếu không có API hoàn chỉnh thì vẫn tạo UI sẵn theo cấu trúc admin giao dịch nhưng lọc theo môi giới hiện tại.
-
-#### 6.9.7. Hồ sơ môi giới
-
-Trang profile môi giới gồm:
-
-1. Tên
-2. Email
-3. Số điện thoại
-4. Link Zalo
-5. Mô tả
-6. Avatar placeholder
-7. Nút cập nhật hồ sơ
-8. Nút đổi mật khẩu
-9. Nút đăng xuất
-
-## 7. Thiết kế Bootstrap chi tiết
-
-### 7.1. Style guide đề xuất
-
-1. Font dễ đọc, hiện đại
-2. Border radius vừa phải
-3. Shadow nhẹ cho card
-4. Khoảng trắng thoáng
-5. Dùng `container-fluid` cho dashboard admin
-6. Dùng `container` cho trang public
-
-### 7.2. Màu sắc đề xuất
-
-1. Primary: xanh navy
-2. Secondary: xám đậm
-3. Success: xanh lá
-4. Warning: vàng cam
-5. Danger: đỏ
-6. Light background: xám rất nhạt
-
-### 7.3. Thành phần Bootstrap nên dùng
-
-1. `navbar`
-2. `offcanvas`
-3. `dropdown`
-4. `card`
-5. `table`
-6. `badge`
-7. `modal`
-8. `toast`
-9. `accordion`
-10. `pagination`
-11. `nav-pills`
-12. `form-floating`
-13. `input-group`
-14. `list-group`
-15. `breadcrumb`
-
-## 8. Đề xuất route frontend
-
-### 8.1. Admin
-
-1. `/admin/login`
-2. `/admin/dashboard`
-3. `/admin/khach-hang`
-4. `/admin/moi-gioi`
-5. `/admin/bat-dong-san`
-6. `/admin/goi-tin`
-7. `/admin/lich-su-mua-goi`
-8. `/admin/giao-dich`
-9. `/admin/chuc-vu`
-10. `/admin/phan-quyen`
-11. `/admin/profile`
-
-### 8.2. Client public
-
-1. `/`
-2. `/bat-dong-san`
-3. `/bat-dong-san/:id`
-4. `/ban-do`
-5. `/ai-dinh-gia`
-6. `/chatbot`
-7. `/dang-nhap`
-8. `/dang-ky`
-
-### 8.3. Khách hàng
-
-1. `/tai-khoan`
-2. `/tai-khoan/yeu-thich`
-3. `/tai-khoan/doi-mat-khau`
-4. `/tai-khoan/nang-cap-moi-gioi`
-
-### 8.4. Môi giới
-
-1. `/moi-gioi/dashboard`
-2. `/moi-gioi/tin-cua-toi`
-3. `/moi-gioi/dang-tin`
-4. `/moi-gioi/chinh-sua/:id`
-5. `/moi-gioi/goi-tin`
-6. `/moi-gioi/giao-dich`
-7. `/moi-gioi/thong-bao`
-8. `/moi-gioi/profile`
-
-## 9. Mapping API chính để FE tích hợp
-
-### 9.1. Public
-
-1. `GET /api/tinh-thanh`
-2. `GET /api/quan-huyen?tinh_id=...`
-3. `GET /api/loai-bds`
-4. `GET /api/bds`
-5. `POST /api/bds/tim-kiem`
-6. `GET /api/bds/{id}`
-7. `GET /api/bds/{id}/moi-gioi`
-8. `GET /api/bds/map-data`
-9. `POST /api/ai/dinh-gia`
-10. `POST /api/chatbot`
-
-### 9.2. Admin
+### 14.2 Auth Admin
 
 1. `POST /api/admin/dang-nhap`
-2. `GET /api/admin/profile`
-3. `POST /api/admin/update-profile`
-4. `GET /api/admin/dang-xuat`
-5. `GET /api/admin/dang-xuat-tat-ca`
-6. `GET /api/admin/khach-hang/data`
-7. `POST /api/admin/khach-hang/search`
-8. `POST /api/admin/khach-hang/update`
-9. `POST /api/admin/khach-hang/delete`
-10. `GET /api/admin/moi-gioi/data`
-11. `POST /api/admin/moi-gioi/search`
-12. `POST /api/admin/moi-gioi/update`
-13. `POST /api/admin/moi-gioi/delete`
-14. `GET /api/admin/bds/data`
-15. `POST /api/admin/bds/duyet`
-16. `POST /api/admin/bds/change-status`
-17. `POST /api/admin/bds/delete`
-18. `POST /api/admin/bds/tim-kiem`
-19. `GET /api/admin/goi-tin/data`
-20. `POST /api/admin/goi-tin/create`
-21. `POST /api/admin/goi-tin/update`
-22. `POST /api/admin/goi-tin/delete`
-23. `GET /api/admin/goi-tin/lich-su-mua`
-24. `GET /api/admin/giao-dich/data`
-25. `POST /api/admin/doanh-thu`
-26. `POST /api/admin/user`
-27. `GET /api/admin/chuc-vu/data`
-28. `POST /api/admin/chuc-vu/create`
-29. `POST /api/admin/chuc-vu/update`
-30. `POST /api/admin/chuc-vu/delete`
-31. `GET /api/admin/chuc-nang/data`
-32. `GET /api/admin/phan-quyen/data/{id_chuc_vu}`
-33. `POST /api/admin/phan-quyen/chuc-vu/create`
-34. `POST /api/admin/phan-quyen/chuc-vu/delete`
+2. `GET /api/admin/dang-xuat`
+3. `GET /api/admin/check-token`
+4. `POST /api/admin/forgot-password/send-otp`
+5. `POST /api/admin/forgot-password/reset`
 
-### 9.3. Khách hàng
+### 14.3 Auth Khách Hàng
 
 1. `POST /api/khach-hang/dang-nhap`
 2. `POST /api/khach-hang/register`
-3. `GET /api/khach-hang/profile`
-4. `POST /api/khach-hang/update-profile`
-5. `POST /api/khach-hang/update-password`
+3. `GET /api/khach-hang/check-token`
+4. `POST /api/khach-hang/forgot-password/send-otp`
+5. `POST /api/khach-hang/forgot-password/reset`
+6. `GET /api/khach-hang/profile`
+7. `POST /api/khach-hang/update-profile`
+8. `POST /api/khach-hang/update-password`
+9. `POST /api/khach-hang/logout`
+
+### 14.4 Khách Hàng
+
+1. `GET /api/khach-hang/dia-chi`
+2. `GET /api/khach-hang/dia-chi/{id}`
+3. `GET /api/khach-hang/bds-khu-vuc`
+4. `GET /api/khach-hang/map/bat-dong-san`
+5. `GET /api/khach-hang/map/nearby`
 6. `POST /api/khach-hang/bds/yeu-thich`
 7. `GET /api/khach-hang/bds/yeu-thich/data`
 8. `POST /api/khach-hang/mua-goi`
 
-### 9.4. Môi giới
+### 14.5 Auth Môi Giới
 
 1. `POST /api/moi-gioi/dang-nhap`
 2. `POST /api/moi-gioi/dang-ky`
-3. `GET /api/moi-gioi/profile`
-4. `POST /api/moi-gioi/update-profile`
-5. `POST /api/moi-gioi/update-password`
-6. `POST /api/moi-gioi/logout`
-7. `GET /api/moi-gioi/bds/data`
-8. `POST /api/moi-gioi/bds/create`
-9. `POST /api/moi-gioi/bds/update`
-10. `POST /api/moi-gioi/bds/delete`
-11. `GET /api/moi-gioi/goi-tin/data`
-12. `POST /api/moi-gioi/goi-tin/mua`
-13. `GET /api/moi-gioi/thong-bao`
-14. `GET /api/moi-gioi/giao-dich/data`
+3. `GET /api/moi-gioi/check-token`
+4. `POST /api/moi-gioi/forgot-password/send-otp`
+5. `POST /api/moi-gioi/forgot-password/reset`
+6. `GET /api/moi-gioi/profile`
+7. `POST /api/moi-gioi/update-profile`
+8. `POST /api/moi-gioi/update-password`
+9. `POST /api/moi-gioi/logout`
 
-## 10. Yêu cầu tích hợp frontend
+### 14.6 Môi Giới
 
-1. Dùng token-based auth
-2. Tách token admin và token client nếu cần
-3. Tạo guard route frontend theo role
-4. Hiển thị loading, empty state, error state cho mọi trang lấy API
-5. Toast khi tạo, sửa, xóa, duyệt, mua gói thành công hoặc thất bại
-6. Tất cả list API có pagination theo chuẩn Laravel
-7. Các form cần validation UI đồng bộ với backend
+1. `GET /api/moi-gioi/bds/data`
+2. `POST /api/moi-gioi/bds/create`
+3. `POST /api/moi-gioi/bds/update`
+4. `POST /api/moi-gioi/bds/delete`
+5. `GET /api/moi-gioi/goi-tin/data`
+6. `POST /api/moi-gioi/goi-tin/mua`
+7. `GET /api/moi-gioi/thong-bao`
+8. `POST /api/moi-gioi/payment/create`
+9. `ANY /api/payment/vnpay-ipn`
+10. `ANY /api/payment/vnpay-return`
 
-## 11. Lưu ý quan trọng về backend hiện tại
+### 14.7 Admin
 
-Khi dựng frontend, hãy hiểu đây là hệ thống đang ở giai đoạn phát triển. Một số điểm cần chuẩn bị UI mềm dẻo:
+1. `GET /api/admin/profile`
+2. `POST /api/admin/update-profile`
+3. `GET /api/admin/dang-xuat-tat-ca`
+4. `GET /api/admin/khach-hang/data`
+5. `POST /api/admin/khach-hang/search`
+6. `POST /api/admin/khach-hang/update`
+7. `POST /api/admin/khach-hang/delete`
+8. `GET /api/admin/moi-gioi/data`
+9. `POST /api/admin/moi-gioi/search`
+10. `POST /api/admin/moi-gioi/update`
+11. `POST /api/admin/moi-gioi/delete`
+12. `GET /api/admin/bds/data`
+13. `GET /api/admin/bds/{id}`
+14. `POST /api/admin/bds/duyet`
+15. `POST /api/admin/bds/delete`
+16. `POST /api/admin/bds/change-status`
+17. `POST /api/admin/bds/tim-kiem`
+18. `GET /api/admin/loai-bds/data`
+19. `POST /api/admin/loai-bds/create`
+20. `PUT /api/admin/loai-bds/update/{id}`
+21. `DELETE /api/admin/loai-bds/delete/{id}`
+22. `GET /api/admin/goi-tin/data`
+23. `POST /api/admin/goi-tin/create`
+24. `PUT /api/admin/goi-tin/update`
+25. `DELETE /api/admin/goi-tin/delete/{id}`
+26. `GET /api/admin/goi-tin/lich-su-mua`
+27. `GET /api/admin/dashboard/stats`
+28. `POST /api/admin/dashboard/revenue-chart`
+29. `GET /api/admin/dashboard/recent-favorites`
+30. `GET /api/admin/dashboard/recent-package-purchases`
+31. `GET /api/admin/giao-dich/data`
+32. `GET /api/admin/chuc-vu/data`
+33. `POST /api/admin/chuc-vu/create`
+34. `POST /api/admin/chuc-vu/update`
+35. `POST /api/admin/chuc-vu/delete`
+36. `GET /api/admin/chuc-nang/data`
+37. `GET /api/admin/phan-quyen/data/{id_chuc_vu}`
+38. `POST /api/admin/phan-quyen/chuc-vu/create`
+39. `POST /api/admin/phan-quyen/chuc-vu/delete`
 
-1. API trả về `status` không đồng nhất, có nơi là `1/0`, có nơi là `success/error`
-2. Module chatbot và AI định giá hiện mang tính placeholder, FE nên gắn nhãn `Beta`
-3. Backend có quan hệ ảnh bất động sản nhưng chưa có API upload ảnh hoàn chỉnh, FE có thể dựng giao diện gallery và input URL ảnh hoặc uploader giả lập
-4. Backend hiện có API đọc tỉnh thành, quận huyện và dữ liệu địa chỉ liên quan đến BĐS, nhưng chưa có flow CRUD địa chỉ đầy đủ cho môi giới. FE nên dựng form địa chỉ theo hướng linh hoạt: chọn tỉnh, chọn quận, nhập địa chỉ chi tiết và có thể chờ API hoàn thiện để lưu chuẩn
-5. Route giao dịch của môi giới đã khai báo, FE nên thiết kế sẵn màn giao dịch cho môi giới
-6. Module chức vụ và phân quyền đã có controller nhưng cần giữ UI linh hoạt vì backend phân quyền còn phụ thuộc dữ liệu admin thực tế
+## 15. Ghi chú quan trọng khi sinh FE
 
-## 12. Kết quả mong muốn từ Stitch
+### 15.1 Những điểm backend đã có rõ
 
-Hãy tạo ra frontend hoàn chỉnh gồm:
+1. Public xem danh sách và chi tiết bất động sản.
+2. Có cơ chế ẩn thông tin liên hệ cho khách chưa đăng nhập.
+3. Khách hàng có thể thả tim và xem danh sách yêu thích.
+4. Khách hàng có module địa chỉ và bản đồ.
+5. Môi giới có CRUD bất động sản của mình.
+6. Môi giới có thông báo khách thả tim.
+7. Admin có dashboard thống kê khá đầy đủ.
+8. Admin có quản lý khách hàng, môi giới, bất động sản, loại bất động sản, gói tin, chức vụ, phân quyền.
+9. Thanh toán VNPay đã có flow tạo URL và callback.
 
-1. Bộ màn hình Admin Portal đầy đủ theo mô tả ở trên
-2. Bộ màn hình Client Portal đầy đủ cho guest, khách hàng và môi giới
-3. Dùng Bootstrap 5 xuyên suốt
-4. Có layout đẹp, rõ, hiện đại, đúng chất nền tảng bất động sản
-5. Ưu tiên component tái sử dụng
-6. Code dễ nối API Laravel ở bước sau
+### 15.2 Những điểm backend còn dang dở hoặc cần FE thiết kế dự phòng
 
-Nếu cần chọn mức ưu tiên, hãy ưu tiên build trước các màn:
+1. Một số route mua gói và lấy danh sách gói cho môi giới/khách hàng đã khai báo nhưng controller hiện tại chưa hoàn thiện đầy đủ.
+2. Route giao dịch admin đã có nhưng controller hiện tại chưa thấy method dữ liệu hoàn chỉnh.
+3. API AI định giá hiện mới là placeholder.
+4. API chatbot hiện mới là placeholder.
+5. Phần ảnh bất động sản có model và dữ liệu trả ra ở chi tiết, nhưng luồng upload/quản lý ảnh cho môi giới chưa thấy hoàn chỉnh trong controller chính.
 
-1. Trang chủ public
-2. Danh sách bất động sản
-3. Chi tiết bất động sản
-4. Đăng nhập và đăng ký client
-5. Dashboard admin
-6. Quản lý bất động sản admin
-7. Tin của tôi cho môi giới
-8. Gói tin và giao dịch
+Vì vậy, khi sinh FE:
+
+1. Vẫn tạo đầy đủ UI cho các module trên.
+2. Tách rõ phần đã sẵn sàng tích hợp API và phần có thể dùng mock data tạm.
+3. Ưu tiên dựng kiến trúc component tốt để sau này cắm API thật dễ dàng.
+
+## 16. Yêu cầu UX cuối cùng
+
+Frontend cần đem lại cảm giác:
+
+1. Dễ dùng với người phổ thông khi tìm nhà đất.
+2. Hiệu quả với môi giới khi quản lý tin đăng.
+3. Rõ ràng và mạnh về dữ liệu với admin.
+
+Ưu tiên:
+
+1. Responsive tốt.
+2. Form rõ ràng.
+3. Table quản trị dễ nhìn.
+4. Badge trạng thái nổi bật.
+5. Giá bất động sản hiển thị đẹp.
+6. Bản đồ dễ thao tác.
+7. Các luồng thanh toán, duyệt tin, xóa dữ liệu có xác nhận rõ ràng.
+
+## 17. Kết luận ngắn để AI sinh FE hiểu đúng
+
+Hãy tạo một hệ thống frontend bất động sản hoàn chỉnh bằng **Bootstrap 5**, gồm:
+
+1. Website public xem và tìm kiếm bất động sản.
+2. Khu vực khách hàng với hồ sơ, yêu thích, bản đồ, tìm kiếm khu vực.
+3. Khu vực môi giới với dashboard, quản lý tin đăng, hồ sơ, thông báo, mua gói và thanh toán VNPay.
+4. Khu vực admin với dashboard thống kê, quản lý người dùng, quản lý bất động sản, duyệt tin, quản lý gói tin, loại bất động sản, chức vụ và phân quyền.
+
+Toàn bộ giao diện phải nhất quán, hiện đại vừa đủ, thiên về doanh nghiệp, dễ dùng, rõ dữ liệu và sẵn sàng tích hợp API Laravel backend hiện tại.

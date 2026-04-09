@@ -68,52 +68,41 @@ class MoiGioiController extends Controller
         }
     }
 
-    public function updateProfile(UpdateMoiGioiRequest $request): JsonResponse
+    public function updateProfile(UpdateMoiGioiRequest $request)
     {
-        /** @var MoiGioi|null $user */
         $user = Auth::guard('sanctum')->user();
+        $data = MoiGioi::find($user->id);
 
-        if ($user) {
-            if ($request->filled('ten')) {
-                $user->ten = $request->input('ten');
-            }
-
-            if ($request->filled('so_dien_thoai')) {
-                $user->so_dien_thoai = $request->input('so_dien_thoai');
-            }
-
-            if ($request->filled('zalo_link')) {
-                $user->zalo_link = $request->input('zalo_link');
-            }
-
-            if ($request->filled('mo_ta')) {
-                $user->mo_ta = $request->input('mo_ta');
-            }
-
-            $user->save();
+        if ($data) {
+            $data->update([
+                'ten'           => $request->ten,
+                'email'         => $request->email,
+                'so_dien_thoai' => $request->so_dien_thoai,
+                'mo_ta'         => $request->mo_ta,
+                'zalo_link'     => $request->zalo_link,
+            ]);
 
             return response()->json([
-                'status' => true,
-                'message' => 'Cập nhật thành công',
-                'data' => $user,
+                'status'  => 1,
+                'message' => 'Cập nhật thông tin thành công!',
+            ]);
+        } else {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Thông tin môi giới không tồn tại!',
             ]);
         }
-
-        return response()->json([
-            'status' => false,
-            'message' => 'Có lỗi xảy ra',
-        ]);
     }
 
     public function register(MoiGioiRegisterRequest $request)
     {
         $moiGioi = MoiGioi::create([
-            'ten' => $request->input('ten'),
-            'email' => $request->input('email'),
-            'so_dien_thoai' => $request->input('so_dien_thoai'),
+            'ten' => $request->ten,
+            'email' => $request->email,
+            'so_dien_thoai' => $request->so_dien_thoai,
             'password' => Hash::make($request->input('password')),
-            'zalo_link' => $request->input('zalo_link') ?? '',
-            'mo_ta' => $request->input('mo_ta') ?? '',
+            'zalo_link' => $request->zalo_link ?? '',
+            'mo_ta' => $request->mo_ta ?? '',
             'is_active' => true,
         ]);
 
@@ -128,7 +117,8 @@ class MoiGioiController extends Controller
             ],
         ]);
     }
-    public function profile(): JsonResponse
+
+    public function profile()
     {
         /** @var MoiGioi|null $user */
         $user = Auth::guard('sanctum')->user();
@@ -139,7 +129,10 @@ class MoiGioiController extends Controller
                 'data' => $user,
             ]);
         } else {
-            return response()->json(['status' => false, 'message' => "Có lỗi xảy ra"]);
+            return response()->json([
+                'status' => false,
+                'message' => "Có lỗi xảy ra"
+            ]);
         }
 
         return response()->json([
@@ -303,7 +296,8 @@ class MoiGioiController extends Controller
         ]);
     }
 
-    public function update(UpdateMoiGioiRequest $request): JsonResponse
+
+    public function update(UpdateMoiGioiRequest $request)
     {
         $id_chuc_nang = 17;
         $user = Auth::guard('sanctum')->user();

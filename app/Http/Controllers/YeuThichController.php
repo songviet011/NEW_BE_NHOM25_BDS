@@ -53,7 +53,7 @@ class YeuThichController extends Controller
         if ($user) {
             $yeuThichs = YeuThich::where('khach_hang_id', $user->id)
                 ->with('batDongSan', 'batDongSan.moiGioi')
-                ->paginate(10);
+                ->get(); 
 
             return response()->json([
                 'status' => true, 

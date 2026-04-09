@@ -7,10 +7,7 @@ use Illuminate\Http\Request;
 
 class MapController extends Controller
 {
-    /**
-     * Lấy dữ liệu BĐS để hiển thị trên bản đồ
-     * GET /api/map/bat-dong-san
-     */
+    //Lấy dữ liệu BĐS để hiển thị trên bản đồ
     public function getBatDongSanMap(Request $request)
     {
         $query = BatDongSan::with([
@@ -26,7 +23,7 @@ class MapController extends Controller
                     ->whereNotNull('lng');
             });
 
-        // ✅ Filter theo bounds (viewport)
+        // Filter theo bounds (viewport)
         if ($request->has('bounds')) {
             $bounds = $request->bounds;
             $query->whereHas('diaChi', function ($q) use ($bounds) {
@@ -35,7 +32,7 @@ class MapController extends Controller
             });
         }
 
-        // ✅ Filter theo giá
+        // Filter theo giá
         if ($request->has('min_price')) {
             $query->where('gia', '>=', $request->min_price);
         }
@@ -43,7 +40,7 @@ class MapController extends Controller
             $query->where('gia', '<=', $request->max_price);
         }
 
-        // ✅ Filter theo loại BĐS
+        // Filter theo loại BĐS
         if ($request->has('loai_id')) {
             $query->where('loai_id', $request->loai_id);
         }
@@ -85,9 +82,7 @@ class MapController extends Controller
         ]);
     }
 
-    /**
-     * Helper: Format giá tiền
-     */
+    //Format giá tiền
     private function formatPrice($price)
     {
         if ($price >= 1000000000) {
@@ -96,10 +91,7 @@ class MapController extends Controller
         return number_format($price / 1000000, 0) . ' triệu';
     }
 
-    /**
-     * Optional: Lấy BĐS gần vị trí
-     * GET /api/map/nearby?lat=16.0544&lng=108.2022&radius=5 (km)
-     */
+    //Lấy BĐS gần vị trí (?lat=16.0544&lng=108.2022&radius=5 (km))
     public function getNearbyProperties(Request $request)
     {
         $request->validate([
@@ -112,7 +104,7 @@ class MapController extends Controller
         $lng = $request->lng;
         $radius = $request->radius ?? 5;
 
-        // ✅ Cách 2: Lấy tất cả BĐS có diaChi, filter bằng PHP (đơn giản hơn)
+        // Lấy tất cả BĐS có diaChi, filter 
         $properties = BatDongSan::with(['diaChi', 'loai'])
             ->where('is_duyet', true)
             ->whereHas('diaChi', function ($q) use ($lat, $lng, $radius) {
@@ -140,9 +132,7 @@ class MapController extends Controller
         ]);
     }
 
-    /**
-     * Tính khoảng cách giữa 2 điểm (Haversine formula)
-     */
+    // Tính khoảng cách giữa 2 điểm (Haversine formula)
     private function calculateDistance($lat1, $lng1, $lat2, $lng2)
     {
         $earthRadius = 6371; // km
