@@ -21,7 +21,7 @@ class AdminController extends Controller
 
         if (!$admin || !Hash::check($request->password, $admin->password)) {
             return response()->json([
-                'status' => false,
+                'status' => 0,  // ✅ Integer 0
                 'message' => 'Email hoặc mật khẩu không đúng'
             ], 401);
         }
@@ -29,11 +29,11 @@ class AdminController extends Controller
         $token = $admin->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'status' => true,
+            'status' => 1,  // ✅ Integer 1
             'message' => 'Đăng nhập thành công',
             'token' => $token,
             'token_type' => 'Bearer',
-            'data' => $admin
+            'data' => $admin  // Không cần thêm 'role' vì FE tự xác định qua user_type
         ], 200);
     }
 

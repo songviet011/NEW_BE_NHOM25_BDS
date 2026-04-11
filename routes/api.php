@@ -22,6 +22,7 @@ use App\Http\Controllers\LoaiBatDongSanController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\PhanQuyenController;
 use App\Http\Controllers\QuanHuyenController;
+use App\Http\Controllers\SSEController;
 use App\Http\Controllers\TinhThanhController;
 use App\Http\Controllers\TrainChatController;
 use App\Http\Middleware\AdminMiddleware;
@@ -55,6 +56,8 @@ Route::prefix('moi-gioi')->group(function () {
     Route::post('/forgot-password/reset', [MoiGioiController::class, 'resetPassword']);
 });
 
+Route::get('/moi-gioi/sse/stream', [SSEController::class, 'stream']);
+
 //---------------------------Client Home (Public)--------------------------
 
 // Bất Động Sản
@@ -72,7 +75,7 @@ Route::any('/payment/vnpay-return', [GiaoDichController::class, 'handleVnPayCall
 
 //----------------------------ADMIN---------------------------
 
-Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
+Route::prefix('admin')->middleware('')->group(function () {
     // LOGOUT ALL
     Route::get('/dang-xuat-tat-ca', [AdminController::class, 'logoutAll']);
 
@@ -135,7 +138,6 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
         Route::get('/recent-package-purchases', [ThongKeController::class, 'getRecentPackagePurchases']); // đã test postman
     });
 
-
     //GIAO DỊCH
     Route::get('/giao-dich/data', [GiaoDichController::class, 'getData']);
 
@@ -148,6 +150,7 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
     });
     //CHỨC NĂNG
     Route::get('/chuc-nang/data', [ChucNangController::class, 'getData']); // đã test postman
+    
 
     // PHÂN QUYỀN
     Route::prefix('phan-quyen')->group(function () {
@@ -196,10 +199,6 @@ Route::prefix('khach-hang')->middleware('KhachHangMiddleware')->group(function (
     Route::post('/update-profile', [KhachHangController::class, 'updateProfile']);
     Route::post('/update-password', [KhachHangController::class, 'updatePassword']);
     Route::post('/logout', [KhachHangController::class, 'logout']);
-
-
-    //QUẢN LÝ BĐS
-    Route::get('/loai-bds', [LoaiBatDongSanController::class, 'getAll']); //đã test postman
 
     //TÌM KIẾM ĐỊA CHỈ
     Route::get('/dia-chi', [DiaChiController::class, 'getDiaChi']); // đã test postman ?keyword=123

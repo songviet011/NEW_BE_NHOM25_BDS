@@ -25,26 +25,24 @@ class KhachHangController extends Controller
     //Khách hàng đăng nhập
     public function login(KhachHangLoginRequest $request)
     {
-        $user = Auth::guard('khach_hang')->attempt([
-            'email' => $request->email,
-            'password' => $request->password,
-        ]);
+        $khachhang = KhachHang::where('email', $request->email)->first();
 
-        if ($user) {
-            $user = Auth::guard('khach_hang')->user();
-            $token = $user->createToken('auth_token')->plainTextToken;
+        if (!$khachhang || !Hash::check($request->password, $khachhang->password)) {
             return response()->json([
-                'status' => 'true',
-                'message' => 'Dang nhap thanh cong',
-                'token' => $token,
-                'data' => $user
-            ], 200);
-        } else {
-            return response()->json([
-                'status' => 'false',
+                'status' => 0,
                 'message' => 'Email hoặc mật khẩu không đúng'
             ], 401);
         }
+
+        $token = $khachhang->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'status' => 1,  
+            'message' => 'Đăng nhập thành công',
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'data' => $khachhang  
+        ], 200);
     }
 
     // Kiểm tra token còn hiệu lực không
@@ -132,58 +130,58 @@ class KhachHangController extends Controller
 
     //Khách hàng cập nhật thông tin cá nhân
     public function updateProfile(KhachHangUpdateProfileRequest $request)
-{
-    $user = Auth::guard('sanctum')->user();
-    $data = KhachHang::find($user->id);
+    {
+        $user = Auth::guard('sanctum')->user();
+        $data = KhachHang::find($user->id);
 
-    if ($data) {
-        $data->update([
-            'ten'           => $request->ten,
-            'email'         => $request->email,
-            'so_dien_thoai' => $request->so_dien_thoai,
-        ]);
+        if ($data) {
+            $data->update([
+                'ten'           => $request->ten,
+                'email'         => $request->email,
+                'so_dien_thoai' => $request->so_dien_thoai,
+            ]);
 
-        return response()->json([
-            'status'  => true,
-            'message' => 'Cập nhật thông tin thành công!',
-        ]);
-    } else {
-        return response()->json([
-            'status'  => false,
-            'message' => 'Thông tin khách hàng không tồn tại!',
-        ]);
+            return response()->json([
+                'status'  => true,
+                'message' => 'Cập nhật thông tin thành công!',
+            ]);
+        } else {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Thông tin khách hàng không tồn tại!',
+            ]);
+        }
     }
-}
 
     //Khách hàng cập nhật mật khẩu
     public function updatePassword(KhachHangUpdatePasswordRequest $request)
-{
-    $user = Auth::guard('sanctum')->user();
-    $data = KhachHang::find($user->id);
+    {
+        $user = Auth::guard('sanctum')->user();
+        $data = KhachHang::find($user->id);
 
-    if ($data) {
-        if (!Hash::check($request->old_password, $data->password)) {
+        if ($data) {
+            if (!Hash::check($request->old_password, $data->password)) {
+                return response()->json([
+                    'status'  => 0,
+                    'message' => 'Mật khẩu cũ không đúng!',
+                ], 400);
+            }
+
+            $data->update([
+                'password' => Hash::make($request->password),
+            ]);
+
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Cập nhật mật khẩu thành công!',
+            ]);
+        } else {
             return response()->json([
                 'status'  => 0,
-                'message' => 'Mật khẩu cũ không đúng!',
-            ], 400);
+                'message' => 'Thông tin khách hàng không tồn tại!',
+            ]);
         }
-
-        $data->update([
-            'password' => Hash::make($request->password),
-        ]);
-
-        return response()->json([
-            'status'  => 1,
-            'message' => 'Cập nhật mật khẩu thành công!',
-        ]);
-    } else {
-        return response()->json([
-            'status'  => 0,
-            'message' => 'Thông tin khách hàng không tồn tại!',
-        ]);
     }
-}
 
     //Gửi OTP
     public function sendOtp(Request $request)

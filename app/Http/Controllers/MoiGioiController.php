@@ -24,26 +24,24 @@ class MoiGioiController extends Controller
 {
     public function login(MoiGioiLoginRequest $request): JsonResponse
     {
-        $user = Auth::guard('moi_gioi')->attempt([
-            'email' => $request->email,
-            'password' => $request->password,
-        ]);
+        $moigioi = MoiGioi::where('email', $request->email)->first();
 
-        if ($user) {
-            $user = Auth::guard('moi_gioi')->user();
-            $token = $user->createToken('auth_token')->plainTextToken;
+        if (!$moigioi || !Hash::check($request->password, $moigioi->password)) {
             return response()->json([
-                'status' => 'success',
-                'message' => 'Dang nhap thanh cong',
-                'token' => $token,
-                'data' => $user
-            ], 200);
-        } else {
-            return response()->json([
-                'status' => 'error',
+                'status' => 0,  // ✅ Integer 0
                 'message' => 'Email hoặc mật khẩu không đúng'
             ], 401);
         }
+
+        $token = $moigioi->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'status' => 1,  // ✅ Integer 1
+            'message' => 'Đăng nhập thành công',
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'data' => $moigioi  // Không cần thêm 'role' vì FE tự xác định qua user_type
+        ], 200);
     }
 
     public function updatePassword(updatePasswordMoiGioiRequest $request)

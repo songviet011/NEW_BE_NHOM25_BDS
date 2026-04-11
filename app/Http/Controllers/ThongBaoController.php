@@ -3,19 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\ThongBao;
-use App\Models\MoiGioi;
-use App\Models\YeuThich;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ThongBaoController extends Controller
 {
-    // Trong Controller của Môi giới
     public function getThongBao()
     {
         $user = Auth::guard('sanctum')->user();
-        // Lấy danh sách yêu thích liên quan đến các BĐS của môi giới này
-        $data = YeuThich::where('moi_gioi_id', $user->id)
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        $data = ThongBao::where('moi_gioi_id', $user->id)
             ->with(['khachHang', 'batDongSan'])
             ->orderBy('created_at', 'desc')
             ->limit(5)
@@ -23,7 +27,12 @@ class ThongBaoController extends Controller
 
         return response()->json([
             'status' => true,
-            'data'   => $data
+            'data' => $data,
         ]);
+    }
+
+    public function sseStream(Request $request)
+    {
+        return app(SSEController::class)->stream($request);
     }
 }

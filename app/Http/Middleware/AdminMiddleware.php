@@ -28,6 +28,40 @@ class AdminMiddleware
         ], 401);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // $user = Auth::guard('sanctum')->user();
 
         // // nếu không có session → dùng Sanctum token

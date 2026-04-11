@@ -15,18 +15,18 @@ class ChucVuController extends Controller
 {
     public function getData()
     {
-        $id_chuc_nang = 52;
-        $user = Auth::guard('sanctum')->user();
-        $id_chuc_vu = $user->id_chuc_vu;
-        $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
-            ->where('id_chuc_nang', $id_chuc_nang)
-            ->first();
-        if (!$user->is_super && !$check_quyen) {
-            return response()->json([
-                'data' => false,
-                'message' => "bạn không có quyền thực hiện chức năng này!"
-            ]);
-        }
+        // $id_chuc_nang = 52;
+        // $user = Auth::guard('sanctum')->user();
+        // $id_chuc_vu = $user->id_chuc_vu;
+        // $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
+        //     ->where('id_chuc_nang', $id_chuc_nang)
+        //     ->first();
+        // if (!$user->is_super && !$check_quyen) {
+        //     return response()->json([
+        //         'data' => false,
+        //         'message' => "bạn không có quyền thực hiện chức năng này!"
+        //     ]);
+        // }
         $data = ChucVu::all();
         return response()->json([
             'data' => $data
@@ -34,18 +34,18 @@ class ChucVuController extends Controller
     }
     public function store(ChucVucreateRequest $request)
     {
-        $id_chuc_nang = 51;
-        $user = Auth::guard('sanctum')->user();
-        $id_chuc_vu = $user->id_chuc_vu;
-        $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
-            ->where('id_chuc_nang', $id_chuc_nang)
-            ->first();
-        if (!$user->is_super && !$check_quyen) {
-            return response()->json([
-                'data' => false,
-                'message' => "bạn không có quyền thực hiện chức năng này!"
-            ]);
-        }
+        // $id_chuc_nang = 51;
+        // $user = Auth::guard('sanctum')->user();
+        // $id_chuc_vu = $user->id_chuc_vu;
+        // $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
+        //     ->where('id_chuc_nang', $id_chuc_nang)
+        //     ->first();
+        // if (!$user->is_super && !$check_quyen) {
+        //     return response()->json([
+        //         'data' => false,
+        //         'message' => "bạn không có quyền thực hiện chức năng này!"
+        //     ]);
+        // }
         $data = ChucVu::create([
             'ten_chuc_vu' => $request->ten_chuc_vu,
             'slug_chuc_vu' => Str::slug($request->ten_chuc_vu),
@@ -57,18 +57,18 @@ class ChucVuController extends Controller
     }
     public function update(ChucVuUpdateRequest $request)
     {
-        $id_chuc_nang = 53;
-        $user = Auth::guard('sanctum')->user();
-        $id_chuc_vu = $user->id_chuc_vu;
-        $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
-            ->where('id_chuc_nang', $id_chuc_nang)
-            ->first();
-        if (!$user->is_super && !$check_quyen) {
-            return response()->json([
-                'data' => false,
-                'message' => "bạn không có quyền thực hiện chức năng này!"
-            ]);
-        }
+        // $id_chuc_nang = 53;
+        // $user = Auth::guard('sanctum')->user();
+        // $id_chuc_vu = $user->id_chuc_vu;
+        // $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
+        //     ->where('id_chuc_nang', $id_chuc_nang)
+        //     ->first();
+        // if (!$user->is_super && !$check_quyen) {
+        //     return response()->json([
+        //         'data' => false,
+        //         'message' => "bạn không có quyền thực hiện chức năng này!"
+        //     ]);
+        // }
         $data = ChucVu::where('id', $request->id)
             ->update([
                 'ten_chuc_vu' => $request->ten_chuc_vu,
@@ -81,18 +81,18 @@ class ChucVuController extends Controller
     }
     public function destroy(ChucVuDeleteRequest $request)
     {
-        $id_chuc_nang = 54;
-        $user = Auth::guard('sanctum')->user();
-        $id_chuc_vu = $user->id_chuc_vu;
-        $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
-            ->where('id_chuc_nang', $id_chuc_nang)
-            ->first();
-        if (!$user->is_super && !$check_quyen) {
-            return response()->json([
-                'data' => false,
-                'message' => "bạn không có quyền thực hiện chức năng này!"
-            ]);
-        }
+        //     $id_chuc_nang = 54;
+        //     $user = Auth::guard('sanctum')->user();
+        //     $id_chuc_vu = $user->id_chuc_vu;
+        //     $check_quyen = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
+        //         ->where('id_chuc_nang', $id_chuc_nang)
+        //         ->first();
+        //     if (!$user->is_super && !$check_quyen) {
+        //         return response()->json([
+        //             'data' => false,
+        //             'message' => "bạn không có quyền thực hiện chức năng này!"
+        //         ]);
+        //     }
         $data = ChucVu::where('id', $request->id)->delete();
         return response()->json([
             'status' => true,

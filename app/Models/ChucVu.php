@@ -12,3 +12,4 @@ class ChucVu extends Model
         'slug_chuc_vu',
     ];
 }
+ 
