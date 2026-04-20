@@ -23,8 +23,9 @@ class MoiGioi extends Authenticatable
         'mo_ta',
         'zalo_link',
         'is_active',
-        'so_tin_con_lai', 
-        'ngay_het_han_goi',  
+        'trang_thai',
+        'so_tin_con_lai',
+        'ngay_het_han_goi',
     ];
 
     protected $hidden = [
@@ -58,5 +59,9 @@ class MoiGioi extends Authenticatable
     public function yeuThichs(): HasMany
     {
         return $this->hasMany(YeuThich::class, 'moi_gioi_id');
+    }
+    public function goiTin()
+    {
+        return $this->belongsTo(GoiTin::class, 'goi_tin_id' , 'id');
     }
 }

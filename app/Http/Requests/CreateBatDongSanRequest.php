@@ -14,7 +14,7 @@ class CreateBatDongSanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'tieu_de' => 'required|string|max:255',
+            'tieu_de' => 'nullable|string|max:255',
             'gia' => 'required|numeric|min:0',
             'dien_tich' => 'required|numeric|min:0',
             'loai_id' => 'required|integer|exists:loai_bat_dong_sans,id',
@@ -34,7 +34,8 @@ class CreateBatDongSanRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'tieu_de.required' => 'Tiêu đề là bắt buộc',
+            'tieu_de.string' => 'Tiêu đề phải là chuỗi ký tự',
+            'tieu_de.max' => 'Tiêu đề không được vượt quá 255 ký tự',
             'gia.required' => 'Giá là bắt buộc',
             'gia.numeric' => 'Giá phải là số',
             'dien_tich.required' => 'Diện tích là bắt buộc',
@@ -46,6 +47,13 @@ class CreateBatDongSanRequest extends FormRequest
             'tinh_id.exists' => 'Tỉnh không tồn tại',
             'quan_id.exists' => 'Quận không tồn tại',
             'dia_chi_id.exists' => 'Địa chỉ không tồn tại',
+            'so_phong_ngu.integer' => 'Số phòng ngủ phải là số nguyên',
+            'so_phong_ngu.min' => 'Số phòng ngủ không được âm',
+            'so_phong_tam.integer' => 'Số phòng tắm phải là số nguyên',
+            'so_phong_tam.min' => 'Số phòng tắm không được âm',
+            'is_noi_bat.boolean' => 'Giá trị is_noi_bat phải là true hoặc false',
+            'mo_ta.string' => 'Mô tả phải là chuỗi ký tự',
+            'mo_ta.max' => 'Mô tả không được vượt quá 255 ký tự',
             'hinh_anh.array'        => 'Hình ảnh phải là danh sách file',
             'hinh_anh.max'          => 'Chỉ được upload tối đa 10 ảnh',
             'hinh_anh.*.image'      => 'File phải là hình ảnh',

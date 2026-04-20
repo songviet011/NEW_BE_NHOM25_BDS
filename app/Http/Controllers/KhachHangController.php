@@ -13,6 +13,9 @@ use App\Http\Requests\KhachHangUpdatePasswordRequest;
 use App\Http\Requests\KhachHangUpdateProfileRequest;
 use App\Http\Requests\SearchKhachHangRequest;
 use App\Http\Requests\updatePasswordKhachHangRequest;
+use App\Http\Requests\ResetPasswordRequest;
+use App\Http\Requests\SendOtpRequest;
+use App\Http\Requests\VerifyOtpRequest;
 use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -69,8 +72,7 @@ class KhachHangController extends Controller
             'email'               => $request->email,
             'so_dien_thoai'       => $request->so_dien_thoai,
             'password'            => Hash::make($request->password),
-            'zalo_link'           => $request->zalo_link,
-            'mo_ta'               => $request->mo_ta,
+            'is_active' => true,
         ]);
 
         $token = $khachHang->createToken('khach-hang-token')->plainTextToken;
@@ -86,11 +88,11 @@ class KhachHangController extends Controller
                     'ten'           => $khachHang->ten,
                     'email'         => $khachHang->email,
                     'so_dien_thoai' => $khachHang->so_dien_thoai,
-                    'zalo_link'     => $khachHang->zalo_link,
                 ]
             ]
         ], 201);
     }
+
     // Khách hàng đăng xuất
     public function logout(Request $request)
     {
@@ -105,6 +107,23 @@ class KhachHangController extends Controller
         } else {
             return response()->json([
                 'status' => 'false',
+                'message' => 'Không tìm thấy người dùng hoặc token không hợp lệ'
+            ], 401);
+        }
+    }
+
+    public function logoutAll()
+    {
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $user->tokens()->delete();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Đã đăng xuất tất cả thiết bị'
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'error',
                 'message' => 'Không tìm thấy người dùng hoặc token không hợp lệ'
             ], 401);
         }
@@ -184,11 +203,8 @@ class KhachHangController extends Controller
     }
 
     //Gửi OTP
-    public function sendOtp(Request $request)
+    public function sendOtp(SendOtpRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email'
-        ]);
 
         $user = KhachHang::where('email', $request->email)->first();
 
@@ -216,14 +232,29 @@ class KhachHangController extends Controller
         ]);
     }
 
-    //Reset password
-    public function resetPassword(Request $request)
+    public function verifyOtp(VerifyOtpRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'otp' => 'required',
-            'password' => 'required|min:6'
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->otp)
+            ->first();
+
+        if (!$record) {
+            return response()->json([
+                'status' => false,
+                'message' => 'OTP không đúng'
+            ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'OTP hợp lệ'
         ]);
+    }
+
+    //Reset password
+    public function resetPassword(ResetPasswordRequest $request)
+    {
 
         $record = DB::table('password_reset_tokens')
             ->where('email', $request->email)
@@ -257,7 +288,9 @@ class KhachHangController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
-            $data = KhachHang::query();
+            $data = KhachHang::query(
+
+            );
 
             return response()->json([
                 'status' => true,

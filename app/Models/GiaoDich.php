@@ -15,14 +15,20 @@ class GiaoDich extends Model
         'so_tien',
         'phuong_thuc',
         'trang_thai',
+        'paid_at',
         'ma_giao_dich',
-        'ma_vnp_txn_ref',
+        'ma_sepay_txn_ref',
     ];
 
     protected $casts = [
-        'so_tien' => 'decimal:2',
+        'so_tien' => 'decimal:0',
         'created_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
+
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_SUCCESS = 'success';
+    public const STATUS_FAILED  = 'failed';
 
     // Quan hệ (Relationship)
     public function moiGioi()

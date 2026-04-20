@@ -13,8 +13,8 @@ class ChucNangSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('chuc_nangs')->delete();
-        DB::table('chuc_nangs')->truncate();
+        // DB::table('chuc_nangs')->delete();
+        // DB::table('chuc_nangs')->truncate();
         DB::table('chuc_nangs')->insert([
             [
                 'id' => 1,

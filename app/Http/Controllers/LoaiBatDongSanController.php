@@ -54,6 +54,7 @@ class LoaiBatDongSanController extends Controller
         }
         $data = LoaiBatDongSan::create([
             'ten_loai' => $request->ten_loai,
+            'is_active' => $request->is_active ?? true, // Mặc định là true nếu không có giá trị
         ]);
 
         return response()->json([
@@ -64,7 +65,7 @@ class LoaiBatDongSanController extends Controller
     }
 
     //Cập nhật loại BĐS
-    public function update(UpdateLoaiBDSRequest $request, $id)
+    public function update(UpdateLoaiBDSRequest $request)
     {
         $id_chuc_nang = 64; // ID chức năng xem loại BĐS
         $user = Auth::guard('sanctum')->user();
@@ -77,9 +78,10 @@ class LoaiBatDongSanController extends Controller
                 'message' => "Bạn không có quyền thực hiện chức năng này"
             ], 403);
         }
-        $data = LoaiBatDongSan::findOrFail($id);
+        $data = LoaiBatDongSan::find($request->id);
         $data->update([
-            'ten_loai' => $request->ten_loai
+            'ten_loai' => $request->ten_loai,
+            'is_active' => $request->is_active
         ]);
         return response()->json([
             'status' => true,
@@ -107,6 +109,50 @@ class LoaiBatDongSanController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Xóa loại BĐS thành công'
+        ]);
+    }
+
+    //Cập nhật trạng thái
+    public function changeStatus(Request $request)
+    {
+        $id_chuc_nang = 66; // ID chức năng xem loại BĐS
+        $user = Auth::guard('sanctum')->user();
+        $check = PhanQuyen::where('id_chuc_vu', $user->id_chuc_vu)
+            ->where('id_chuc_nang', $id_chuc_nang)
+            ->first();
+        if (!$user->is_super && !$check) {
+            return response()->json([
+                'status' => false,
+                'message' => "Bạn không có quyền thực hiện chức năng này"
+            ], 403);
+        }
+        $data = LoaiBatDongSan::find($request->id);
+        $data->update([
+            'is_active' => $request->is_active
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Cập nhật trạng thái thành công',
+            'data' => $data
+        ]);
+    }
+
+    // Lấy loại bất động sản cho Môi Giới 
+    public function getDataMoiGioi(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => "Bạn cần đăng nhập để thực hiện chức năng này"
+            ], 401);
+        }
+        $data = LoaiBatDongSan::all();
+
+        return response()->json([
+            'status' => true,
+            'data' => $data
         ]);
     }
 }

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class BatDongSan extends Model
 {
@@ -32,46 +32,37 @@ class BatDongSan extends Model
         'is_noi_bat' => 'boolean',
     ];
 
-    public function loai(): BelongsTo
-    {
-        return $this->belongsTo(LoaiBatDongSan::class, 'loai_id');
-    }
-
-    public function trangThai(): BelongsTo
-    {
-        return $this->belongsTo(TrangThaiBatDongSan::class, 'trang_thai_id');
-    }
-
-    public function moiGioi(): BelongsTo
-    {
-        return $this->belongsTo(MoiGioi::class, 'moi_gioi_id');
-    }
-
-    public function diaChi(): BelongsTo
-    {
-        return $this->belongsTo(DiaChi::class, 'dia_chi_id');
-    }
-
+    public function loai(): BelongsTo { return $this->belongsTo(LoaiBatDongSan::class, 'loai_id'); }
+    public function trangThai(): BelongsTo { return $this->belongsTo(TrangThaiBatDongSan::class, 'trang_thai_id'); }
+    public function moiGioi(): BelongsTo { return $this->belongsTo(MoiGioi::class, 'moi_gioi_id'); }
+    public function diaChi(): BelongsTo { return $this->belongsTo(DiaChi::class, 'dia_chi_id'); }
+    
     public function hinhAnh()
     {
-        return $this->hasMany(HinhAnhBatDongSan::class, 'bds_id')
-            ->orderBy('thu_tu', 'asc');
+        return $this->hasMany(HinhAnhBatDongSan::class, 'bds_id')->orderBy('thu_tu', 'asc');
     }
 
     public function anhDaiDien()
     {
         return $this->hasOne(HinhAnhBatDongSan::class, 'bds_id')
-            ->where('is_anh_dai_dien', true);
+            ->where('is_anh_dai_dien', true)
+            ->orderBy('thu_tu', 'asc');
     }
     
     public function getAnhDaiDienUrlAttribute()
     {
-        $anh = $this->anhDaiDien()->first();
+        $anh = $this->relationLoaded('anhDaiDien')
+            ? $this->getRelation('anhDaiDien')
+            : $this->anhDaiDien()->first();
+
         if ($anh) {
             return asset('storage/' . $anh->url);
         }
-        // Fallback: lấy ảnh đầu tiên nếu chưa có ảnh đại diện
-        $first = $this->hinhAnh()->first();
+
+        $first = $this->relationLoaded('hinhAnh')
+            ? $this->hinhAnh->sortBy('thu_tu')->first()
+            : $this->hinhAnh()->orderBy('thu_tu', 'asc')->first();
+
         return $first ? asset('storage/' . $first->url) : null;
     }
 }

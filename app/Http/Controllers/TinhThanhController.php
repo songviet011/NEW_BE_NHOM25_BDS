@@ -18,4 +18,5 @@ class TinhThanhController extends Controller
             'data' => $data
         ]);
     }
+    
 }

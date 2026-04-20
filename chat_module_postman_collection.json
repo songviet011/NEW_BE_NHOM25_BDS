@@ -1,0 +1,108 @@
+{
+  "info": {
+    "name": "Chat Module - BE_BDS_KLTN_T6",
+    "_postman_id": "d9f0de70-2b30-4e7b-8ed6-8fa6e0cb9f11",
+    "description": "Postman collection to test chat module between KhachHang and MoiGioi.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000/api" },
+    { "key": "khach_hang_token", "value": "" },
+    { "key": "moi_gioi_token", "value": "" },
+    { "key": "conversation_id", "value": "1" },
+    { "key": "moi_gioi_id", "value": "1" },
+    { "key": "bat_dong_san_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Chat",
+      "item": [
+        {
+          "name": "Start Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{khach_hang_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/chat/start",
+              "host": ["{{base_url}}"],
+              "path": ["chat", "start"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moi_gioi_id\": {{moi_gioi_id}},\n  \"bat_dong_san_id\": {{bat_dong_san_id}}\n}"
+            }
+          }
+        },
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{khach_hang_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/chat/{{conversation_id}}/message",
+              "host": ["{{base_url}}"],
+              "path": ["chat", "{{conversation_id}}", "message"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Xin chao\",\n  \"type\": \"text\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{khach_hang_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/chat/conversations",
+              "host": ["{{base_url}}"],
+              "path": ["chat", "conversations"]
+            }
+          }
+        },
+        {
+          "name": "Get Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{khach_hang_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/chat/{{conversation_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": ["chat", "{{conversation_id}}", "messages"]
+            }
+          }
+        },
+        {
+          "name": "Mark As Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{khach_hang_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/chat/{{conversation_id}}/read",
+              "host": ["{{base_url}}"],
+              "path": ["chat", "{{conversation_id}}", "read"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

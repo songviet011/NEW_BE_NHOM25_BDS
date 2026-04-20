@@ -13,23 +13,23 @@ class PhanQuyenController extends Controller
     // Lấy danh sách phân quyền theo chức vụ
     public function getData($id_chuc_vu)
     {
-        // $login = Auth::guard('sanctum')->user();
-        // if (!$login->is_super) {
-        //     $id_chuc_nang_check = 58;
+        $login = Auth::guard('sanctum')->user();
+        if (!$login->is_super) {
+            $id_chuc_nang_check = 58;
             
-        //     $current_user_role_id = $login->id_chuc_vu; 
+            $current_user_role_id = $login->id_chuc_vu; 
 
-        //     $check_quyen = PhanQuyen::where('id_chuc_vu', $current_user_role_id)
-        //         ->where('id_chuc_nang', $id_chuc_nang_check)
-        //         ->first();
+            $check_quyen = PhanQuyen::where('id_chuc_vu', $current_user_role_id)
+                ->where('id_chuc_nang', $id_chuc_nang_check)
+                ->first();
 
-        //     if (!$check_quyen) {
-        //         return response()->json([
-        //             'status' => false, 
-        //             'message' => "bạn không có quyền!"
-        //         ], 403); 
-        //     }
-        // }
+            if (!$check_quyen) {
+                return response()->json([
+                    'status' => false, 
+                    'message' => "bạn không có quyền!"
+                ], 403); 
+            }
+        }
         $data = PhanQuyen::where('id_chuc_vu', $id_chuc_vu)
             ->join('chuc_nangs', 'phan_quyens.id_chuc_nang', '=', 'chuc_nangs.id')
             ->join('chuc_vus', 'phan_quyens.id_chuc_vu', '=', 'chuc_vus.id')

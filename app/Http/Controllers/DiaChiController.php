@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\BatDongSan;
 use App\Models\DiaChi;
 use App\Http\Requests\DiaChiRequest;
@@ -77,6 +78,46 @@ class DiaChiController extends Controller
         return response()->json([
             'status' => true,
             'data' => $data
+        ]);
+    }
+
+    public function storeOrGet(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'dia_chi_chi_tiet' => 'nullable|string',
+            'tinh_id' => 'nullable|exists:tinh_thanhs,id',
+            'quan_id' => 'nullable|exists:quan_huyens,id',
+        ]);
+
+        // Tìm địa chỉ đã tồn tại (trong bán kính ~10m)
+        $existing = DiaChi::whereRaw(
+            "ABS(latitude - ?) < 0.0001 AND ABS(longitude - ?) < 0.0001",
+            [$request->latitude, $request->longitude]
+        )->first();
+
+        if ($existing) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Địa chỉ đã tồn tại',
+                'data' => $existing
+            ]);
+        }
+
+        // Tạo mới với field đúng tên
+        $diaChi = DiaChi::create([
+            'latitude' => $request->latitude,    // ✅ Khớp với model
+            'longitude' => $request->longitude,  // ✅ Khớp với model
+            'dia_chi_chi_tiet' => $request->dia_chi_chi_tiet,
+            'tinh_id' => $request->tinh_id,
+            'quan_id' => $request->quan_id,
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Tạo địa chỉ thành công',
+            'data' => $diaChi
         ]);
     }
 }

@@ -10,7 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class KhachHang extends Authenticatable
 {
-    use Notifiable,HasApiTokens;
+    use Notifiable, HasApiTokens;
 
     protected $table = 'khach_hangs';
 
@@ -20,6 +20,7 @@ class KhachHang extends Authenticatable
         'so_dien_thoai',
         'password',
         'is_active',
+        'trang_thai',
     ];
 
     protected $hidden = [

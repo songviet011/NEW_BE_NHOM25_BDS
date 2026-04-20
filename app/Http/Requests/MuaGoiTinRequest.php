@@ -15,7 +15,7 @@ class MuaGoiTinRequest extends FormRequest
     {
         return [
             'goi_tin_id' => 'required|integer|exists:goi_tins,id',
-            'phuong_thuc' => 'nullable|string|in:cash,bank,credit_card',
+            'phuong_thuc' => 'nullable|string|in:cash,bank,credit_card,sepay',
         ];
     }
 

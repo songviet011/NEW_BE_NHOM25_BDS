@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\YeuThichRequest;
 use App\Models\BatDongSan;
-use App\Models\ThongBao;
 use App\Models\YeuThich;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Events\BatDongSanDuocYeuThich;
 
 class YeuThichController extends Controller
 {
@@ -42,21 +42,16 @@ class YeuThichController extends Controller
             }
 
             DB::transaction(function () use ($user, $bds, $bdsId) {
+                // FIX: lưu lịch sử yêu thích theo user đang đăng nhập và BĐS được like
                 YeuThich::create([
                     'moi_gioi_id' => $bds->moi_gioi_id,
                     'khach_hang_id' => $user->id,
                     'bds_id' => $bdsId,
-                    'noi_dung' => "Khach hang {$user->ten} da tha tim BDS {$bdsId}",
+                    'noi_dung' => "Khach hang {$user->ten} da tha tim BDS {$bds->tieu_de}",
                 ]);
 
-                ThongBao::create([
-                    'moi_gioi_id' => $bds->moi_gioi_id,
-                    'khach_hang_id' => $user->id,
-                    'bat_dong_san_id' => $bdsId,
-                    'tieu_de' => 'Khach hang vua tuong tac bat dong san',
-                    'noi_dung' => "Khach hang {$user->ten} da tha tim BDS {$bdsId}",
-                    'trang_thai' => 0,
-                ]);
+                // FIX: dispatch event để listener tạo Thông báo cho môi giới
+                event(new BatDongSanDuocYeuThich($user, $bds));
             });
 
             $message = 'Da thich';
@@ -80,8 +75,18 @@ class YeuThichController extends Controller
         }
 
         $yeuThichs = YeuThich::where('khach_hang_id', $user->id)
-            ->with('batDongSan', 'batDongSan.moiGioi')
+            ->with([
+                'batDongSan',
+                'batDongSan.moiGioi',
+                'batDongSan.hinhAnh',
+                'batDongSan.anhDaiDien',
+            ])
             ->get();
+
+        // FIX: đảm bảo BĐS trả sẵn URL ảnh đại diện chuẩn cho FE dùng thống nhất
+        // $yeuThichs->each(function ($item) {
+        //     $item->batDongSan?->setAttribute('anh_dai_dien_url', $item->batDongSan->anhDaiDienUrl);
+        // });
 
         return response()->json([
             'status' => true,

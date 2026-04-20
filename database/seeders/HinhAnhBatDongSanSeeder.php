@@ -15,7 +15,7 @@ class HinhAnhBatDongSanSeeder extends Seeder
         DB::table('hinh_anh_bat_dong_sans')->insert([
             [
                 'bds_id' => 1,
-                'url' => 'https://cms.luatvietnam.vn/uploaded/Images/Original/2018/09/29/nha-dang-the-chap_2909092944.jpg',
+                'url' => 'https://images.pexels.com/photos/34973980/pexels-photo-34973980.jpeg',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

@@ -18,8 +18,7 @@ class KhachHangRegisterRequest extends FormRequest
             'email'               => 'required|email|unique:khach_hangs,email|max:255',
             'so_dien_thoai'       => 'required|string|regex:/^[0-9]{10,11}$/|unique:khach_hangs,so_dien_thoai',
             'password'            => 'required|string|min:6|confirmed',
-            'zalo_link'           => 'nullable|string|max:255',
-            'mo_ta'               => 'nullable|string|max:500',
+
         ];
     }
 
@@ -42,9 +41,6 @@ class KhachHangRegisterRequest extends FormRequest
             'password.required'       => 'Mật khẩu là bắt buộc',
             'password.min'            => 'Mật khẩu phải ít nhất 6 ký tự',
             'password.confirmed'      => 'Mật khẩu xác nhận không khớp',
-            
-            'zalo_link.string'        => 'Zalo link phải là chuỗi ký tự',
-            'mo_ta.string'            => 'Mô tả phải là chuỗi ký tự',
         ];
     }
 }

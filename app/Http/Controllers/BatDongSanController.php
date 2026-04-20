@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Requests\SearchBatDongSanAdminRequest;
 use App\Http\Requests\UpdateImageBatDongSanRequest;
 use App\Models\PhanQuyen;
+use App\Events\BatDongSanMoiDang;
+use App\Http\Requests\DeleteBatDongSanRequest;
 
 class BatDongSanController extends Controller
 {
@@ -42,11 +44,12 @@ class BatDongSanController extends Controller
         }
         $data = BatDongSan::with([
             'loai',
-            'trangThai',
+            'moiGioi',
+            // 'trangThai',
             'diaChi.tinh',
             'diaChi.quan',
             'hinhAnh' // Lấy danh sách ảnh
-        ])->get(); // Hoặc ->paginate(20) nếu dữ liệu nhiều
+        ])->paginate(10); // nếu dữ liệu nhiều
 
         return response()->json([
             'status' => true,
@@ -138,7 +141,7 @@ class BatDongSanController extends Controller
     }
 
     // Xóa BDS (Dành cho admin, môi giới có thể xóa nhưng khách hàng không có quyền này)
-    public function delete(DestroyRequest $request) //chính xác 
+    public function delete(Request $request) //chính xác 
     {
         $id_chuc_nang = 4; // ID chức năng xóa BDS
         $user = Auth::guard('sanctum')->user();
@@ -291,13 +294,15 @@ class BatDongSanController extends Controller
             }
         }
 
+        event(new BatDongSanMoiDang($batDongSan));
+
         return response()->json([
             'status'  => true,
             'message' => 'Tạo BĐS thành công và đang chờ duyệt',
             'data'    => [
                 'id' => $batDongSan->id,
                 'tieu_de' => $batDongSan->tieu_de,
-                'anh_dai_dien' => $batDongSan->anh_dai_dien_url, //Trả về luôn URL ảnh bìa
+                'anh_dai_dien' => $batDongSan->anh_dai_dien_url,
             ]
         ], 201);
     }
@@ -331,7 +336,7 @@ class BatDongSanController extends Controller
     }
 
     // Xóa bài đăng BDS (Dành cho môi giới, admin chỉ có thể duyệt khách hàng không có quyền này)
-    public function destroy(Request $request)
+    public function destroy(DeleteBatDongSanRequest $request)
     {
         $user = Auth::guard('sanctum')->user();
         $data = BatDongSan::find($request->id);

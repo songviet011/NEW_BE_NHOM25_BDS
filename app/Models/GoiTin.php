@@ -11,9 +11,11 @@ class GoiTin extends Model
 
     protected $fillable = [
         'ten_goi',
+        'mo_ta',
         'gia',
         'so_ngay',
         'so_luong_tin',
+        'trang_thai',
     ];
 
     protected $casts = [
@@ -21,12 +23,12 @@ class GoiTin extends Model
     ];
 
     public function user()
-{
-    return $this->belongsTo(User::class, 'moi_gioi_id');
-}
+    {
+        return $this->belongsTo(User::class, 'moi_gioi_id');
+    }
 
-public function goiTin()
-{
-    return $this->belongsTo(GoiTin::class, 'goi_tin_id');
-}
+    public function goiTin()
+    {
+        return $this->belongsTo(GoiTin::class, 'goi_tin_id');
+    }
 }

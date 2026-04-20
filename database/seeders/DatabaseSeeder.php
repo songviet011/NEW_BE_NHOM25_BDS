@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
             ThongBaoSeeder::class,
             AIDinhGiaSeeder::class,
             LichSuDinhGiaSeeder::class,
+            ChatSeeder::class,
         ]);
 
         // Seed user test

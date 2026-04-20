@@ -97,7 +97,7 @@ Bao gồm:
 6. Xóa tin đăng.
 7. Xem thông báo khách hàng thả tim.
 8. Xem gói tin.
-9. Thanh toán mua gói qua VNPay.
+9. Thanh toán mua gói qua SePay.
 10. Theo dõi số tin còn lại và ngày hết hạn gói.
 
 ### 4.4 Khu vực Admin
@@ -264,7 +264,7 @@ Trường dữ liệu chính:
 5. `phuong_thuc`
 6. `trang_thai`
 7. `ma_giao_dich`
-8. `ma_vnp_txn_ref`
+8. `ma_sepay_txn_ref`
 9. `created_at`
 
 ### 7.6 Địa chỉ
@@ -713,15 +713,15 @@ Mỗi pricing card hiển thị:
 2. Giá tiền.
 3. Số ngày hiệu lực.
 4. Số lượng tin đăng.
-5. Nút “Thanh toán qua VNPay”.
+5. Nút “Thanh toán qua SePay”.
 
 Flow thanh toán:
 
 1. Người dùng bấm mua gói.
 2. Mở modal xác nhận thông tin gói.
 3. Gọi API tạo thanh toán.
-4. Nhận `payment_url`.
-5. Redirect sang VNPay.
+4. Nhận `payment_form`.
+5. Frontend submit form HTML sang SePay.
 6. Sau khi quay về hệ thống, hiển thị trang kết quả thanh toán.
 
 ### 10.13 Trang kết quả thanh toán
@@ -983,7 +983,7 @@ Tạo màn hình giao dịch cho admin với table:
 4. Số tiền
 5. Phương thức
 6. Trạng thái
-7. Mã VNPay
+7. Mã SePay
 8. Ngày tạo
 
 Lưu ý:
@@ -1157,8 +1157,8 @@ Mỗi trạng thái cần màu riêng, đồng nhất toàn hệ thống.
 6. `POST /api/moi-gioi/goi-tin/mua`
 7. `GET /api/moi-gioi/thong-bao`
 8. `POST /api/moi-gioi/payment/create`
-9. `ANY /api/payment/vnpay-ipn`
-10. `ANY /api/payment/vnpay-return`
+9. `POST /api/payment/sepay-webhook`
+10. `ANY /api/payment/sepay-return`
 
 ### 14.7 Admin
 
@@ -1214,7 +1214,7 @@ Mỗi trạng thái cần màu riêng, đồng nhất toàn hệ thống.
 6. Môi giới có thông báo khách thả tim.
 7. Admin có dashboard thống kê khá đầy đủ.
 8. Admin có quản lý khách hàng, môi giới, bất động sản, loại bất động sản, gói tin, chức vụ, phân quyền.
-9. Thanh toán VNPay đã có flow tạo URL và callback.
+9. Thanh toán SePay đã có flow tạo form và callback.
 
 ### 15.2 Những điểm backend còn dang dở hoặc cần FE thiết kế dự phòng
 
@@ -1254,7 +1254,7 @@ Hãy tạo một hệ thống frontend bất động sản hoàn chỉnh bằng 
 
 1. Website public xem và tìm kiếm bất động sản.
 2. Khu vực khách hàng với hồ sơ, yêu thích, bản đồ, tìm kiếm khu vực.
-3. Khu vực môi giới với dashboard, quản lý tin đăng, hồ sơ, thông báo, mua gói và thanh toán VNPay.
+3. Khu vực môi giới với dashboard, quản lý tin đăng, hồ sơ, thông báo, mua gói và thanh toán SePay.
 4. Khu vực admin với dashboard thống kê, quản lý người dùng, quản lý bất động sản, duyệt tin, quản lý gói tin, loại bất động sản, chức vụ và phân quyền.
 
 Toàn bộ giao diện phải nhất quán, hiện đại vừa đủ, thiên về doanh nghiệp, dễ dùng, rõ dữ liệu và sẵn sàng tích hợp API Laravel backend hiện tại.

@@ -13,13 +13,14 @@ class KhachHangSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('khach_hangs')->insert([
+        DB::table('khach_hangs')->insertOrIgnore([
             [
                 'ten' => 'Hoàng Văn A',
                 'email' => 'hva@example.com',
                 'so_dien_thoai' => '0987654321',
                 'password' => Hash::make('123456789'),
                 'is_active' => true,
+                'trang_thai' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -29,6 +30,7 @@ class KhachHangSeeder extends Seeder
                 'so_dien_thoai' => '0976543210',
                 'password' => Hash::make('123456789'),
                 'is_active' => true,
+                'trang_thai' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -38,6 +40,7 @@ class KhachHangSeeder extends Seeder
                 'so_dien_thoai' => '0965432109',
                 'password' => Hash::make('123456789'),
                 'is_active' => true,
+                'trang_thai' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -47,6 +50,7 @@ class KhachHangSeeder extends Seeder
                 'so_dien_thoai' => '0954321098',
                 'password' => Hash::make('123456789'),
                 'is_active' => true,
+                'trang_thai' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
@@ -56,6 +60,7 @@ class KhachHangSeeder extends Seeder
                 'so_dien_thoai' => '0943210987',
                 'password' => Hash::make('123456789'),
                 'is_active' => false,
+                'trang_thai' => 'inactive',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
