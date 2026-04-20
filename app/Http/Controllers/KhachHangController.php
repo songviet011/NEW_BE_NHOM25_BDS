@@ -40,11 +40,11 @@ class KhachHangController extends Controller
         $token = $khachhang->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'status' => 1,  
+            'status' => 1,
             'message' => 'Đăng nhập thành công',
             'token' => $token,
             'token_type' => 'Bearer',
-            'data' => $khachhang  
+            'data' => $khachhang
         ], 200);
     }
 
@@ -288,9 +288,7 @@ class KhachHangController extends Controller
     {
         $user = Auth::guard('sanctum')->user();
         if ($user) {
-            $data = KhachHang::query(
-
-            );
+            $data = KhachHang::query();
 
             return response()->json([
                 'status' => true,
@@ -396,5 +394,25 @@ class KhachHangController extends Controller
             'status' => false,
             'message' => 'Không tìm thấy khách hàng để xóa'
         ], 404);
+    }
+
+    //MoiGioi xem thông tin chi tiết khách hàng
+    public function show($id)
+    {
+        $user = auth('sanctum')->user();
+
+        $khachHang = KhachHang::find($id);
+
+        if (!$khachHang) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Không tìm thấy khách hàng'
+            ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $khachHang
+        ]);
     }
 }

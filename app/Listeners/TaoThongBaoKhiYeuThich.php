@@ -12,13 +12,17 @@ class TaoThongBaoKhiYeuThich
         $khachHang = $event->khachHang;
         $batDongSan = $event->batDongSan;
 
-        ThongBao::create([
-            'moi_gioi_id' => $batDongSan->moi_gioi_id,
-            'khach_hang_id' => $khachHang->id,
-            'bat_dong_san_id' => $batDongSan->id,
-            'tieu_de' => 'Khach hang vua tuong tac bat dong san',
-            'noi_dung' => "Khach hang {$khachHang->ten} da tha tim BDS {$batDongSan->tieu_de}",
-            'trang_thai' => 0,
-        ]);
+        ThongBao::updateOrCreate(
+            [
+                'moi_gioi_id' => $batDongSan->moi_gioi_id,
+                'khach_hang_id' => $khachHang->id,
+                'bat_dong_san_id' => $batDongSan->id,
+            ],
+            [
+                'tieu_de' => 'Khách hàng vừa tương tác bất động sản',
+                'noi_dung' => "Khách hàng {$khachHang->ten} đã thả tim BĐS {$batDongSan->tieu_de}",
+                'trang_thai' => 0 // luôn là chưa đọc khi có tương tác mới
+            ]
+        );
     }
 }

@@ -195,6 +195,7 @@ Route::prefix('moi-gioi')->middleware('MoiGioiMiddleware')->group(function () {
         Route::post('/{id}/anh-dai-dien', [BatDongSanController::class, 'setImage']);
     });
 
+    //LOẠI BĐS
     Route::get('/loai-bat-dong-san/data', [LoaiBatDongSanController::class, 'getDataMoiGioi']); // đã test postman
     Route::get('/tinh-thanh', [TinhThanhController::class, 'getTinhThanh']); //đã test postman 
     Route::get('/quan-huyen', [QuanHuyenController::class, 'getQuanHuyen']);
@@ -208,6 +209,9 @@ Route::prefix('moi-gioi')->middleware('MoiGioiMiddleware')->group(function () {
     Route::post('/thong-bao/doc-tat-ca', [ThongBaoController::class, 'markAllAsRead']);
     Route::post('/thong-bao/{id}/da-doc', [ThongBaoController::class, 'markAsRead']);
     Route::delete('/thong-bao/{id}', [ThongBaoController::class, 'destroy']);
+
+    //QUẢN LÝ KHÁCH HÀNG
+    Route::get('/khach-hang/{id}', [KhachHangController::class, 'show']);
 
     //SSE STREAM
     Route::get('/moi-gioi/sse/stream', [SSEController::class, 'stream']);

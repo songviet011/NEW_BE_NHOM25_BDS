@@ -8,6 +8,7 @@ use App\Models\YeuThich;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Events\BatDongSanDuocYeuThich;
+use App\Models\ThongBao;
 
 class YeuThichController extends Controller
 {
@@ -30,6 +31,11 @@ class YeuThichController extends Controller
 
         if ($yeuThich) {
             $yeuThich->delete();
+
+            ThongBao::where('khach_hang_id', $user->id)
+                ->where('bat_dong_san_id', $bdsId)
+                ->delete();
+
             $message = 'Bo thich';
         } else {
             $bds = BatDongSan::find($bdsId);

@@ -35,51 +35,55 @@ class ThongBaoController extends Controller
     {
         return app(SSEController::class)->stream($request);
     }
-    
+
     // Đánh dấu đã đọc tất cả
     public function markAllAsRead()
     {
-        $user = Auth::guard('sanctum')->user();
-        
-        ThongBao::where('moi_gioi_id', $user->id)
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
-        
-        return response()->json(['success' => true]);
+        $moiGioiId = auth('sanctum')->id(); // 🔥 FIX
+
+        $updated = ThongBao::where('moi_gioi_id', $moiGioiId)
+            ->where('trang_thai', 0)
+            ->update([
+                'trang_thai' => 1
+            ]);
+
+        return response()->json([
+            'status' => true,
+            'updated' => $updated
+        ]);
     }
-    
+
     // Đánh dấu đã đọc một thông báo
     public function markAsRead($id)
     {
-        $user = Auth::guard('sanctum')->user();
-        
-        $notification = ThongBao::where('id', $id)
-            ->where('moi_gioi_id', $user->id)
-            ->first();
-        
-        if ($notification) {
-            $notification->update(['read_at' => now()]);
-            return response()->json(['success' => true]);
-        }
-        
-        return response()->json(['message' => 'Not found'], 404);
+        $moiGioiId = auth('sanctum')->id(); // 🔥 FIX
+
+        $updated = ThongBao::where('id', $id)
+            ->where('moi_gioi_id', $moiGioiId)
+            ->update([
+                'trang_thai' => 1
+            ]);
+
+        return response()->json([
+            'status' => true,
+            'updated' => $updated // debug
+        ]);
     }
-    
+
     // Xóa thông báo
     public function destroy($id)
     {
         $user = Auth::guard('sanctum')->user();
-        
+
         $notification = ThongBao::where('id', $id)
             ->where('moi_gioi_id', $user->id)
             ->first();
-        
+
         if ($notification) {
             $notification->delete();
             return response()->json(['success' => true]);
         }
-        
+
         return response()->json(['message' => 'Not found'], 404);
     }
 }
-
