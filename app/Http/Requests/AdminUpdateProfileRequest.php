@@ -17,7 +17,7 @@ class AdminUpdateProfileRequest extends FormRequest
             'ten'   => "required|string|max:255|unique:admins,ten," . $this->user()?->id,
             'email' => "required|email|unique:admins,email," . $this->user()?->id,
             'mo_ta' => "nullable|string",
-            'so_dien_thoai' => "required|string|regex:/^[0-9]{10,11}$/|unique:admins,so_dien_thoai," . $this->user()?->id,
+            //'so_dien_thoai' => "required|string|regex:/^[0-9]{10,11}$/|unique:admins,so_dien_thoai," . $this->user()?->id
         ];
     }
 

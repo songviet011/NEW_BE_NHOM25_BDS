@@ -21,6 +21,8 @@ class KhachHang extends Authenticatable
         'password',
         'is_active',
         'trang_thai',
+        'hash_reset',
+        'hash_reset_expires_at',
     ];
 
     protected $hidden = [

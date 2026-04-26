@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DatLaiMatKhauRequest;
 use App\Http\Requests\DeleteKhachHangRequest;
 use App\Models\KhachHang;
 use App\Http\Requests\KhachHangLoginRequest;
@@ -9,6 +10,7 @@ use App\Http\Requests\KhachHangRegisterRequest;
 use App\Http\Requests\UpdateKhachHangRequest;
 use App\Http\Requests\SearchRequest;
 use App\Http\Requests\DestroyRequest;
+use App\Http\Requests\GuiMaQuenMatKhauRequest;
 use App\Http\Requests\KhachHangUpdatePasswordRequest;
 use App\Http\Requests\KhachHangUpdateProfileRequest;
 use App\Http\Requests\SearchKhachHangRequest;
@@ -16,11 +18,14 @@ use App\Http\Requests\updatePasswordKhachHangRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\SendOtpRequest;
 use App\Http\Requests\VerifyOtpRequest;
+use App\Http\Requests\XacThucMaQuenMatKhauRequest;
+use App\Mail\ResetPasswordCodeMail;
 use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class KhachHangController extends Controller
@@ -28,23 +33,24 @@ class KhachHangController extends Controller
     //Khách hàng đăng nhập
     public function login(KhachHangLoginRequest $request)
     {
-        $khachhang = KhachHang::where('email', $request->email)->first();
+        $user = KhachHang::where('email', $request->email)->first();
 
-        if (!$khachhang || !Hash::check($request->password, $khachhang->password)) {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'status' => 0,
                 'message' => 'Email hoặc mật khẩu không đúng'
             ], 401);
         }
 
-        $token = $khachhang->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'status' => 1,
             'message' => 'Đăng nhập thành công',
             'token' => $token,
             'token_type' => 'Bearer',
-            'data' => $khachhang
+            'user_type' => 'khach-hang',
+            'data' => $user
         ], 200);
     }
 
@@ -52,16 +58,17 @@ class KhachHangController extends Controller
     public function checkToken()
     {
         $user = Auth::guard('sanctum')->user();
-        if ($user) {
+        if ($user && $user instanceof KhachHang) {
             return response()->json([
-                'status' => "true",
-                'data' => ['ten' => $user->ten],
-            ]);
+                'status' => 'success',
+                'data' => $user,
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token không hợp lệ'
+            ], 401);
         }
-        return response()->json([
-            'status' => "false",
-            'message' => 'Chưa đăng nhập',
-        ]);
     }
 
     // Khách hàng đăng ký
@@ -202,87 +209,6 @@ class KhachHangController extends Controller
         }
     }
 
-    //Gửi OTP
-    public function sendOtp(SendOtpRequest $request)
-    {
-
-        $user = KhachHang::where('email', $request->email)->first();
-
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Email không tồn tại'
-            ]);
-        }
-
-        $otp = rand(100000, 999999);
-
-        DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $request->email],
-            [
-                'token' => $otp,
-                'created_at' => now()
-            ]
-        );
-
-        return response()->json([
-            'status' => true,
-            'message' => 'OTP đã gửi',
-            'otp' => $otp // dev thôi
-        ]);
-    }
-
-    public function verifyOtp(VerifyOtpRequest $request)
-    {
-        $record = DB::table('password_reset_tokens')
-            ->where('email', $request->email)
-            ->where('token', $request->otp)
-            ->first();
-
-        if (!$record) {
-            return response()->json([
-                'status' => false,
-                'message' => 'OTP không đúng'
-            ]);
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'OTP hợp lệ'
-        ]);
-    }
-
-    //Reset password
-    public function resetPassword(ResetPasswordRequest $request)
-    {
-
-        $record = DB::table('password_reset_tokens')
-            ->where('email', $request->email)
-            ->where('token', $request->otp)
-            ->first();
-
-        if (!$record) {
-            return response()->json([
-                'status' => false,
-                'message' => 'OTP không đúng'
-            ]);
-        }
-
-        $user = KhachHang::where('email', $request->email)->first();
-
-        $user->password = Hash::make($request->password);
-        $user->save();
-
-        DB::table('password_reset_tokens')
-            ->where('email', $request->email)
-            ->delete();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Đổi mật khẩu thành công'
-        ]);
-    }
-
     // Admin lấy danh sách khách hàng
     public function getData(Request $request)
     {
@@ -413,6 +339,133 @@ class KhachHangController extends Controller
         return response()->json([
             'status' => true,
             'data' => $khachHang
+        ]);
+    }
+
+    // 1. Gửi mã xác nhận quên mật khẩu
+    public function guiMaQuenMatKhau(GuiMaQuenMatKhauRequest $request)
+    {
+        $kh = KhachHang::where('email', $request->email)->first();
+
+        if (!$kh) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Email không tồn tại trong hệ thống!',
+            ], 404);
+        }
+
+        $code = rand(100000, 999999);
+
+        $kh->update([
+            'hash_reset' => Hash::make($code),
+            'hash_reset_expires_at' => now()->addMinutes(5),
+        ]);
+
+        // Gửi mail
+        Mail::to($kh->email)->send(new ResetPasswordCodeMail($code));
+        // Mail::raw('Test mail', function ($message) {
+        //     $message->to('songviet011@gmail.com')
+        //         ->subject('Test');
+        // });
+
+        return response()->json([
+            'status'  => 1,
+            'message' => 'Đã gửi mã xác nhận quên mật khẩu đến email của bạn!',
+        ]);
+    }
+
+    // 2) Xác thực mã
+    public function xacThucMaQuenMatKhau(XacThucMaQuenMatKhauRequest $request)
+    {
+        $kh = KhachHang::where('email', $request->email)->first();
+
+        if (!$kh || !$kh->hash_reset) {
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Mã không hợp lệ!',
+            ], 400);
+        }
+
+        // Check hết hạn
+        if ($kh->hash_reset_expires_at < now()) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Mã đã hết hạn!',
+            ], 400);
+        }
+
+        // Check đúng mã
+        if (!Hash::check($request->code, $kh->hash_reset)) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Mã không đúng!',
+            ], 400);
+        }
+
+        return response()->json([
+            'status'  => 1,
+            'message' => 'Mã xác nhận hợp lệ.',
+        ]);
+    }
+
+    // 3) Đặt lại mật khẩu
+    public function datLaiMatKhau(DatLaiMatKhauRequest $request)
+    {
+        \Log::info('Reset password attempt:', [
+            'email' => $request->email,
+            'code' => $request->code,
+        ]);
+
+        $kh = KhachHang::where('email', $request->email)->first();
+
+        if (!$kh) {
+            \Log::error('Email not found');
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Email không tồn tại!',
+            ], 400);
+        }
+
+        if (!$kh->hash_reset) {
+            \Log::error('Hash reset is null - code already used or not generated');
+            return response()->json([
+                'status'  => 0,
+                'message' => 'Mã xác nhận không tồn tại! Có thể đã được sử dụng.',
+                'debug' => [
+                    'hash_reset' => $kh->hash_reset,
+                    'expires_at' => $kh->hash_reset_expires_at,
+                    'now' => now(),
+                ]
+            ], 400);
+        }
+
+        if ($kh->hash_reset_expires_at < now()) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Mã đã hết hạn!',
+                'debug' => [
+                    'expires_at' => $kh->hash_reset_expires_at,
+                    'now' => now(),
+                ]
+            ], 400);
+        }
+
+        if (!Hash::check($request->code, $kh->hash_reset)) {
+            return response()->json([
+                'status' => 0,
+                'message' => 'Mã không đúng!',
+            ], 400);
+        }
+
+        $kh->update([
+            'password' => Hash::make($request->password),
+            'hash_reset' => null,
+            'hash_reset_expires_at' => null,
+        ]);
+
+        return response()->json([
+            'status'  => 1,
+            'message' => 'Đặt lại mật khẩu thành công!',
         ]);
     }
 }

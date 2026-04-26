@@ -24,6 +24,7 @@ class MoiGioi extends Authenticatable
         'zalo_link',
         'is_active',
         'trang_thai',
+        'goi_tin_id',
         'so_tin_con_lai',
         'ngay_het_han_goi',
     ];

@@ -15,6 +15,8 @@ return new class extends Migration
             $table->decimal('gia', 15, 0);
             $table->integer('so_ngay');
             $table->integer('so_luong_tin');
+            $table->boolean('gan_nhan_vip')->default(false);
+            $table->integer('uu_tien_hien_thi')->default(0);
             $table->string('trang_thai')->default('active')->index();
             $table->timestamps();
         });

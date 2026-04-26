@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\LichSuGoiTinController as AdminLichSuGoiTinController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
@@ -26,20 +27,28 @@ use App\Http\Controllers\SSEController;
 use App\Http\Controllers\TinhThanhController;
 use App\Http\Controllers\TrainChatController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ThongKeMoGioiController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\KhachHangMiddleware;
 use App\Http\Middleware\MoiGioiMiddleware;
 
-
+Route::options('{any}', function () {
+    return response()->json([], 200);
+})->where('any', '.*');
 //--------------------- AUTH + CHECK TOKEN-----------------------------
 
 Route::prefix('admin')->group(function () {
     Route::post('/dang-nhap', [AdminController::class, 'login']); // đã test postman
     Route::get('/dang-xuat', [AdminController::class, 'logout']);  // đã test postman
     Route::get('/check-token', [AdminController::class, 'checkToken']); // đã test postman
+    Route::post('/dang-xuat-tat-ca', [AdminController::class, 'logoutAll']);
     Route::post('/forgot-password/send-otp', [AdminController::class, 'sendOtp']);
     Route::post('/forgot-password/verify-otp', [AdminController::class, 'verifyOtp']);
     Route::post('/forgot-password/reset', [AdminController::class, 'resetPassword']);
+    Route::get('/giao-dich/export', [GiaoDichController::class, 'exportGiaoDich']);
+    Route::get('/khach-hang/export', [KhachHangController::class, 'exportKhachHang']);
+    Route::get('/moi-gioi/export', [MoiGioiController::class, 'exportMoiGioi']);
+    Route::get('/moi-gioi/export/{id}', [MoiGioiController::class, 'exportChiTietMoiGioi']);
 });
 
 Route::prefix('khach-hang')->group(function () {
@@ -47,9 +56,9 @@ Route::prefix('khach-hang')->group(function () {
     Route::post('/dang-ky', [KhachHangController::class, 'register']); // đã test postman
     Route::get('/check-token', [KhachHangController::class, 'checkToken']); // đã test postman
     Route::post('/dang-xuat-tat-ca', [KhachHangController::class, 'logoutAll']);
-    Route::post('/forgot-password/send-otp', [KhachHangController::class, 'sendOtp']);
-    Route::post('/forgot-password/verify-otp', [KhachHangController::class, 'verifyOtp']);
-    Route::post('/forgot-password/reset', [KhachHangController::class, 'resetPassword']);
+    Route::post('/quen-mat-khau/xac-thuc', [KhachHangController::class, 'xacThucMaQuenMatKhau']);
+    Route::post('/quen-mat-khau/gui-ma', [KhachHangController::class, 'guiMaQuenMatKhau']);
+    Route::post('/quen-mat-khau/dat-lai', [KhachHangController::class, 'datLaiMatKhau']);
 });
 
 Route::prefix('moi-gioi')->group(function () {
@@ -57,9 +66,9 @@ Route::prefix('moi-gioi')->group(function () {
     Route::post('/dang-ky', [MoiGioiController::class, 'register']); // đã test postman
     Route::get('/check-token', [MoiGioiController::class, 'checkToken']); // đã test postman
     Route::post('/dang-xuat-tat-ca', [MoiGioiController::class, 'logoutAll']);
-    Route::post('/forgot-password/send-otp', [MoiGioiController::class, 'sendOtp']);
-    Route::post('/forgot-password/verify-otp', [MoiGioiController::class, 'verifyOtp']);
-    Route::post('/forgot-password/reset', [MoiGioiController::class, 'resetPassword']);
+    Route::post('/quen-mat-khau/xac-thuc', [MoiGioiController::class, 'xacThucMaQuenMatKhau']);
+    Route::post('/quen-mat-khau/gui-ma', [MoiGioiController::class, 'guiMaQuenMatKhau']);
+    Route::post('/quen-mat-khau/dat-lai', [MoiGioiController::class, 'datLaiMatKhau']);
 });
 
 //---------------------------Client Home (Public)--------------------------
@@ -78,14 +87,23 @@ Route::get('client/loai-bat-dong-san', [ClientHomeController::class, 'getLoaiBDS
 Route::get('/tinh-thanh', [TinhThanhController::class, 'getTinhThanh']); //đã test postman 
 Route::get('/quan-huyen', [QuanHuyenController::class, 'getQuanHuyen']); //đã test postman ?tinh_id=1
 Route::get('/loai-bds', [LoaiBatDongSanController::class, 'getAll']);
-// Payment routes cho SePay
-Route::post('/payment/sepay-webhook', [GiaoDichController::class, 'handleSePayWebhook']);
-Route::any('/payment/sepay-return', [GiaoDichController::class, 'handleSePayReturn']);
+
+// Return URL (can be GET)
+// Route::post('/moi-gioi/payment/create', [GiaoDichController::class, 'createPayment'])
+//     ->middleware('auth:sanctum');
+
+Route::post('/payment/sepay-webhook', [GiaoDichController::class, 'handleSePayWebhook'])
+    ->withoutMiddleware([
+        \Illuminate\Auth\Middleware\Authenticate::class,
+        \App\Http\Middleware\VerifyCsrfToken::class,
+    ]);
+Route::get('/payment/sepay-return', [GiaoDichController::class, 'handleSePayReturn']);
+Route::get('/payment/success', [GiaoDichController::class, 'handlePaymentSuccess']);
+Route::get('/payment/error', [GiaoDichController::class, 'handlePaymentError']);
+Route::get('/payment/cancel', [GiaoDichController::class, 'handlePaymentCancel']);
 
 //----------------------------ADMIN---------------------------
 Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
-    // LOGOUT ALL
-    Route::post('/dang-xuat-tat-ca', [AdminController::class, 'logoutAll']);
 
     //PROFILE ADMIN 
     Route::get('/profile', [AdminController::class, 'profile']); // đã test postman
@@ -108,8 +126,7 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
         Route::delete('/delete', [MoiGioiController::class, 'destroy']); // đã test postman
         Route::post('/search', [MoiGioiController::class, 'search']); // đã test postman ?keyword=abc
         Route::post('/change-status', [MoiGioiController::class, 'changeStatus']);
-        Route::get('/export', [MoiGioiController::class, 'exportMoiGioi']);
-        Route::get('/export/{id}', [MoiGioiController::class, 'exportChiTietMoiGioi']);
+        
     });
 
     //QUẢN LÝ BẤT ĐỘNG SẢN (xong)
@@ -117,7 +134,7 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
         Route::get('/data', [BatDongSanController::class, 'getData']); // đã test postman
         Route::get('/{id}', [BatDongSanController::class, 'xemChiTietBDS']); // đã test postman
         Route::post('/duyet', [BatDongSanController::class, 'duyetTin']); // đã test postman
-        Route::delete('/delete', [BatDongSanController::class, 'delete']); // đã test postman
+        Route::delete('/delete/{id}', [BatDongSanController::class, 'delete']); // đã test postman
         Route::post('/change-status', [BatDongSanController::class, 'changeStatus']); // đã test postman
         Route::post('/tim-kiem', [BatDongSanController::class, 'searchAdmin']); // đã test postman
     });
@@ -139,7 +156,7 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
         Route::delete('/delete/{id}', [GoiTinController::class, 'destroy']); // đã test postman
         Route::post('/change-status', [GoiTinController::class, 'changeStatus']); // đã test postman
         Route::get('/lich-su-mua', [LichSuGoiTinController::class, 'lichSuMua']);
-        Route::get('/lich-su-mua/{id}/chi-tiet', [LichSuGoiTinController::class, 'chiTietLichSuMua']);
+       Route::get('/lich-su-mua/{id}/chi-tiet', [LichSuGoiTinController::class, 'chiTietLichSuMua']);
     });
 
     //THỐNG KÊ (Dashboard)
@@ -156,7 +173,13 @@ Route::prefix('admin')->middleware('AdminMiddleware')->group(function () {
 
     //GIAO DỊCH
     Route::get('/giao-dich/data', [GiaoDichController::class, 'getData']);
-    Route::get('/giao-dich/export', [GiaoDichController::class, 'exportGiaoDich']);
+    Route::get('/giao-dich/pending', [LichSuGoiTinController::class, 'getPendingTransactions']);
+    
+    // Unmatched payments
+
+    Route::get('/unmatched-payments', [LichSuGoiTinController::class, 'index']);
+    Route::post('/unmatched-payments/{id}/match', [LichSuGoiTinController::class, 'match']);
+    Route::post('/unmatched-payments/{id}/ignore', [LichSuGoiTinController::class, 'ignore']);
 
     //CHỨC VỤ
     Route::prefix('chuc-vu')->group(function () {
@@ -221,6 +244,16 @@ Route::prefix('moi-gioi')->middleware('MoiGioiMiddleware')->group(function () {
 
     //GIAO DỊCH
     Route::post('/payment/create', [GiaoDichController::class, 'createPayment']); //đã test postman
+    Route::get('/giao-dich/{orderCode}/status', [GiaoDichController::class, 'getTransactionStatus']);
+
+    Route::prefix('thong-ke')->group(function () {
+        Route::get('/tong-tin-da-dang', [ThongKeMoGioiController::class, 'tongTinDaDang']);
+        Route::get('/tin-con-lai', [ThongKeMoGioiController::class, 'tinConLai']);
+        Route::get('/tong-yeu-thich', [ThongKeMoGioiController::class, 'tongYeuThich']);
+        Route::get('/tong-tien', [ThongKeMoGioiController::class, 'tongTien']);
+        Route::get('/bieu-do-bai-dang', [ThongKeMoGioiController::class, 'bieuDoBaiDang']);
+        Route::get('/khach-hang-lien-he', [ThongKeMoGioiController::class, 'khachHangLienHe']);
+    });
 
     //---------------------------CHAT---------------------------
     Route::prefix('chat')->group(function () {

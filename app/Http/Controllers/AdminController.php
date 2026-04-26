@@ -21,23 +21,24 @@ class AdminController extends Controller
 {
     public function login(AdminLoginRequest $request)
     {
-        $admin = Admin::where('email', $request->email)->first();
+        $user = Admin::where('email', $request->email)->first();
 
-        if (!$admin || !Hash::check($request->password, $admin->password)) {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'status' => 0,  // ✅ Integer 0
                 'message' => 'Email hoặc mật khẩu không đúng'
             ], 401);
         }
 
-        $token = $admin->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'status' => 1,  // ✅ Integer 1
             'message' => 'Đăng nhập thành công',
             'token' => $token,
             'token_type' => 'Bearer',
-            'data' => $admin  // Không cần thêm 'role' vì FE tự xác định qua user_type
+            'user_type' => 'admin',
+            'data' => $user
         ], 200);
     }
 
@@ -129,24 +130,6 @@ class AdminController extends Controller
         ]);
     }
 
-    // public function getActiveSessions(Request $request)
-    // {
-    //     $user = Auth::guard('sanctum')->user();
-    //     $currentTokenId = $user->currentAccessToken()->id;
-
-    //     $sessions = $user->tokens()->get()->map(function ($token) use ($currentTokenId) {
-    //         return [
-    //             'id' => $token->id,
-    //             'name' => $token->name, // Có thể lưu device name khi tạo token
-    //             'created_at' => $token->created_at,
-    //             'last_used_at' => $token->last_used_at,
-    //             'is_current' => $token->id === $currentTokenId,
-    //         ];
-    //     });
-
-    //     return response()->json(['sessions' => $sessions]);
-    // }
-
     public function logout()
     {
         /** @var Admin|null $user */
@@ -168,7 +151,6 @@ class AdminController extends Controller
     public function logoutAll()
     {
         try {
-            // Lấy user từ token hiện tại (trước khi xóa)
             $user = Auth::guard('sanctum')->user();
 
             if (!$user) {
@@ -178,16 +160,9 @@ class AdminController extends Controller
                 ], 401);
             }
 
-            // ✅ QUAN TRỌNG: Xóa token hiện tại TRƯỚC
-            $currentToken = $user->currentAccessToken();
-            if ($currentToken) {
-                $currentToken->delete();
-            }
-
-            // ✅ Sau đó xóa tất cả token còn lại
+            // ✅ XÓA TẤT CẢ TOKEN MỘT LƯỢC (bao gồm current token)
             $user->tokens()->delete();
 
-            // ✅ Trả về 200 (không phải 401)
             return response()->json([
                 'status' => 'success',
                 'message' => 'Đã đăng xuất tất cả thiết bị'

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('so_phong_tam')->nullable();
             $table->boolean('is_duyet')->default(false)->index();
             $table->boolean('is_noi_bat')->default(false)->index();
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
 
             $table->index(['moi_gioi_id', 'trang_thai_id']);

@@ -147,39 +147,101 @@ class GoiTinController extends Controller
 
     public function getAll()
     {
-        // ✅ Lấy tổng số lượng TRƯỚC khi map
+        // ✅ LẤY USER HIỆN TẠI
+        $user = auth()->guard('sanctum')->user();
+
         $plans = GoiTin::where('trang_thai', 'active')
             ->orderBy('gia', 'asc')
             ->get();
 
-        $total = $plans->count(); // ✅ Đếm ở đây
-
-        $formattedPlans = $plans->map(function ($plan, $index) use ($total) { // ✅ Chỉ 2 tham số + use ($total)
-            $isPopular = ($total === 3 && $index === 1) || ($plan->so_luong_tin >= 20 && $plan->so_luong_tin <= 50);
-
+        $formattedPlans = $plans->map(function ($plan) {
             return [
                 'id'            => $plan->id,
                 'name'          => $plan->ten_goi,
+                'label'         => $plan->gan_nhan_vip ? 'VIP' : null,
                 'description'   => $plan->mo_ta,
                 'monthlyPrice'  => (int) $plan->gia,
                 'yearlyPrice'   => (int) ($plan->gia * 12 * 0.8),
                 'durationDays'  => (int) $plan->so_ngay,
                 'postLimit'     => (int) $plan->so_luong_tin,
-                'isPopular'     => $isPopular,
+                'isPopular'     => $plan->uu_tien_hien_thi == 1,
+
                 'features' => [
                     "Đăng tối đa <strong>{$plan->so_luong_tin}</strong> tin",
                     "Hiệu lực <strong>{$plan->so_ngay}</strong> ngày",
-                    $plan->so_luong_tin >= 20
-                        ? "Ưu tiên hiển thị & Gắn nhãn VIP"
+                    $plan->gan_nhan_vip
+                        ? "🔥 Gắn nhãn VIP & ưu tiên hiển thị"
                         : "Hiển thị tin đăng tiêu chuẩn",
                     "Hỗ trợ kỹ thuật qua Email/Zalo"
                 ],
-                'btnText'  => $isPopular ? 'Nâng Cấp Ngay' : 'Chọn Gói',
-                'btnClass' => $isPopular ? 'btn-primary' : 'btn-outline-primary',
-                'cardClass' => $isPopular ? 'popular' : ''
+
+                'btnText'  => $plan->gan_nhan_vip ? 'Mua VIP Ngay' : 'Chọn Gói',
+                'btnClass' => $plan->gan_nhan_vip ? 'btn-warning' : 'btn-outline-primary',
+                'cardClass' => $plan->uu_tien_hien_thi == 1 ? 'popular' : ''
             ];
         });
 
-        return response()->json(['status' => true, 'data' => $formattedPlans]);
+        // ✅ MỚI: TRẢ VỀ GÓI HIỆN TẠI CỦA USER
+        $currentPlan = null;
+        if ($user && $user->goi_tin_id) {
+            $currentPlanData = GoiTin::find($user->goi_tin_id);
+            if ($currentPlanData) {
+                $currentPlan = [
+                    'id' => $currentPlanData->id,
+                    'used_posts' => 0, // hoặc logic đếm số tin đã dùng
+                    'postLimit' => $currentPlanData->so_luong_tin,
+                ];
+            }
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $formattedPlans,
+            'current_plan' => $currentPlan  // ✅ QUAN TRỌNG
+        ]);
+    }
+
+    public function muaGoi(MuaGoiTinRequest $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        $goi = GoiTin::find($request->goi_tin_id);
+
+        if (!$goi) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Gói không tồn tại'
+            ], 404);
+        }
+
+        DB::beginTransaction();
+        try {
+            // ✅ cập nhật môi giới
+            $user->update([
+                'goi_tin_id' => $goi->id,
+                'so_tin_con_lai' => $goi->so_luong_tin,
+                'ngay_het_han_goi' => now()->addDays($goi->so_ngay),
+            ]);
+
+            // (tuỳ bạn) lưu lịch sử
+            LichSuGoiTin::create([
+                'moi_gioi_id' => $user->id,
+                'goi_tin_id' => $goi->id,
+                'so_tien' => $goi->gia,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Mua gói thành công'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => 'Lỗi: ' . $e->getMessage()
+            ]);
+        }
     }
 }

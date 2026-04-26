@@ -15,6 +15,8 @@ class GoiTin extends Model
         'gia',
         'so_ngay',
         'so_luong_tin',
+        'gan_nhan_vip',
+        'uu_tien_hien_thi',
         'trang_thai',
     ];
 

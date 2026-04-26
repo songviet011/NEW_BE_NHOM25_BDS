@@ -21,8 +21,11 @@ return new class extends Migration
             $table->string('trang_thai')->default('active')->index();
             $table->integer('so_tin_con_lai')->default(0);
             $table->dateTime('ngay_het_han_goi')->nullable();
+            $table->foreignId('goi_tin_id')
+                ->nullable()
+                ->constrained('goi_tins')
+                ->nullOnDelete();
             $table->timestamps();
-
             $table->index(['is_active', 'trang_thai']);
         });
     }
